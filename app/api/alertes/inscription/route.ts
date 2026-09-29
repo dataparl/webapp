@@ -15,17 +15,17 @@ const Corps = z.object({
 });
 
 // Toujours la même réponse, que l'adresse soit connue ou non.
-const OK = { message: "Merci ! Un email de confirmation vient de vous être envoyé. Pensez à vérifier vos indésirables." };
+const OK = { message: "Merci ! Un email de confirmation vient de t'être envoyé. Pense à regarder dans tes indésirables." };
 
 export async function POST(req: Request) {
   const parsed = Corps.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
-    return NextResponse.json({ message: "Vérifiez l'adresse email, les chambres choisies et la case de consentement." }, { status: 400 });
+    return NextResponse.json({ message: "Vérifie l'adresse email, les chambres choisies et la case de consentement." }, { status: 400 });
   }
   const { frequence, chambres, site } = parsed.data;
   if (site) return NextResponse.json(OK); // robot : on ne fait rien
   if (await tropDeTentatives()) {
-    return NextResponse.json({ message: "Trop de tentatives. Réessayez dans une heure." }, { status: 429 });
+    return NextResponse.json({ message: "Trop de tentatives. Réessaie dans une heure." }, { status: 429 });
   }
 
   const email = normalizeEmail(parsed.data.email);
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
   );
   if (error) {
     console.error("inscription", error.message);
-    return NextResponse.json({ message: "Une erreur est survenue, réessayez plus tard." }, { status: 500 });
+    return NextResponse.json({ message: "Une erreur est survenue, réessaie plus tard." }, { status: 500 });
   }
 
   const mail = emailConfirmation(`${SITE_URL}/alertes/confirmation?token=${encodeURIComponent(token)}`);

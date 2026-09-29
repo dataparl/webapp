@@ -26,9 +26,9 @@ export default async function Accueil() {
 
   return (
     <>
-      <h1><span className="lisere">Qui travaille pour vos élus ?</span></h1>
+      <h1>Qui travaille pour <span className="surligne">vos élus</span> ?</h1>
       <p className="lead">
-        Chaque matin, CavaParlement relit les listes officielles des collaborateurs parlementaires et signale
+        Chaque matin, DataParl&apos; relit les listes officielles des collaborateurs parlementaires et signale
         les arrivées, les départs et les transferts.
       </p>
 

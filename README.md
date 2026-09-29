@@ -1,6 +1,6 @@
-# CavaParlement : webapp
+# DataParl' : webapp
 
-Site public, alertes par email, connexion, administration et API de [cavaparlement.eu](https://www.cavaparlement.eu). Un seul déploiement Next.js 16 sert tous les sous-domaines ; le routage est dans `proxy.ts` (nouveau nom de `middleware.ts` depuis Next 16).
+Site public, alertes par email, connexion, compte, administration et API de DataParl' (adresse actuelle : [cavaparlement.eu](https://www.cavaparlement.eu)). Un seul déploiement Next.js 16 sert tous les sous-domaines ; le routage est dans `proxy.ts` (nouveau nom de `middleware.ts` depuis Next 16).
 
 | Hôte | Rôle |
 |---|---|

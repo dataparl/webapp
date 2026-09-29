@@ -1,0 +1,74 @@
+import type { Metadata } from "next";
+import { CONTACT, MISE_A_JOUR } from "../maj";
+
+export const metadata: Metadata = { title: "Conditions d'utilisation de l'API" };
+
+export default function CGUAPI() {
+  return (
+    <>
+      <h1>Conditions d&apos;utilisation de <span className="surligne">l&apos;API</span></h1>
+      <p className="meta">Dernière mise à jour : {MISE_A_JOUR}</p>
+      <p>
+        Ces conditions complètent les <a href="/informations-legales/cgu">conditions générales d&apos;utilisation</a>.
+        La documentation technique est sur la page <a href="/api">API</a>.
+      </p>
+
+      <h2>1. Accès par clé</h2>
+      <ul>
+        <li>L&apos;API est gratuite. Chaque appel nécessite une clé personnelle, créée depuis la page <a href="/api">API</a> une fois connecté(e).</li>
+        <li>Chaque compte peut détenir jusqu&apos;à 3 clés actives. Une clé peut être révoquée à tout moment.</li>
+        <li>
+          La clé est transmise dans l&apos;en-tête <code>Authorization: Bearer &lt;clé&gt;</code> (ou <code>X-API-Key</code>).
+          Elle est personnelle : ne la publie pas (dépôt de code public, application côté navigateur) et ne la cède pas.
+        </li>
+        <li>DataParl&apos; ne conserve qu&apos;une empreinte de la clé : si tu la perds, révoque-la et crée-en une nouvelle.</li>
+      </ul>
+
+      <h2>2. Quotas</h2>
+      <p>
+        Chaque clé dispose de 1 000 requêtes par jour, remises à zéro à minuit (heure de Paris). Au-delà, l&apos;API
+        répond <code>429</code> jusqu&apos;au lendemain. Un quota plus élevé peut être accordé sur demande motivée
+        (recherche, journalisme, projet d&apos;intérêt général) : <a href={`mailto:${CONTACT}`}>{CONTACT}</a>.
+      </p>
+      <p>Il est interdit de contourner les quotas, notamment en multipliant les comptes ou les clés.</p>
+
+      <h2>3. Réutilisation des données</h2>
+      <p>
+        Les données servies par l&apos;API sont diffusées sous licence ODbL 1.0 (voir{" "}
+        <a href="/informations-legales/licences">Licences et réutilisation</a>). Toute réutilisation, y compris
+        commerciale, est permise à condition :
+      </p>
+      <ul>
+        <li>de citer la source : « DataParl&apos; (cavaparlement.eu), d&apos;après les publications de l&apos;Assemblée nationale, du Sénat et les archives Regards Citoyens » ;</li>
+        <li>de publier sous la même licence toute base de données dérivée rendue publique ;</li>
+        <li>d&apos;indiquer la date d&apos;extraction, les données évoluant chaque jour.</li>
+      </ul>
+
+      <h2>4. Données personnelles</h2>
+      <p>
+        Les données contiennent les noms de collaborateurs et d&apos;élus. En les réutilisant, tu deviens responsable de
+        ton propre traitement au sens du RGPD et tu dois en respecter les obligations (finalité légitime,
+        information, droits des personnes).
+      </p>
+      <p>Sont notamment interdits :</p>
+      <ul>
+        <li>la prospection commerciale ou le démarchage des personnes citées ;</li>
+        <li>la constitution de profils individuels destinés à surveiller, harceler ou discriminer une personne ;</li>
+        <li>le croisement avec d&apos;autres sources pour retrouver des coordonnées personnelles.</li>
+      </ul>
+
+      <h2>5. Disponibilité et évolutions</h2>
+      <p>
+        L&apos;API est fournie en l&apos;état, sans garantie de disponibilité ni d&apos;exhaustivité. Les versions sont
+        préfixées (<code>/v1</code>) ; un changement incompatible donne lieu à une nouvelle version et à une période
+        de transition annoncée.
+      </p>
+
+      <h2>6. Suspension</h2>
+      <p>
+        Une clé utilisée en violation de ces conditions, ou de manière à dégrader le service, peut être suspendue ou
+        révoquée sans préavis. Le titulaire du compte en est informé par email.
+      </p>
+    </>
+  );
+}

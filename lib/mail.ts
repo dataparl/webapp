@@ -1,5 +1,5 @@
 import "server-only";
-import { MAIL_FROM, SITE_URL, secret } from "./env";
+import { MAIL_FROM, secret } from "./env";
 
 // Envoi via l'API Resend en fetch brut (comme sur PasDeVelib).
 
@@ -33,37 +33,37 @@ export async function sendEmail(e: Envoi): Promise<string | null> {
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 export function layoutEmail(titre: string, corpsHtml: string, pied: string): string {
-  return `<!doctype html><html lang="fr"><body style="margin:0;background:#f6f5f2;font-family:Arial,Helvetica,sans-serif;color:#1c2430">
+  return `<!doctype html><html lang="fr"><body style="margin:0;background:#FFFDF5;font-family:Arial,Helvetica,sans-serif;color:#071A41">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
-<table role="presentation" width="100%" style="max-width:560px;background:#ffffff;border-radius:8px;padding:32px">
+<table role="presentation" width="100%" style="max-width:560px;background:#ffffff;border:1px solid #E6E3D8;border-radius:10px;padding:32px">
 <tr><td>
-<p style="margin:0 0 4px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#B06A1F">CavaParlement</p>
-<h1 style="margin:0 0 20px;font-family:Georgia,serif;font-size:24px;color:#1E3A5F">${esc(titre)}</h1>
+<p style="margin:0 0 16px;font-family:Georgia,serif;font-weight:bold;font-size:20px;color:#071A41">Data<span style="background:#FFD23F;padding:0 2px">Parl'</span></p>
+<h1 style="margin:0 0 20px;font-family:Georgia,serif;font-size:24px;color:#071A41">${esc(titre)}</h1>
 ${corpsHtml}
 </td></tr></table>
-<p style="max-width:560px;font-size:12px;line-height:1.5;color:#6b7280;margin:16px auto 0">${pied}</p>
+<p style="max-width:560px;font-size:12px;line-height:1.5;color:#4A5670;margin:16px auto 0">${pied}</p>
 </td></tr></table></body></html>`;
 }
 
 export function bouton(url: string, libelle: string): string {
-  return `<p style="margin:24px 0"><a href="${esc(url)}" style="display:inline-block;background:#1E3A5F;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:6px;font-weight:bold">${esc(libelle)}</a></p>`;
+  return `<p style="margin:24px 0"><a href="${esc(url)}" style="display:inline-block;background:#F0444F;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:6px;font-weight:bold">${esc(libelle)}</a></p>`;
 }
 
 export function piedObligatoire(): string {
-  return `Message envoyé par CavaParlement (${SITE_URL.replace("https://", "")}) suite à une action de votre part. Si vous n'êtes pas à l'origine de cette demande, ignorez-le : rien ne sera enregistré.`;
+  return "Message envoyé par DataParl' suite à une action faite avec ton adresse. Si ce n'est pas toi, ignore-le : rien ne sera enregistré.";
 }
 
 export function piedOptIn(prefsUrl: string, unsubUrl: string): string {
-  return `Vous recevez ce message car vous êtes abonné(e) aux alertes CavaParlement. <a href="${esc(prefsUrl)}" style="color:#6b7280">Gérer mes préférences</a> · <a href="${esc(unsubUrl)}" style="color:#6b7280">Me désinscrire</a>`;
+  return `Tu reçois ce message parce que tu es abonné(e) aux alertes DataParl'. <a href="${esc(prefsUrl)}" style="color:#4A5670">Régler mes préférences</a> · <a href="${esc(unsubUrl)}" style="color:#4A5670">Me désinscrire</a>`;
 }
 
 export function emailConfirmation(confirmUrl: string) {
-  const subject = "Confirmez votre inscription aux alertes CavaParlement";
+  const subject = "Confirme ton inscription aux alertes DataParl'";
   const html = layoutEmail(
-    "Confirmez votre inscription",
-    `<p style="line-height:1.6">Vous avez demandé à recevoir les alertes sur les mouvements de collaborateurs parlementaires. Cliquez ci-dessous pour confirmer (lien valable 48 heures).</p>${bouton(confirmUrl, "Confirmer mon inscription")}`,
+    "Encore un clic",
+    `<p style="line-height:1.6">Tu as demandé à recevoir les alertes sur les mouvements de collaborateurs parlementaires. Confirme ci-dessous (lien valable 48 heures).</p>${bouton(confirmUrl, "Confirmer mon inscription")}`,
     piedObligatoire(),
   );
-  const text = `Confirmez votre inscription aux alertes CavaParlement (lien valable 48 heures) :\n${confirmUrl}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez ce message.`;
+  const text = `Confirme ton inscription aux alertes DataParl' (lien valable 48 heures) :\n${confirmUrl}\n\nSi ce n'est pas toi, ignore ce message.`;
   return { subject, html, text };
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { consommer } from "@/lib/apiKeys";
 import { COLONNES_PUBLIQUES, dataQuery, type Mouvement } from "@/lib/data";
 
 // GET https://api.cavaparlement.eu/mouvements
@@ -11,13 +12,25 @@ const TYPES = new Set(["arrivee", "depart", "transfert"]);
 const SOURCES = new Set(["live", "regardscitoyens", "wayback"]);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, OPTIONS" };
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Authorization, X-API-Key",
+};
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
 }
 
 export async function GET(req: Request) {
+  const verdict = await consommer(req);
+  if (!verdict.ok) {
+    return NextResponse.json({ error: verdict.message }, { status: verdict.status, headers: CORS });
+  }
+  const quotaHeaders = {
+    "X-RateLimit-Limit": String(verdict.quota),
+    "X-RateLimit-Remaining": String(Math.max(verdict.quota - verdict.requetes, 0)),
+  };
   const q = new URL(req.url).searchParams;
   const limit = Math.min(Math.max(Number(q.get("limit") ?? 100) || 100, 1), 500);
   const offset = Math.max(Number(q.get("offset") ?? 0) || 0, 0);
@@ -44,8 +57,8 @@ export async function GET(req: Request) {
   try {
     const { rows, total } = await dataQuery<Mouvement>("mouvements", p, 300);
     return NextResponse.json(
-      { total, limit, offset, mouvements: rows, licence: "Licence Ouverte (AN, Sénat) ; historique ODbL (Regards Citoyens)" },
-      { headers: { ...CORS, "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } },
+      { total, limit, offset, mouvements: rows, licence: "ODbL 1.0", source: "DataParl' (cavaparlement.eu), d'après les publications de l'Assemblée nationale, du Sénat et les archives Regards Citoyens" },
+      { headers: { ...CORS, ...quotaHeaders, "Cache-Control": "private, max-age=60" } },
     );
   } catch {
     return NextResponse.json({ error: "données indisponibles" }, { status: 503, headers: CORS });

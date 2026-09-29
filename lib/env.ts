@@ -9,7 +9,7 @@ export const DATA_SUPABASE_KEY = process.env.NEXT_PUBLIC_DATA_SUPABASE_KEY ?? "s
 export const AUTH_SUPABASE_URL = process.env.NEXT_PUBLIC_AUTH_SUPABASE_URL ?? "https://kuywydrsfuixppchugpe.supabase.co";
 export const AUTH_SUPABASE_KEY = process.env.NEXT_PUBLIC_AUTH_SUPABASE_KEY ?? "sb_publishable_oYCbgl4J2fz9RnwOmsEz9w_DMVp-rZ6";
 
-export const MAIL_FROM = process.env.MAIL_FROM ?? "CavaParlement <noreply@mail.cavaparlement.eu>";
+export const MAIL_FROM = process.env.MAIL_FROM ?? "\"DataParl'\" <noreply@mail.cavaparlement.eu>";
 export const PRIVACY_VERSION = process.env.PRIVACY_VERSION ?? "2026-09";
 
 export function secret(name: "AUTH_SUPABASE_SERVICE_ROLE_KEY" | "RESEND_API_KEY" | "CONSENT_SALT"): string {

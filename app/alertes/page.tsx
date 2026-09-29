@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Alertes par email" };
 export default function Alertes() {
   return (
     <>
-      <h1><span className="lisere">Alertes par email</span></h1>
+      <h1><span className="surligne">Alertes</span> par email</h1>
       <p className="lead">
         Recevez les arrivées, départs et transferts de collaborateurs parlementaires dès qu&apos;ils apparaissent dans les
         publications officielles. Un email de confirmation vous sera envoyé.

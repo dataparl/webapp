@@ -14,5 +14,5 @@ test("sha256 stable et hexadécimal", async () => {
 });
 
 test("normalisation des emails", () => {
-  assert.equal(normalizeEmail("  Hello@CavaParlement.EU "), "hello@cavaparlement.eu");
+  assert.equal(normalizeEmail("  Hello@Mail.Exemple.FR "), "hello@mail.exemple.fr");
 });

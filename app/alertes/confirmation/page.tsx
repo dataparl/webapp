@@ -52,7 +52,7 @@ export default async function Confirmation({ searchParams }: { searchParams: Pro
     return (
       <div className="card">
         <h1>Inscription confirmée</h1>
-        <p>Vous recevrez les alertes CavaParlement. Chaque email contiendra un lien pour gérer vos préférences ou vous désinscrire.</p>
+        <p>C&apos;est fait, tu recevras les alertes DataParl&apos;. Chaque email contiendra un lien pour régler tes préférences ou te désinscrire.</p>
         {id && <a className="btn" href={`/preferences?id=${encodeURIComponent(id)}`}>Régler mes préférences</a>}
       </div>
     );

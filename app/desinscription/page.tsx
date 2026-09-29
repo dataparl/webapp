@@ -16,7 +16,7 @@ async function valider(formData: FormData) {
 export default async function Desinscription({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const { id, etat } = await searchParams;
   if (etat === "ok") {
-    return <div className="card"><h1>Désinscription confirmée</h1><p>Vous ne recevrez plus d&apos;alertes CavaParlement.</p></div>;
+    return <div className="card"><h1>Désinscription confirmée</h1><p>C&apos;est noté : tu ne recevras plus d&apos;alertes DataParl&apos;.</p></div>;
   }
   if (etat === "invalide" || !(await emailDepuisJeton(id))) {
     return <div className="card"><h1>Lien expiré</h1><p>Utilisez le lien de désinscription du dernier email reçu.</p></div>;
@@ -24,7 +24,7 @@ export default async function Desinscription({ searchParams }: { searchParams: P
   return (
     <div className="card">
       <h1>Se désinscrire</h1>
-      <p>Vous ne recevrez plus aucune alerte CavaParlement.</p>
+      <p>Tu ne recevras plus aucune alerte DataParl&apos;.</p>
       <form action={valider}>
         <input type="hidden" name="id" value={id} />
         <button type="submit">Confirmer la désinscription</button>
