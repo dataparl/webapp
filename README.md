@@ -9,7 +9,7 @@ Site public, alertes par email, connexion, compte, administration et API de Data
 | `api.cavaparlement.eu` | site de l'API (`/`, `/docs/*`, `/request-access`, `/mon-espace-api`, réécrits vers `/espace-api/*`) et API elle-même (`/v1/*`, réécrit vers `/api/v1/*`) |
 | `admin.cavaparlement.eu` | administration, réécrite vers `/admin/*` |
 
-`/connexion` est servie telle quelle sur chaque hôte : le flux OAuth (PKCE) doit rester sur l'origine qui l'a lancé. La session n'est donc pas partagée entre `www` et `api` : il faut se connecter sur chacun.
+`/connexion` est servie telle quelle sur chaque hôte : le flux OAuth (PKCE) doit rester sur l'origine qui l'a lancé. La session, elle, est stockée dans des cookies du domaine `.cavaparlement.eu` (`lib/cookieStorage.ts`, découpés en morceaux de 3 Ko) : une seule connexion vaut pour `www`, `api` et `admin`.
 
 Les pages sont réparties en trois groupes de routes : `app/(site)`, `app/(auth)` (connexion) et `app/(apisite)` (site de l'API), chacun avec son en-tête.
 

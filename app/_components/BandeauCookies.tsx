@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { cookieStorage } from "@/lib/cookieStorage";
 
 // Bandeau d'information : DataParl' ne dépose que des éléments strictement
 // nécessaires (session de connexion). Aucun consentement n'est requis, il n'y
@@ -10,16 +11,12 @@ export default function BandeauCookies() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    try {
-      if (!localStorage.getItem(CLE)) setVisible(true);
-    } catch {
-      // stockage indisponible (navigation privée stricte) : on n'insiste pas
-    }
+    if (!cookieStorage.getItem(CLE)) setVisible(true);
   }, []);
 
   if (!visible) return null;
   const fermer = () => {
-    try { localStorage.setItem(CLE, new Date().toISOString()); } catch {}
+    cookieStorage.setItem(CLE, new Date().toISOString().slice(0, 10));
     setVisible(false);
   };
 

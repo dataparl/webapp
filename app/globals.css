@@ -145,3 +145,18 @@ textarea { width: 100%; min-height: 140px; padding: 10px 12px; border: 1px solid
 .puces { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .puce { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: color-mix(in srgb, var(--bleu) 12%, transparent); font-size: .88rem; }
 .puce button { margin: 0; padding: 0 2px; background: none; border: 0; color: var(--ink); font-weight: 700; }
+
+/* Famille de marques : VigiParl' (rouge), MixiParl' (violet) */
+:root { --vigi: #C8102E; --mixi: #7B3FE4; }
+@media (prefers-color-scheme: dark) { :root { --vigi: #FF6B7D; --mixi: #B794FF; } }
+.surligne-vigi { background: var(--vigi); color: #fff; padding: 0 .12em; }
+.surligne-mixi { background: var(--mixi); color: #fff; padding: 0 .12em; }
+.chiffres.vigi strong { color: var(--vigi); }
+.chiffres.mixi strong { color: var(--mixi); }
+.barre { height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--line) 70%, transparent); overflow: hidden; min-width: 80px; }
+.barre > span { display: block; height: 100%; }
+.barre.vigi > span { background: var(--vigi); }
+.barre.mixi > span { background: var(--mixi); }
+table.stats td.num, table.stats th.num { text-align: right; white-space: nowrap; }
+details.tableau summary { cursor: pointer; font-weight: 600; margin: 14px 0; }
+.defile { overflow-x: auto; }

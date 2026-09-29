@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ListeMouvements from "@/app/_components/ListeMouvements";
 import { CHAMBRE_LONG } from "@/lib/format";
-import { eluDepuisId, equipe, lienOfficiel, mouvementsElu } from "@/lib/elus";
+import { eluDepuisId, equipe, lienOfficiel, mouvementsElu, statsElu } from "@/lib/elus";
+import { partFemmes, pct, tauxTurnover } from "@/lib/stats";
 
 export const revalidate = 3600;
 
@@ -16,7 +17,7 @@ export default async function Parlementaire({ params }: { params: Promise<{ id: 
   const { id } = await params;
   const e = await eluDepuisId(decodeURIComponent(id));
   if (!e) notFound();
-  const [collabs, mouvements] = await Promise.all([equipe(e), mouvementsElu(e, 5)]);
+  const [collabs, mouvements, stats] = await Promise.all([equipe(e), mouvementsElu(e, 5), statsElu(e).catch(() => null)]);
   const officiel = lienOfficiel(e);
 
   return (
@@ -28,6 +29,19 @@ export default async function Parlementaire({ params }: { params: Promise<{ id: 
         {collabs.length} collaborateur{collabs.length > 1 ? "s" : ""} déclaré{collabs.length > 1 ? "s" : ""} aujourd&apos;hui.
         {officiel && <> <a href={officiel}>Fiche officielle</a>.</>}
       </p>
+
+      {stats && (
+        <div className="chiffres">
+          <div>
+            <strong style={{ color: "var(--vigi)" }}>{pct(tauxTurnover(stats))}</strong>
+            <span><a href="/vigiparl">VigiParl&apos;</a> · renouvellement sur 12 mois ({stats.departs_12m} départ{stats.departs_12m > 1 ? "s" : ""})</span>
+          </div>
+          <div>
+            <strong style={{ color: "var(--mixi)" }}>{pct(partFemmes(stats))}</strong>
+            <span><a href="/mixiparl">MixiParl&apos;</a> · de femmes ({stats.femmes} F, {stats.hommes} H{stats.indetermines ? `, ${stats.indetermines} ind.` : ""})</span>
+          </div>
+        </div>
+      )}
 
       <h2>L&apos;équipe</h2>
       {collabs.length === 0 ? (

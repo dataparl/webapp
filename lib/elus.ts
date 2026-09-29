@@ -38,3 +38,9 @@ export async function mouvementsElu(e: Elu, limit = 5) {
   });
   return (await dataQuery<Mouvement>("mouvements", p, 3600)).rows;
 }
+
+export async function statsElu(e: Elu) {
+  const p = new URLSearchParams({ select: "*", chambre: `eq.${e.chambre}`, elu_cle: `eq.${e.cle}`, limit: "1" });
+  const { rows } = await dataQuery<import("./stats").StatElu>("stats_turnover_elus", p, 3600);
+  return rows[0] ?? null;
+}

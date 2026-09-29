@@ -45,6 +45,8 @@ export default async function Accueil() {
       <ul className="sommaire">
         <li><a href="/mouvements/parlement"><strong>Mouvements</strong><span>Rechercher dans les trois chambres →</span></a></li>
         <li><a href="/collabs"><strong>Collaborateurs</strong><span>Qui travaille pour quel élu, et comment le joindre →</span></a></li>
+        <li><a href="/vigiparl"><strong>Vigi<span className="surligne-vigi">Parl&apos;</span></strong><span>Le renouvellement des équipes, élu par élu →</span></a></li>
+        <li><a href="/mixiparl"><strong>Mixi<span className="surligne-mixi">Parl&apos;</span></strong><span>La mixité femmes-hommes des équipes →</span></a></li>
         <li><a href="/alertes"><strong>Alertes</strong><span>Être prévenu(e) des mouvements qui t&apos;intéressent →</span></a></li>
       </ul>
     </>
