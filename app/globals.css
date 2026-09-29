@@ -160,3 +160,55 @@ textarea { width: 100%; min-height: 140px; padding: 10px 12px; border: 1px solid
 table.stats td.num, table.stats th.num { text-align: right; white-space: nowrap; }
 details.tableau summary { cursor: pointer; font-weight: 600; margin: 14px 0; }
 .defile { overflow-x: auto; }
+
+/* Admin et webmail */
+.wrap.large { max-width: 1200px; }
+header.site.admin .espace { font-family: "DM Sans", sans-serif; font-weight: 600; font-size: .95rem; color: var(--bleu); margin-left: 4px; }
+header.site.admin nav { align-items: center; }
+header.site.admin nav a[aria-current=page] { color: var(--bleu); font-weight: 600; }
+.porte { max-width: 460px; margin: 48px auto; padding: 0 16px; text-align: center; }
+.porte .card { text-align: left; max-width: none; margin-top: 20px; border-radius: 18px; }
+.marque-admin { font-family: "Spectral", serif; font-weight: 700; font-size: 1.8rem; margin: 0; }
+.marque-admin > span:last-child { color: var(--bleu); }
+.code-otp { width: 100%; font-size: 1.8rem; letter-spacing: .5em; text-align: center; padding: 10px; border: 1px solid var(--line); border-radius: var(--radius-btn); background: var(--bg); color: var(--ink); font-family: ui-monospace, monospace; }
+code.secret { word-break: break-all; }
+.carte-admin { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--card); padding: 16px 18px; margin: 12px 0; }
+.carte-admin header { display: flex; gap: 8px 12px; flex-wrap: wrap; align-items: baseline; }
+.corps-message { white-space: pre-wrap; margin: 12px 0; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.actions button, .actions select { margin-top: 8px; width: auto; }
+.barre-recherche { display: flex; gap: 8px; max-width: 520px; }
+.barre-recherche button { margin-top: 0; }
+.pagination { display: flex; gap: 16px; align-items: center; }
+button.lien:disabled { opacity: .4; text-decoration: none; }
+
+.webmail-main { padding-top: 16px; }
+.webmail { display: grid; grid-template-columns: 180px minmax(260px, 360px) 1fr; gap: 20px; min-height: 70vh; }
+.wm-dossiers button { width: 100%; margin-top: 0; }
+.wm-dossiers nav { display: flex; flex-direction: column; margin-top: 12px; }
+.wm-dossiers nav a { display: flex; justify-content: space-between; padding: 8px 10px; border-radius: 8px; color: var(--ink); text-decoration: none; }
+.wm-dossiers nav a[aria-current=page] { background: color-mix(in srgb, var(--bleu) 12%, transparent); font-weight: 600; }
+.compteur { background: var(--corail); color: var(--sur-corail); border-radius: 999px; padding: 0 8px; font-size: .8rem; font-weight: 700; }
+.wm-liste { border-right: 1px solid var(--line); padding-right: 12px; min-width: 0; }
+.wm-liste ul { list-style: none; margin: 10px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.wm-liste li button { all: unset; box-sizing: border-box; display: block; width: 100%; padding: 10px 8px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.wm-liste li button:focus-visible { outline: 2px solid var(--bleu); }
+.wm-liste li.actif button { background: color-mix(in srgb, var(--bleu) 8%, transparent); }
+.wm-liste li.non-lu .wm-qui, .wm-liste li.non-lu .wm-objet { font-weight: 700; }
+.wm-ligne1 { display: flex; justify-content: space-between; gap: 8px; }
+.wm-qui, .wm-objet { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wm-objet { font-size: .93rem; }
+.wm-lecture { min-width: 0; }
+.wm-titre { font-size: 1.4rem; margin: 0 0 8px; }
+.wm-corps { width: 100%; min-height: 60vh; border: 1px solid var(--line); border-radius: var(--radius-card); background: #fff; margin-top: 12px; }
+.wm-texte { white-space: pre-wrap; font-family: inherit; font-size: .95rem; }
+.wm-redaction textarea { min-height: 280px; }
+.wm-vide { margin-top: 40px; text-align: center; }
+.retour { display: none; }
+@media (max-width: 900px) {
+  .webmail { grid-template-columns: 1fr; }
+  .wm-liste { border-right: 0; padding-right: 0; }
+  .webmail.avec-lecture .wm-liste, .webmail.avec-lecture .wm-dossiers { display: none; }
+  .webmail:not(.avec-lecture) .wm-lecture { display: none; }
+  .retour { display: inline; }
+}

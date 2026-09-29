@@ -39,3 +39,11 @@ export function slugSenat(eluNom: string, matricule: string): string {
   const n = (s: string) => s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/['’]/g, "").replace(/[\s-]+/g, "_").replace(/[^a-z0-9_]/g, "");
   return `${n(nom)}_${n(prenom)}${matricule.toLowerCase()}`;
 }
+
+// Clé de nom identique à celle du pipeline (collabs/normalize.py : cle) :
+// minuscules, sans accents, ponctuation en espaces, tokens triés.
+export function cleNom(...parts: string[]): string {
+  const txt = parts.join(" ").normalize("NFD").replace(/\p{M}/gu, "").toLowerCase()
+    .replace(/[-'’`.]/g, " ").replace(/[^a-z0-9 ]/g, "");
+  return txt.split(/\s+/).filter(Boolean).sort().join(" ");
+}

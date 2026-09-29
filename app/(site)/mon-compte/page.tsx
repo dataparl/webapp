@@ -31,6 +31,18 @@ export default function MonCompte() {
   );
 
   useEffect(() => {
+    // Retour d'une association Google/GitHub refusée par DataParl' Auth.
+    const params = new URLSearchParams(window.location.search + "&" + window.location.hash.slice(1));
+    const erreur = params.get("error_description");
+    if (erreur) {
+      setMessage({
+        ok: false,
+        texte: /already linked|already exists/i.test(erreur)
+          ? "Ce compte est déjà relié à un autre compte DataParl'. Supprime d'abord l'autre compte (ou écris-nous via le formulaire de contact) pour pouvoir l'associer ici."
+          : "L'association n'a pas abouti, réessaie.",
+      });
+      window.history.replaceState(null, "", "/mon-compte");
+    }
     authBrowser().auth.getSession().then(({ data }) => setSession(data.session));
   }, []);
 
@@ -59,7 +71,7 @@ export default function MonCompte() {
       provider,
       options: { redirectTo: `${window.location.origin}/mon-compte` },
     });
-    if (error) setMessage({ ok: false, texte: "L'association n'est pas disponible pour le moment." });
+    if (error) setMessage({ ok: false, texte: "L'association de comptes n'est pas disponible pour le moment." });
   }
 
   async function exporter() {

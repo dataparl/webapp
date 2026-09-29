@@ -14,7 +14,20 @@ export const MAIL_FROM = process.env.MAIL_FROM ?? "\"DataParl'\" <noreply@mail.c
 export const CONTACT_INBOX = process.env.CONTACT_INBOX ?? "hello@cavaparlement.eu";
 export const PRIVACY_VERSION = process.env.PRIVACY_VERSION ?? "2026-09";
 
-export function secret(name: "AUTH_SUPABASE_SERVICE_ROLE_KEY" | "RESEND_API_KEY" | "CONSENT_SALT"): string {
+// Comptes GitHub autorisés à administrer (séparés par des virgules). Ils sont
+// ajoutés à admin_users à leur première connexion.
+export const ADMIN_GITHUB_LOGINS = (process.env.ADMIN_GITHUB_LOGINS ?? "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+
+// Adresses d'expédition autorisées depuis la webmail. hello@cavaparlement.eu
+// (boîte Infomaniak) passe par le domaine d'envoi cavaparlement.eu de Resend ;
+// sa copie des emails reçus est transférée vers hello@mail.cavaparlement.eu.
+export const EXPEDITEURS = ["hello@cavaparlement.eu", "hello@mail.cavaparlement.eu", "presse@mail.cavaparlement.eu", "rgpd@mail.cavaparlement.eu", "noreply@mail.cavaparlement.eu"];
+
+type Secret =
+  | "AUTH_SUPABASE_SERVICE_ROLE_KEY" | "RESEND_API_KEY" | "CONSENT_SALT"
+  | "ADMIN_VAULT_KEY" | "ADMIN_OTP_SECRET" | "RESEND_WEBHOOK_SECRET";
+
+export function secret(name: Secret): string {
   const v = process.env[name];
   if (!v) throw new Error(`Variable d'environnement manquante : ${name}`);
   return v;
