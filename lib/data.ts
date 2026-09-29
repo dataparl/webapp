@@ -39,7 +39,7 @@ export async function dataQuery<T>(table: string, params: URLSearchParams, reval
   return { rows: (await r.json()) as T[], total };
 }
 
-export async function derniersMouvements(limit = 40): Promise<Mouvement[]> {
+export async function derniersMouvements(limit = 10): Promise<Mouvement[]> {
   const p = new URLSearchParams({
     select: COLONNES_PUBLIQUES,
     source: "eq.live",
@@ -56,4 +56,100 @@ export async function compteAffectations(): Promise<Record<string, number>> {
     out[chambre] = (await dataQuery<unknown>("affectations", p, 3600)).total ?? 0;
   }
   return out;
+}
+
+// ── Référentiel des élus (d'après l'état courant des affectations) ──────────
+
+export type Elu = { chambre: Mouvement["chambre"]; cle: string; id: string; nom: string; groupe: string; n_collabs: number };
+
+// PostgREST plafonne chaque réponse (1 000 lignes par défaut) : on pagine.
+export async function dataQueryTout<T>(table: string, params: URLSearchParams, revalidate = 3600, page = 1000): Promise<T[]> {
+  const out: T[] = [];
+  for (let offset = 0; offset < 100_000; offset += page) {
+    const p = new URLSearchParams(params);
+    p.set("limit", String(page));
+    p.set("offset", String(offset));
+    const { rows } = await dataQuery<T>(table, p, revalidate);
+    out.push(...rows);
+    if (rows.length < page) break;
+  }
+  return out;
+}
+
+export async function referentiel(): Promise<Elu[]> {
+  const p = new URLSearchParams({ select: "chambre,elu_cle,elu_id,elu_nom,elu_groupe", order: "chambre,elu_cle,collab_cle" });
+  const rows = await dataQueryTout<{ chambre: Elu["chambre"]; elu_cle: string; elu_id: string; elu_nom: string; elu_groupe: string }>(
+    "affectations", p,
+  );
+  const parCle = new Map<string, Elu>();
+  for (const r of rows) {
+    const k = `${r.chambre}|${r.elu_cle}`;
+    const e = parCle.get(k);
+    if (e) e.n_collabs += 1;
+    else parCle.set(k, { chambre: r.chambre, cle: r.elu_cle, id: r.elu_id, nom: r.elu_nom, groupe: r.elu_groupe, n_collabs: 1 });
+  }
+  return [...parCle.values()].sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+}
+
+export function groupesDe(elus: Elu[]): Record<string, string[]> {
+  const out: Record<string, Set<string>> = {};
+  for (const e of elus) if (e.groupe) (out[e.chambre] ??= new Set()).add(e.groupe);
+  return Object.fromEntries(Object.entries(out).map(([c, s]) => [c, [...s].sort()]));
+}
+
+// ── Recherche de mouvements (toutes sources) ──────────────────────────────
+
+export type Filtres = {
+  chambre?: string; type?: string; groupe?: string; elu?: string; q?: string;
+  depuis?: string; jusqua?: string; limit?: number; offset?: number;
+};
+
+const CHAMBRES_OK = new Set(["assemblee", "senat", "europarl"]);
+const TYPES_OK = new Set(["arrivee", "depart", "transfert"]);
+const DATE_OK = /^\d{4}-\d{2}-\d{2}$/;
+const TEXTE_OK = /^[\p{L}\p{N} .'’-]{1,80}$/u;
+
+export function normaliser(t: string): string {
+  return t.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/[-'’.]/g, " ").replace(/[^a-z0-9 ]/g, "").trim();
+}
+
+// Construit les paramètres PostgREST ; renvoie null si un filtre est invalide.
+export function parametresRecherche(f: Filtres): URLSearchParams | null {
+  const p = new URLSearchParams({
+    select: COLONNES_PUBLIQUES,
+    order: "date_event.desc,id.asc",
+    limit: String(Math.min(Math.max(f.limit ?? 50, 1), 500)),
+    offset: String(Math.max(f.offset ?? 0, 0)),
+  });
+  const et: string[] = [];
+  if (f.chambre) { if (!CHAMBRES_OK.has(f.chambre)) return null; p.set("chambre", `eq.${f.chambre}`); }
+  if (f.type) { if (!TYPES_OK.has(f.type)) return null; p.set("type", `eq.${f.type}`); }
+  if (f.groupe) {
+    if (!TEXTE_OK.test(f.groupe)) return null;
+    et.push(`or(elu_groupe.eq."${f.groupe}",elu_origine_groupe.eq."${f.groupe}")`);
+  }
+  if (f.elu) {
+    if (!TEXTE_OK.test(f.elu)) return null;
+    et.push(`or(elu_cle.eq."${f.elu}",elu_id.eq."${f.elu}",elu_origine_cle.eq."${f.elu}",elu_origine_id.eq."${f.elu}")`);
+  }
+  if (f.depuis) { if (!DATE_OK.test(f.depuis)) return null; et.push(`date_event.gte.${f.depuis}`); }
+  if (f.jusqua) { if (!DATE_OK.test(f.jusqua)) return null; et.push(`date_event.lte.${f.jusqua}`); }
+  if (f.q) {
+    if (!TEXTE_OK.test(f.q)) return null;
+    // Chaque mot doit apparaître quelque part ; collab_cle est déjà sans accents
+    // (on compare le mot normalisé), elu_nom sans tenir compte de la casse.
+    for (const brut of f.q.split(/[\s-]+/).filter(Boolean).slice(0, 6)) {
+      const n = normaliser(brut).replace(/ /g, "");
+      if (!n) continue;
+      const e = brut.replace(/["*]/g, "");
+      et.push(`or(collab_cle.ilike."*${n}*",elu_nom.ilike."*${e}*",elu_origine_nom.ilike."*${e}*")`);
+    }
+  }
+  if (et.length) p.set("and", `(${et.join(",")})`);
+  return p;
+}
+
+// Les sources internes sont présentées comme « suivi quotidien » ou « archives ».
+export function sourcePublique(source: string): "suivi" | "archives" {
+  return source === "live" ? "suivi" : "archives";
 }

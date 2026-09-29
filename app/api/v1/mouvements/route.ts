@@ -2,14 +2,15 @@ import { NextResponse } from "next/server";
 import { consommer } from "@/lib/apiKeys";
 import { COLONNES_PUBLIQUES, dataQuery, type Mouvement } from "@/lib/data";
 
-// GET https://api.cavaparlement.eu/mouvements
+// GET https://api.cavaparlement.eu/v1/mouvements
 //   ?chambre=assemblee|senat|europarl  ?type=arrivee|depart|transfert
-//   ?depuis=AAAA-MM-JJ  ?jusqua=AAAA-MM-JJ  ?elu=<elu_cle ou elu_id>
-//   ?source=live|regardscitoyens|wayback  ?limit=1..500  ?offset=0..
+//   ?depuis=AAAA-MM-JJ  ?jusqua=AAAA-MM-JJ  ?elu=<identifiant de l'élu>
+//   ?source=suivi|archives  ?limit=1..500  ?offset=0..
 
 const CHAMBRES = new Set(["assemblee", "senat", "europarl"]);
 const TYPES = new Set(["arrivee", "depart", "transfert"]);
-const SOURCES = new Set(["live", "regardscitoyens", "wayback"]);
+// Les sources internes sont exposées sous deux noms publics.
+const SOURCES: Record<string, string> = { suivi: "eq.live", archives: "in.(regardscitoyens,wayback)" };
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 const CORS = {
@@ -41,7 +42,7 @@ export async function GET(req: Request) {
   const type = q.get("type");
   if (type) { if (!TYPES.has(type)) return erreur("type"); p.set("type", `eq.${type}`); }
   const source = q.get("source");
-  if (source) { if (!SOURCES.has(source)) return erreur("source"); p.set("source", `eq.${source}`); }
+  if (source) { if (!(source in SOURCES)) return erreur("source"); p.set("source", SOURCES[source]); }
   const depuis = q.get("depuis"), jusqua = q.get("jusqua");
   if (depuis && !DATE.test(depuis)) return erreur("depuis");
   if (jusqua && !DATE.test(jusqua)) return erreur("jusqua");
@@ -57,7 +58,12 @@ export async function GET(req: Request) {
   try {
     const { rows, total } = await dataQuery<Mouvement>("mouvements", p, 300);
     return NextResponse.json(
-      { total, limit, offset, mouvements: rows, licence: "ODbL 1.0", source: "DataParl' (cavaparlement.eu), d'après les publications de l'Assemblée nationale, du Sénat et les archives Regards Citoyens" },
+      {
+        total, limit, offset,
+        mouvements: rows.map((m) => ({ ...m, source: m.source === "live" ? "suivi" : "archives" })),
+        licence: "ODbL 1.0",
+        attribution: "DataParl' (cavaparlement.eu), d'après les publications de l'Assemblée nationale et du Sénat",
+      },
       { headers: { ...CORS, ...quotaHeaders, "Cache-Control": "private, max-age=60" } },
     );
   } catch {

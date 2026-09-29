@@ -4,10 +4,14 @@ Site public, alertes par email, connexion, compte, administration et API de Data
 
 | Hôte | Rôle |
 |---|---|
-| `www.cavaparlement.eu` | site public, alertes, préférences, désinscription, connexion |
+| `www.cavaparlement.eu` | site : accueil, mouvements, collaborateurs, parlementaires, alertes, compte, contact, presse, FAQ, pages légales ; `/api` redirige vers l'API |
 | `cavaparlement.eu` | redirection 308 vers `www` |
-| `api.cavaparlement.eu` | API publique (`/mouvements`), réécrite vers `/api/v1/*` |
-| `admin.cavaparlement.eu` | administration, réécrite vers `/admin/*` ; `/connexion` servie telle quelle pour que le flux OAuth PKCE reste sur la même origine |
+| `api.cavaparlement.eu` | site de l'API (`/`, `/docs/*`, `/request-access`, `/mon-espace-api`, réécrits vers `/espace-api/*`) et API elle-même (`/v1/*`, réécrit vers `/api/v1/*`) |
+| `admin.cavaparlement.eu` | administration, réécrite vers `/admin/*` |
+
+`/connexion` est servie telle quelle sur chaque hôte : le flux OAuth (PKCE) doit rester sur l'origine qui l'a lancé. La session n'est donc pas partagée entre `www` et `api` : il faut se connecter sur chacun.
+
+Les pages sont réparties en trois groupes de routes : `app/(site)`, `app/(auth)` (connexion) et `app/(apisite)` (site de l'API), chacun avec son en-tête.
 
 ## Données et services
 

@@ -5,7 +5,7 @@ import { randomToken, sha256 } from "./tokens";
 // Clés API : « dp_ » + 32 caractères aléatoires. Seule l'empreinte SHA-256 est
 // stockée ; la clé en clair n'est montrée qu'une fois, à la création.
 
-export const MAX_CLES = 3;
+export const MAX_CLES = 1;
 
 export async function genererCle(): Promise<{ cle: string; prefixe: string; hash: string }> {
   const cle = `dp_${randomToken(24)}`;
@@ -27,7 +27,7 @@ export type Verdict =
 export async function consommer(req: Request): Promise<Verdict> {
   const cle = cleDepuisRequete(req);
   if (!cle || cle.length > 80) {
-    return { ok: false, status: 401, message: "clé API requise : en-tête Authorization: Bearer <clé> (gratuit, voir https://www.cavaparlement.eu/api)" };
+    return { ok: false, status: 401, message: "clé API requise : en-tête Authorization: Bearer <clé> (gratuite, à demander sur https://api.cavaparlement.eu/request-access)" };
   }
   const { data, error } = await authAdmin().rpc("api_consommer", { p_hash: await sha256(cle) });
   if (error || !data?.[0]) return { ok: false, status: 503, message: "vérification de la clé impossible, réessaie" };

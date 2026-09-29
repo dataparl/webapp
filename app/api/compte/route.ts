@@ -14,7 +14,7 @@ export async function GET(req: Request) {
   const db = authAdmin();
   const [{ data: prefs }, { data: subs }] = await Promise.all([
     db.from("communication_preferences").select("alertes_enabled").eq("email", email).maybeSingle(),
-    db.from("alert_subscriptions").select("frequence, chambres, active").eq("email", email)
+    db.from("alert_subscriptions").select("frequence, chambres, types, groupes, elus, partis, commissions, active").eq("email", email)
       .order("created_at", { ascending: false }).limit(1),
   ]);
   const sub = subs?.[0];
@@ -26,6 +26,11 @@ export async function GET(req: Request) {
       actives: !!prefs?.alertes_enabled && !!sub?.active,
       frequence: sub?.frequence ?? "quotidienne",
       chambres: sub?.chambres ?? ["assemblee", "senat"],
+      types: sub?.types ?? ["arrivee", "depart", "transfert"],
+      groupes: sub?.groupes ?? [],
+      elus: sub?.elus ?? [],
+      partis: sub?.partis ?? [],
+      commissions: sub?.commissions ?? [],
     },
   });
 }

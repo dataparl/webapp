@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { genererCle, MAX_CLES } from "@/lib/apiKeys";
+import { logConsent } from "@/lib/consent";
+import { normalizeEmail } from "@/lib/tokens";
 import { authAdmin } from "@/lib/supabaseAdmin";
 import { utilisateur } from "@/lib/userAuth";
 
@@ -23,18 +25,20 @@ export async function GET(req: Request) {
   return NextResponse.json({ max: MAX_CLES, cles: (cles ?? []).map((c) => ({ ...c, requetes_aujourdhui: parCle.get(c.id) ?? 0 })) });
 }
 
-// POST : crée une clé ; la valeur en clair n'est renvoyée qu'ici.
+// POST : crée LA clé de l'utilisateur (une seule par compte), après acceptation
+// des CGU de l'API ; la valeur en clair n'est renvoyée qu'ici.
 export async function POST(req: Request) {
   const user = await utilisateur(req);
   if (!user) return NextResponse.json({ error: "non connecté" }, { status: 401 });
-  const parsed = z.object({ nom: z.string().trim().min(1).max(60) }).safeParse(await req.json().catch(() => null));
-  if (!parsed.success) return NextResponse.json({ error: "donne un nom à ta clé (60 caractères max)" }, { status: 400 });
+  const parsed = z.object({ nom: z.string().trim().min(1).max(60), cgu: z.literal(true) }).safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "indique l'usage prévu et accepte les conditions d'utilisation de l'API" }, { status: 400 });
   const db = authAdmin();
   const { count } = await db.from("api_keys").select("id", { count: "exact", head: true }).eq("user_id", user.id).is("revoked_at", null);
-  if ((count ?? 0) >= MAX_CLES) return NextResponse.json({ error: `${MAX_CLES} clés actives au maximum : révoque-en une d'abord` }, { status: 400 });
+  if ((count ?? 0) >= MAX_CLES) return NextResponse.json({ error: "tu as déjà une clé : révoque-la d'abord pour en obtenir une nouvelle" }, { status: 400 });
   const { cle, prefixe, hash } = await genererCle();
   const { error } = await db.from("api_keys").insert({ user_id: user.id, nom: parsed.data.nom, prefixe, key_hash: hash });
   if (error) return NextResponse.json({ error: "création impossible, réessaie" }, { status: 500 });
+  await logConsent(normalizeEmail(user.email!), "subscribe", "api");
   return NextResponse.json({ cle, prefixe });
 }
 

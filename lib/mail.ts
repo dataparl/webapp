@@ -10,6 +10,7 @@ type Envoi = {
   text: string;
   // Présents pour la communication opt-in : désinscription en un clic (RFC 8058).
   unsubscribeUrl?: string;
+  replyTo?: string;
 };
 
 export async function sendEmail(e: Envoi): Promise<string | null> {
@@ -21,7 +22,10 @@ export async function sendEmail(e: Envoi): Promise<string | null> {
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${secret("RESEND_API_KEY")}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: MAIL_FROM, to: [e.to], subject: e.subject, html: e.html, text: e.text, headers }),
+    body: JSON.stringify({
+      from: MAIL_FROM, to: [e.to], subject: e.subject, html: e.html, text: e.text, headers,
+      ...(e.replyTo ? { reply_to: e.replyTo } : {}),
+    }),
   });
   if (!r.ok) {
     console.error("Resend", r.status, await r.text());
@@ -55,15 +59,4 @@ export function piedObligatoire(): string {
 
 export function piedOptIn(prefsUrl: string, unsubUrl: string): string {
   return `Tu reçois ce message parce que tu es abonné(e) aux alertes DataParl'. <a href="${esc(prefsUrl)}" style="color:#4A5670">Régler mes préférences</a> · <a href="${esc(unsubUrl)}" style="color:#4A5670">Me désinscrire</a>`;
-}
-
-export function emailConfirmation(confirmUrl: string) {
-  const subject = "Confirme ton inscription aux alertes DataParl'";
-  const html = layoutEmail(
-    "Encore un clic",
-    `<p style="line-height:1.6">Tu as demandé à recevoir les alertes sur les mouvements de collaborateurs parlementaires. Confirme ci-dessous (lien valable 48 heures).</p>${bouton(confirmUrl, "Confirmer mon inscription")}`,
-    piedObligatoire(),
-  );
-  const text = `Confirme ton inscription aux alertes DataParl' (lien valable 48 heures) :\n${confirmUrl}\n\nSi ce n'est pas toi, ignore ce message.`;
-  return { subject, html, text };
 }

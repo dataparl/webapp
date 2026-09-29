@@ -7,7 +7,7 @@ import { randomToken, sha256 } from "./tokens";
 // Consentement, jetons de préférences et limitation de débit (dataparl-auth).
 
 type Action = "subscribe" | "confirm" | "unsubscribe" | "prefs_update" | "account_delete";
-type Type = "newsletter" | "alertes" | "compte";
+type Type = "newsletter" | "alertes" | "compte" | "api" | "contact";
 
 export async function clientFingerprint(): Promise<{ ipHash: string | null; userAgent: string | null }> {
   const h = await headers();
