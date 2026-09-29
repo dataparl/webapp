@@ -44,6 +44,13 @@ export default function Connexion() {
     setEtape("connecte");
   }
 
+  async function google() {
+    await authBrowser().auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/connexion` },
+    });
+  }
+
   async function github() {
     const suite = window.location.hostname.startsWith("admin.") ? "/" : "/admin";
     await authBrowser().auth.signInWithOAuth({
@@ -72,6 +79,8 @@ export default function Connexion() {
           <label htmlFor="email">Adresse email</label>
           <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
           <button type="submit" disabled={enCours}>Recevoir un code</button>
+          <p className="meta" style={{ margin: "18px 0 0" }}>ou</p>
+          <button type="button" className="secondaire" onClick={google}>Continuer avec Google</button>
         </form>
       )}
       {etape === "code" && (

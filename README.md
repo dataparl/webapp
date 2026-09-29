@@ -26,7 +26,7 @@ Jetons : 24 octets aléatoires, seul le hash SHA-256 est stocké, un seul jeton 
 
 ## Administration
 
-Connexion GitHub obligatoire + présence dans la table `admin_users`. Phase 1 : tableau de bord (inscrits, confirmations, envois). Phase 2 : webmail, campagnes et sondages, derrière un second facteur TOTP.
+Les visiteurs se connectent par code email ou avec Google. L'administration exige une connexion GitHub + la présence dans la table `admin_users`. Phase 1 : tableau de bord (inscrits, confirmations, envois). Phase 2 : webmail, campagnes et sondages, derrière un second facteur TOTP.
 
 ## Variables d'environnement
 
