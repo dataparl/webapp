@@ -15,7 +15,7 @@ test("correspondances entre chambres", () => {
   assert.equal(familleDe("assemblee", "EcoS")?.code, "ECO");
   assert.equal(familleDe("europarl", "Verts/ALE")?.code, "ECO");
   assert.equal(familleDe("assemblee", "LFI-NFP")?.code, "LFI");
-  assert.deepEqual(siglesDe("ECO", "senat").sort(), ["ECOLO", "GEST"]);
+  assert.deepEqual(siglesDe("ECO", "senat").sort(), ["ECO", "ECOLO", "GEST"]);
   assert.deepEqual(siglesDe("GEST"), ["GEST"]);
   assert.equal(resume(FAMILLES.find((f) => f.code === "ECO")!), "GEST au Sénat, EcoS à l'AN, Verts/ALE au PE");
 });
