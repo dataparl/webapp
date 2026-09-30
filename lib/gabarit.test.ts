@@ -3,9 +3,9 @@ import assert from "node:assert/strict";
 import { gabarit, texteVersHtml } from "./gabarit.ts";
 
 test("gabarit : lien en ligne, titre échappé, pied de carte", () => {
-  const h = gabarit({ titre: "Re: <test>", corpsHtml: "<p>x</p>", lireUrl: "https://mail.cavaparlement.eu/lire/abc" });
+  const h = gabarit({ titre: "Re: <test>", corpsHtml: "<p>x</p>", lireUrl: "https://mail.dataparl.fr/lire/abc" });
   assert.match(h, /consulte-le en ligne/);
-  assert.match(h, /mail\.cavaparlement\.eu\/lire\/abc/);
+  assert.match(h, /mail\.dataparl\.fr\/lire\/abc/);
   assert.match(h, /Re: &lt;test&gt;/);
   assert.match(h, /Informations légales/);
   assert.doesNotMatch(gabarit({ titre: "t", corpsHtml: "" }), /consulte-le en ligne/);

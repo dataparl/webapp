@@ -64,7 +64,7 @@ export default function Webmail() {
     const moi = new Set(EXPEDITEURS);
     const dest = m.direction === "in" ? adresse(m.reply_to || m.from_addr) : listeAdresses(m.to_addr)[0] ?? "";
     const autres = tous ? [...listeAdresses(m.to_addr), ...listeAdresses(m.cc_addr ?? "")].filter((a) => a !== dest && !moi.has(a)) : [];
-    const recuSur = listeAdresses(m.to_addr).find((a) => moi.has(a) && a !== "hello@mail.cavaparlement.eu");
+    const recuSur = listeAdresses(m.to_addr).find((a) => moi.has(a) && a.endsWith("@dataparl.fr"));
     setBrouillon({
       from: m.direction === "out" ? adresse(m.from_addr) : recuSur ?? EXPEDITEURS[0],
       to: dest, cc: autres.join(", "), subject: prefixer(m.subject, "Re"),

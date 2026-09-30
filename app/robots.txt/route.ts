@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 // les aperçus ne le sont jamais.
 export async function GET() {
   const host = ((await headers()).get("host") ?? "").split(":")[0].toLowerCase();
-  const public_ = host === "www.cavaparlement.eu" || host === "api.cavaparlement.eu";
+  const public_ = host === "www.dataparl.fr" || host === "api.dataparl.fr";
   const corps = public_
     ? [
         "User-agent: *",

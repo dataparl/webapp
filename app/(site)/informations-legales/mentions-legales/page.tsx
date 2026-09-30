@@ -31,8 +31,8 @@ export default function MentionsLegales() {
 
       <h2>Nom de domaine</h2>
       <p>
-        Le site est accessible à l&apos;adresse cavaparlement.eu, enregistrée auprès d&apos;Infomaniak Network SA,
-        Genève, Suisse.
+        Le site est accessible à l&apos;adresse dataparl.fr (ancienne adresse : cavaparlement.eu, redirigée), enregistrée auprès d&apos;IONOS SE,
+        Elgendorfer Straße 57, 56410 Montabaur, Allemagne.
       </p>
 
       <h2>Propriété intellectuelle</h2>

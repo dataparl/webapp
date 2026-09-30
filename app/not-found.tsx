@@ -23,7 +23,7 @@ export default function NotFound() {
           <div style={{ color: "var(--ink)" }}><UrneVide /></div>
           <h1><span className="surligne">Motion rejetée.</span></h1>
           <p className="lead" style={{ margin: "0 auto" }}>Cette page n&apos;existe pas (ou plus). Pas grave, l&apos;hémicycle t&apos;attend.</p>
-          <a className="btn" href="https://www.cavaparlement.eu/">Retour à l&apos;accueil</a>
+          <a className="btn" href="https://www.dataparl.fr/">Retour à l&apos;accueil</a>
         </div>
       </main>
     </div>

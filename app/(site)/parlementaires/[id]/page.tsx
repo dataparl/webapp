@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const nom = prenomNom(f.prenom, f.nom);
     const role = `${f.actif ? titre(f) : `${ancien(f)} ${titre(f).toLowerCase()}`}${f.circonscription && f.chambre !== "europarl" ? ` (${f.circonscription})` : ""}`;
     const description = `${nom}, ${role.charAt(0).toLowerCase()}${role.slice(1)}${f.groupe ? `, groupe ${f.groupe}` : ""} : collaborateurs parlementaires, mouvements de l'équipe, mandats et commissions.`;
-    const url = `https://www.cavaparlement.eu/parlementaires/${encodeURIComponent(f.slug)}`;
+    const url = `https://www.dataparl.fr/parlementaires/${encodeURIComponent(f.slug)}`;
     return {
       title: `${nom} : équipe et parcours`, description,
       alternates: { canonical: url },
@@ -84,7 +84,7 @@ export default async function Parlementaire({ params }: Props) {
 
   const jsonLd = {
     "@context": "https://schema.org", "@type": "Person", name: nom, givenName: f.prenom, familyName: f.nom,
-    image: f.photo_url || undefined, url: `https://www.cavaparlement.eu/parlementaires/${f.slug}`,
+    image: f.photo_url || undefined, url: `https://www.dataparl.fr/parlementaires/${f.slug}`,
     jobTitle: f.actif ? titre(f) : undefined, sameAs: f.url_officielle ? [f.url_officielle] : undefined,
     memberOf: f.actif ? { "@type": "GovernmentOrganization", name: CHAMBRE_LONG[f.chambre] } : undefined,
   };

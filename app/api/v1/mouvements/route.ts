@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { consommer } from "@/lib/apiKeys";
 import { COLONNES_PUBLIQUES, dataQuery, type Mouvement } from "@/lib/data";
 
-// GET https://api.cavaparlement.eu/v1/mouvements
+// GET https://api.dataparl.fr/v1/mouvements
 //   ?chambre=assemblee|senat|europarl  ?type=arrivee|depart|transfert
 //   ?depuis=AAAA-MM-JJ  ?jusqua=AAAA-MM-JJ  ?elu=<identifiant de l'élu>
 //   ?source=suivi|archives  ?limit=1..500  ?offset=0..
@@ -62,7 +62,7 @@ export async function GET(req: Request) {
         total, limit, offset,
         mouvements: rows.map((m) => ({ ...m, source: m.source === "live" ? "suivi" : "archives" })),
         licence: "ODbL 1.0",
-        attribution: "DataParl' (cavaparlement.eu), d'après les publications de l'Assemblée nationale et du Sénat",
+        attribution: "DataParl' (dataparl.fr), d'après les publications de l'Assemblée nationale et du Sénat",
       },
       { headers: { ...CORS, ...quotaHeaders, "Cache-Control": "private, max-age=60" } },
     );

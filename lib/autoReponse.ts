@@ -27,7 +27,7 @@ export function doitRepondre(e: Entrant): boolean {
   const h = e.headers;
   const de = adresseNue(e.from);
   if (!de.includes("@")) return false;
-  if (/@(mail\.)?cavaparlement\.eu$/.test(de)) return false;
+  if (/@((mail\.)?cavaparlement\.eu|dataparl\.(fr|com))$/.test(de)) return false;
   if (ROBOTS.test(de)) return false;
   if (h["in-reply-to"] || h["references"]) return false;
   if (PREFIXES.test(e.subject ?? "")) return false;

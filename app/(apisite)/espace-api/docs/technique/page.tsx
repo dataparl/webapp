@@ -43,7 +43,7 @@ export default function Technique() {
     }
   ],
   "licence": "ODbL 1.0",
-  "attribution": "DataParl' (cavaparlement.eu), d'après les publications de l'Assemblée nationale et du Sénat"
+  "attribution": "DataParl' (dataparl.fr), d'après les publications de l'Assemblée nationale et du Sénat"
 }`}</pre>
       <ul>
         <li><code>type=transfert</code> : <code>elu_*</code> désigne l&apos;élu rejoint, <code>elu_origine_*</code> l&apos;élu quitté.</li>

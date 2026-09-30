@@ -15,7 +15,7 @@ export default function Metiers() {
       <h2>Recherche</h2>
       <p>Constituer des séries longues (depuis 2015 au Sénat, 2017 à l&apos;Assemblée) sur la stabilité des cabinets parlementaires.</p>
       <pre>{`/v1/mouvements?source=archives&limit=500&offset=0`}</pre>
-      <p className="meta">Pour de gros volumes, préfère les fichiers complets plutôt que des milliers d&apos;appels : écris-nous via le <a href="https://www.cavaparlement.eu/contact?sujet=api">formulaire de contact</a>.</p>
+      <p className="meta">Pour de gros volumes, préfère les fichiers complets plutôt que des milliers d&apos;appels : écris-nous via le <a href="https://www.dataparl.fr/contact?sujet=api">formulaire de contact</a>.</p>
     </>
   );
 }

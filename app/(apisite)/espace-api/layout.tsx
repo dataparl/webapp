@@ -17,7 +17,7 @@ export default function ApiLayout({ children }: { children: React.ReactNode }) {
           <nav aria-label="Navigation de l'API">
             <a href="/docs">Documentation</a>
             <a href="/mon-espace-api">Mon espace API</a>
-            <a href="https://www.cavaparlement.eu/">Le site</a>
+            <a href="https://www.dataparl.fr/">Le site</a>
           </nav>
         </div>
       </header>

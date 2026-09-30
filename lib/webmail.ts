@@ -9,7 +9,7 @@ import { authAdmin } from "./supabaseAdmin";
 // webhook Resend (email.received), tout est rangé dans la table emails.
 
 const RESEND = "https://api.resend.com";
-const REPLI = "hello@mail.cavaparlement.eu"; // adresse toujours vérifiée chez Resend
+const REPLI = "hello@dataparl.fr"; // adresse du domaine vérifié chez Resend
 
 export type Brouillon = {
   from: string;

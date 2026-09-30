@@ -1,15 +1,15 @@
+import { domaineCookie } from "./domaine.ts";
 // Stockage de la session Supabase dans des cookies du domaine parent
-// (.cavaparlement.eu) : une seule connexion vaut pour www, api et admin.
+// (.dataparl.fr) : une seule connexion vaut pour www, api, admin et webmail.
 // Les cookies sont limités à ~4 Ko : la valeur est découpée en morceaux
-// « <clé>.0 », « <clé>.1 »… Hors de cavaparlement.eu (localhost, aperçus),
+// « <clé>.0 », « <clé>.1 »… Hors de dataparl.fr (localhost, aperçus),
 // les cookies restent attachés à l'hôte courant.
 
 const TAILLE = 3000;
 const DUREE = 60 * 60 * 24 * 30; // 30 jours ; la session est de toute façon rafraîchie
 
 function domaine(): string {
-  const h = typeof window === "undefined" ? "" : window.location.hostname;
-  return h === "cavaparlement.eu" || h.endsWith(".cavaparlement.eu") ? "; Domain=.cavaparlement.eu" : "";
+  return domaineCookie(typeof window === "undefined" ? "" : window.location.hostname);
 }
 
 function lire(): Map<string, string> {

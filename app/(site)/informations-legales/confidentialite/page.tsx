@@ -76,7 +76,7 @@ export default function Confidentialite() {
         <a href="/informations-legales/cookies">Cookies</a>.
       </p>
       <p>
-        Les emails envoyés par DataParl&apos; (depuis les adresses en @mail.cavaparlement.eu) mesurent leur
+        Les emails envoyés par DataParl&apos; (depuis les adresses en @dataparl.fr) mesurent leur
         ouverture et les clics sur leurs liens, via notre prestataire d&apos;envoi Resend, pour vérifier qu&apos;ils sont
         bien délivrés. Chaque email dispose aussi d&apos;une version en ligne, accessible uniquement par le lien
         unique qu&apos;il contient.

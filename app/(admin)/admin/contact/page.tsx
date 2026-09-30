@@ -56,7 +56,7 @@ function Message({ m, onMaj }: { m: Msg; onMaj: () => void }) {
         <button className="secondaire" onClick={() => setOuvert(!ouvert)}>{ouvert ? "Fermer" : "Répondre"}</button>
       </div>
       {ouvert && <div>
-        <label>Réponse (envoyée depuis hello@cavaparlement.eu, message d&apos;origine cité)</label>
+        <label>Réponse (envoyée depuis hello@dataparl.fr, message d&apos;origine cité)</label>
         <textarea value={texte} onChange={(e) => setTexte(e.target.value)} rows={8} />
         <button onClick={repondre}>Envoyer la réponse</button>
         <label>Note interne</label>

@@ -17,7 +17,8 @@ test("pas d'accusé pour une réponse, un transfert, un robot, une liste, nous-m
   assert.equal(doitRepondre({ ...base, headers: { "list-id": "<x>" } }), false);
   assert.equal(doitRepondre({ ...base, from: "noreply@service.fr" }), false);
   assert.equal(doitRepondre({ ...base, from: "MAILER-DAEMON@mx.fr" }), false);
-  assert.equal(doitRepondre({ ...base, from: "hello@mail.cavaparlement.eu" }), false);
+  assert.equal(doitRepondre({ ...base, from: "hello@dataparl.fr" }), false);
+  assert.equal(doitRepondre({ ...base, from: "contact@dataparl.fr" }), false);
   assert.equal(doitRepondre({ ...base, headers: { "auto-submitted": "no" } }), true);
 });
 

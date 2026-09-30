@@ -6,9 +6,9 @@ const spec = {
     title: "API DataParl'",
     version: "1.0.0",
     description: "Mouvements des collaborateurs parlementaires français. Données sous licence ODbL 1.0.",
-    termsOfService: "https://www.cavaparlement.eu/informations-legales/cgu-api",
+    termsOfService: "https://www.dataparl.fr/informations-legales/cgu-api",
   },
-  servers: [{ url: "https://api.cavaparlement.eu" }],
+  servers: [{ url: "https://api.dataparl.fr" }],
   security: [{ cle: [] }],
   components: {
     securitySchemes: { cle: { type: "http", scheme: "bearer", description: "Clé personnelle dp_… (une par compte)" } },

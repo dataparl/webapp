@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 
 // Simule document.cookie et window pour tester le découpage.
 const jar = new Map<string, string>();
-(globalThis as any).window = { location: { hostname: "www.cavaparlement.eu", protocol: "https:" } };
+(globalThis as any).window = { location: { hostname: "www.dataparl.fr", protocol: "https:" } };
 (globalThis as any).document = {
   get cookie() { return [...jar].map(([k, v]) => `${k}=${v}`).join("; "); },
   set cookie(s: string) {

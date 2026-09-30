@@ -28,7 +28,7 @@ export default function BandeauCookies() {
         DataParl&apos; ne dépose aucun cookie publicitaire ni de mesure d&apos;audience. Seul ce qui sert à te garder
         connecté(e) est enregistré sur ton appareil.
       </p>
-      <p><a href="https://www.cavaparlement.eu/informations-legales/cookies">Lire la politique cookies</a></p>
+      <p><a href="https://www.dataparl.fr/informations-legales/cookies">Lire la politique cookies</a></p>
       <button onClick={fermer}>Compris</button>
     </div>
   );

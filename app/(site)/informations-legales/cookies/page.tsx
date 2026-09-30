@@ -17,7 +17,7 @@ export default function Cookies() {
 
       <h2>Ce qui est stocké</h2>
       <p>
-        Ces cookies sont posés sur le domaine <code>cavaparlement.eu</code>, pour qu&apos;une seule connexion vaille sur
+        Ces cookies sont posés sur le domaine <code>dataparl.fr</code>, pour qu&apos;une seule connexion vaille sur
         le site et sur l&apos;espace API.
       </p>
       <table>

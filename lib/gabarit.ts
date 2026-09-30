@@ -1,11 +1,11 @@
-// Gabarit commun à tous les emails envoyés depuis @mail.cavaparlement.eu
+// Gabarit commun à tous les emails envoyés depuis @dataparl.fr
 // (transactionnels, réponses de la webmail, accusés de réception).
 // HTML de messagerie : tableaux et styles en ligne. Sans dépendance (testé).
 
 export const esc = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
-const SITE = "https://www.cavaparlement.eu";
+const SITE = "https://www.dataparl.fr";
 const BLEU = "#164DFF";
 const ENCRE = "#071A41";
 const GRIS = "#4A5670";
@@ -14,7 +14,7 @@ const LIGNE = "#E6E3D8";
 export type Gabarit = {
   titre: string;
   corpsHtml: string;
-  lireUrl?: string | null; // version en ligne (mail.cavaparlement.eu/lire/<jeton>)
+  lireUrl?: string | null; // version en ligne (mail.dataparl.fr/lire/<jeton>)
   pied?: string; // mention sous la carte (désinscription, raison de l'envoi)
 };
 

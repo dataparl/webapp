@@ -10,12 +10,12 @@ export default function CGUAPI() {
       <p className="meta">Dernière mise à jour : {MISE_A_JOUR}</p>
       <p>
         Ces conditions complètent les <a href="/informations-legales/cgu">conditions générales d&apos;utilisation</a>.
-        La documentation est sur <a href="https://api.cavaparlement.eu/docs">api.cavaparlement.eu/docs</a>.
+        La documentation est sur <a href="https://api.dataparl.fr/docs">api.dataparl.fr/docs</a>.
       </p>
 
       <h2>1. Accès par clé</h2>
       <ul>
-        <li>L&apos;API est gratuite. Chaque appel nécessite une clé personnelle, obtenue sur <a href="https://api.cavaparlement.eu/request-access">api.cavaparlement.eu/request-access</a> après avoir lu et accepté les présentes conditions.</li>
+        <li>L&apos;API est gratuite. Chaque appel nécessite une clé personnelle, obtenue sur <a href="https://api.dataparl.fr/request-access">api.dataparl.fr/request-access</a> après avoir lu et accepté les présentes conditions.</li>
         <li>Une seule clé par compte. Elle peut être révoquée puis remplacée à tout moment depuis l&apos;espace API.</li>
         <li>
           La clé est transmise dans l&apos;en-tête <code>Authorization: Bearer &lt;clé&gt;</code> (ou <code>X-API-Key</code>).
@@ -39,7 +39,7 @@ export default function CGUAPI() {
         commerciale, est permise à condition :
       </p>
       <ul>
-        <li>de citer la source : « DataParl&apos; (cavaparlement.eu), d&apos;après les publications de l&apos;Assemblée nationale et du Sénat » ;</li>
+        <li>de citer la source : « DataParl&apos; (dataparl.fr), d&apos;après les publications de l&apos;Assemblée nationale et du Sénat » ;</li>
         <li>de publier sous la même licence toute base de données dérivée rendue publique ;</li>
         <li>d&apos;indiquer la date d&apos;extraction, les données évoluant chaque jour.</li>
       </ul>

@@ -9,8 +9,8 @@ const PAGES = ["", "/mouvements", "/collab", "/parlementaires", "/vigiparl", "/m
 // Plan du site : pages publiques et une fiche par parlementaire (anciens compris).
 export async function GET() {
   const host = ((await headers()).get("host") ?? "").split(":")[0].toLowerCase();
-  if (host !== "www.cavaparlement.eu") return new Response("Not found", { status: 404 });
-  const base = "https://www.cavaparlement.eu";
+  if (host !== "www.dataparl.fr") return new Response("Not found", { status: 404 });
+  const base = "https://www.dataparl.fr";
   let elus: { s: string; a: boolean }[] = [];
   try { elus = await tousLesParlementaires(); } catch { /* le plan reste utile sans les fiches */ }
   const url = (loc: string, priorite: string, freq: string) =>

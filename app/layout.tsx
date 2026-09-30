@@ -3,7 +3,7 @@ import BandeauCookies from "./_components/BandeauCookies";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.cavaparlement.eu"),
+  metadataBase: new URL("https://www.dataparl.fr"),
   title: { default: "DataParl' : le Parlement, pièce par pièce", template: "%s | DataParl'" },
   description:
     "Arrivées, départs et transferts des collaborateurs des députés, sénateurs et eurodéputés, d'après les publications officielles. Gratuit, sans pub, sans pistage.",

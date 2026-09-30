@@ -1,20 +1,34 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 // Routage par sous-domaine (un seul déploiement pour tous les hôtes) :
-//   www.cavaparlement.eu    site public ; /api -> api.cavaparlement.eu
-//   cavaparlement.eu        -> redirection 308 vers www
-//   api.cavaparlement.eu    /v1/* -> /api/v1/* (l'API elle-même)
+//   www.dataparl.fr         site public ; /api -> api.dataparl.fr
+//   dataparl.fr             -> redirection 308 vers www
+//   api.dataparl.fr         /v1/* -> /api/v1/* (l'API elle-même)
 //                           /connexion servie telle quelle (OAuth PKCE sur la même origine)
 //                           /api/* (routes internes des pages) servies telles quelles
 //                           tout le reste -> /espace-api/* (site de l'API)
-//   admin.cavaparlement.eu  /x -> /admin/x, sauf /connexion et /api/*
-//   webmail.cavaparlement.eu /x -> /webmail/x, sauf /connexion et /api/*
-//   mail.cavaparlement.eu    /lire/<jeton> (version en ligne des emails), le reste -> www
+//   admin.dataparl.fr       /x -> /admin/x, sauf /connexion et /api/*
+//   webmail.dataparl.fr     /x -> /webmail/x, sauf /connexion et /api/*
+//   mail.dataparl.fr        /lire/<jeton> (version en ligne des emails), le reste -> www
+// Anciens domaines (cavaparlement.eu, dataparl.com) : redirection 308 vers la
+// même adresse sur dataparl.fr. Exceptions, servies telles quelles pendant la
+// transition : /api/* (webhooks, formulaires déjà ouverts) et l'API /v1 sur
+// api.cavaparlement.eu (clients existants).
 // Sur admin, webmail et mail : pas d'indexation, pas d'intégration en iframe,
 // pas de Referer transmis.
 // Tout autre hôte (localhost, aperçus Vercel) : pas de réécriture.
 
-const DOMAINE = "cavaparlement.eu";
+const DOMAINE = "dataparl.fr";
+const ANCIENS = ["cavaparlement.eu", "dataparl.com"];
+
+// Ancien hôte -> nouvel hôte équivalent, ou null.
+function nouvelHote(host: string): string | null {
+  for (const ancien of ANCIENS) {
+    if (host === ancien) return `www.${DOMAINE}`;
+    if (host.endsWith(`.${ancien}`)) return `${host.slice(0, -ancien.length - 1)}.${DOMAINE}`;
+  }
+  return null;
+}
 
 function vers(req: NextRequest, host: string, pathname: string, status: 307 | 308) {
   const url = req.nextUrl.clone();
@@ -37,6 +51,16 @@ export function proxy(req: NextRequest) {
   const host = (req.headers.get("host") ?? "").split(":")[0].toLowerCase();
   const path = req.nextUrl.pathname;
 
+  const cible = nouvelHote(host);
+  if (cible) {
+    if (path.startsWith("/api/")) return NextResponse.next();
+    if (host === "api.cavaparlement.eu" && (path === "/v1" || path.startsWith("/v1/"))) {
+      const url = req.nextUrl.clone();
+      url.pathname = `/api${path}`;
+      return NextResponse.rewrite(url);
+    }
+    return vers(req, cible, path, 308);
+  }
   if (host === DOMAINE) return vers(req, `www.${DOMAINE}`, path, 308);
 
   if (host === `api.${DOMAINE}`) {

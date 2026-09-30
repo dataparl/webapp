@@ -11,7 +11,7 @@ export default function Docs() {
       <ol>
         <li>Crée un compte DataParl&apos;, puis <a href="/request-access">demande ta clé</a> (gratuite, une par compte).</li>
         <li>Envoie-la dans l&apos;en-tête <code>Authorization: Bearer dp_…</code> de chaque requête.</li>
-        <li>Interroge <code>https://api.cavaparlement.eu/v1/mouvements</code> avec les filtres de ton choix.</li>
+        <li>Interroge <code>https://api.dataparl.fr/v1/mouvements</code> avec les filtres de ton choix.</li>
       </ol>
       <h2>Bon à savoir</h2>
       <ul>

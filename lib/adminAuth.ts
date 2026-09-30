@@ -1,6 +1,7 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import * as OTPAuth from "otpauth";
+import { domaineCookie as domaineDeHote } from "./domaine";
 import { chiffrer, dechiffrer, signerJeton, verifierJeton } from "./crypto";
 import { ADMIN_GITHUB_LOGINS, secret } from "./env";
 import { authAdmin } from "./supabaseAdmin";
@@ -120,8 +121,7 @@ export async function verifierCode(a: Admin, code: string): Promise<boolean> {
 }
 
 function domaineCookie(req: Request): string {
-  const host = (req.headers.get("host") ?? "").split(":")[0];
-  return host.endsWith("cavaparlement.eu") ? "; Domain=.cavaparlement.eu" : "";
+  return domaineDeHote(req.headers.get("host") ?? "");
 }
 
 export function poserCookieOtp(res: NextResponse, req: Request, userId: string): void {

@@ -37,7 +37,7 @@ export async function PATCH(req: Request) {
 
 const Reponse = z.object({ id: z.string().uuid(), texte: z.string().trim().min(1).max(20000), from: z.string().email().optional() });
 
-// Répond à un message de contact depuis une adresse @mail.cavaparlement.eu ;
+// Répond à un message de contact depuis une adresse @dataparl.fr ;
 // la réponse est rangée dans « Envoyés » de la webmail.
 export async function POST(req: Request) {
   return avecAdmin(req, async (a) => {

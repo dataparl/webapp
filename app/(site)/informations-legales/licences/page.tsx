@@ -59,7 +59,7 @@ export default function Licences() {
         Tu peux la copier, la diffuser et l&apos;adapter, y compris à des fins commerciales, à trois conditions :
       </p>
       <ul>
-        <li><strong>Attribution</strong> : « DataParl&apos; (cavaparlement.eu), d&apos;après les publications de l&apos;Assemblée nationale et du Sénat » ;</li>
+        <li><strong>Attribution</strong> : « DataParl&apos; (dataparl.fr), d&apos;après les publications de l&apos;Assemblée nationale et du Sénat » ;</li>
         <li><strong>Partage à l&apos;identique</strong> : une base de données dérivée rendue publique doit être diffusée sous ODbL ;</li>
         <li><strong>Ouverture</strong> : pas de mesure technique empêchant la réutilisation de cette base dérivée.</li>
       </ul>
@@ -71,7 +71,7 @@ export default function Licences() {
       <h2>Accéder aux données</h2>
       <ul>
         <li>Fichiers CSV complets et historique des versions : <a href="https://github.com/dataparl/collaborateurs">github.com/dataparl/collaborateurs</a> ;</li>
-        <li>API avec clé gratuite : <a href="https://api.cavaparlement.eu">api.cavaparlement.eu</a> et ses <a href="/informations-legales/cgu-api">conditions d&apos;utilisation</a>.</li>
+        <li>API avec clé gratuite : <a href="https://api.dataparl.fr">api.dataparl.fr</a> et ses <a href="/informations-legales/cgu-api">conditions d&apos;utilisation</a>.</li>
       </ul>
 
       <h2>Données personnelles</h2>

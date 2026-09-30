@@ -4,7 +4,7 @@ import { cookieStorage } from "./cookieStorage";
 import { AUTH_SUPABASE_KEY, AUTH_SUPABASE_URL } from "./env";
 
 // Client navigateur de dataparl-auth (clé publique). La session est stockée
-// dans des cookies du domaine .cavaparlement.eu : partagée entre www, api et
+// dans des cookies du domaine .dataparl.fr : partagée entre www, api et
 // admin (voir cookieStorage).
 let client: SupabaseClient | null = null;
 

@@ -11,7 +11,7 @@ export default function AccueilApi() {
         mis à jour chaque matin. Gratuit, avec une clé personnelle.
       </p>
       <pre>{`curl -H "Authorization: Bearer dp_ta_cle" \\
-  "https://api.cavaparlement.eu/v1/mouvements?chambre=senat&type=arrivee&depuis=2026-01-01"`}</pre>
+  "https://api.dataparl.fr/v1/mouvements?chambre=senat&type=arrivee&depuis=2026-01-01"`}</pre>
       <div className="chiffres">
         <div><strong>1</strong><span>clé gratuite par compte</span></div>
         <div><strong>1 000</strong><span>requêtes par jour</span></div>

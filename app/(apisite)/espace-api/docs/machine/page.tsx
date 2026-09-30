@@ -7,7 +7,7 @@ export default function Machine() {
     <>
       <h1>Pour les <span className="surligne">machines</span></h1>
       <h2>OpenAPI</h2>
-      <p>La description complète de l&apos;API, au format OpenAPI 3.1 : <a href="/v1/openapi.json"><code>https://api.cavaparlement.eu/v1/openapi.json</code></a>. Elle se charge dans Postman, Insomnia ou tout générateur de client.</p>
+      <p>La description complète de l&apos;API, au format OpenAPI 3.1 : <a href="/v1/openapi.json"><code>https://api.dataparl.fr/v1/openapi.json</code></a>. Elle se charge dans Postman, Insomnia ou tout générateur de client.</p>
       <h2>Conventions</h2>
       <ul>
         <li>Encodage UTF-8, JSON uniquement, dates au format ISO <code>AAAA-MM-JJ</code>.</li>

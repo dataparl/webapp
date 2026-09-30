@@ -22,7 +22,7 @@ export default function Mcp() {
         La plupart des assistants savent lire une description OpenAPI : donne-leur{" "}
         <a href="/v1/openapi.json"><code>/v1/openapi.json</code></a> et ta clé, depuis un environnement où elle reste privée.
       </p>
-      <p className="meta">Tu veux tester la version préliminaire ? Écris-nous via le <a href="https://www.cavaparlement.eu/contact?sujet=api">formulaire de contact</a>.</p>
+      <p className="meta">Tu veux tester la version préliminaire ? Écris-nous via le <a href="https://www.dataparl.fr/contact?sujet=api">formulaire de contact</a>.</p>
     </>
   );
 }

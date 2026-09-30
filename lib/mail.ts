@@ -8,7 +8,7 @@ export { esc, texteVersHtml } from "./gabarit";
 
 // Point d'envoi unique (API Resend en fetch brut). Chaque email :
 //   - est habillé du gabarit DataParl' ;
-//   - a une version en ligne (mail.cavaparlement.eu/lire/<jeton>, seul le
+//   - a une version en ligne (mail.dataparl.fr/lire/<jeton>, seul le
 //     hash du jeton est stocké) ;
 //   - est rangé dans la table emails (visible dans la webmail).
 

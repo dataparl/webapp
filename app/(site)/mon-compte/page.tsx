@@ -144,7 +144,7 @@ export default function MonCompte() {
       <section className="section-compte">
         <h2>Mon espace API</h2>
         <p>Ta clé API, sa consommation et la documentation sont sur le site de l&apos;API.</p>
-        <a className="btn secondaire" href="https://api.cavaparlement.eu/mon-espace-api">Ouvrir mon espace API</a>
+        <a className="btn secondaire" href="https://api.dataparl.fr/mon-espace-api">Ouvrir mon espace API</a>
       </section>
     </div>
   );

@@ -1,17 +1,18 @@
 # DataParl' : webapp
 
-Site public, alertes par email, connexion, compte, administration et API de DataParl' (adresse actuelle : [cavaparlement.eu](https://www.cavaparlement.eu)). Un seul déploiement Next.js 16 sert tous les sous-domaines ; le routage est dans `proxy.ts` (nouveau nom de `middleware.ts` depuis Next 16).
+Site public, alertes par email, connexion, compte, administration et API de DataParl' ([dataparl.fr](https://www.dataparl.fr)). Les anciens domaines (cavaparlement.eu, dataparl.com) redirigent en 308 vers la même adresse sur dataparl.fr ; seules `/api/*` et l'API `/v1` d'api.cavaparlement.eu y répondent encore directement, le temps de la transition. Un seul déploiement Next.js 16 sert tous les sous-domaines ; le routage est dans `proxy.ts` (nouveau nom de `middleware.ts` depuis Next 16).
 
 | Hôte | Rôle |
 |---|---|
-| `www.cavaparlement.eu` | site : accueil, mouvements, collaborateurs, parlementaires, alertes, compte, contact, presse, FAQ, pages légales ; `/api` redirige vers l'API |
-| `cavaparlement.eu` | redirection 308 vers `www` |
-| `api.cavaparlement.eu` | site de l'API (`/`, `/docs/*`, `/request-access`, `/mon-espace-api`, réécrits vers `/espace-api/*`) et API elle-même (`/v1/*`, réécrit vers `/api/v1/*`) |
-| `admin.cavaparlement.eu` | administration, réécrite vers `/admin/*` |
-| `webmail.cavaparlement.eu` | webmail de l'équipe, réécrite vers `/webmail/*` |
-| `mail.cavaparlement.eu` | versions en ligne des emails (`/lire/<jeton>`) ; le reste redirige vers `www` (le domaine sert aussi à Resend : MX et enregistrement A cohabitent) |
+| `www.dataparl.fr` | site : accueil, mouvements, collaborateurs, parlementaires, alertes, compte, contact, presse, FAQ, pages légales ; `/api` redirige vers l'API |
+| `dataparl.fr` | redirection 308 vers `www` |
+| `cavaparlement.eu`, `dataparl.com` et leurs sous-domaines | redirection 308 vers l'équivalent sur dataparl.fr |
+| `api.dataparl.fr` | site de l'API (`/`, `/docs/*`, `/request-access`, `/mon-espace-api`, réécrits vers `/espace-api/*`) et API elle-même (`/v1/*`, réécrit vers `/api/v1/*`) |
+| `admin.dataparl.fr` | administration, réécrite vers `/admin/*` |
+| `webmail.dataparl.fr` | webmail de l'équipe, réécrite vers `/webmail/*` |
+| `mail.dataparl.fr` | versions en ligne des emails (`/lire/<jeton>`) ; le reste redirige vers `www` (enregistrement A vers Vercel) |
 
-`/connexion` est servie telle quelle sur chaque hôte : le flux OAuth (PKCE) doit rester sur l'origine qui l'a lancé. La session, elle, est stockée dans des cookies du domaine `.cavaparlement.eu` (`lib/cookieStorage.ts`, découpés en morceaux de 3 Ko) : une seule connexion vaut pour `www`, `api` et `admin`.
+`/connexion` est servie telle quelle sur chaque hôte : le flux OAuth (PKCE) doit rester sur l'origine qui l'a lancé. La session, elle, est stockée dans des cookies du domaine `.dataparl.fr` (`lib/domaine.ts`) (`lib/cookieStorage.ts`, découpés en morceaux de 3 Ko) : une seule connexion vaut pour `www`, `api` et `admin`.
 
 Les pages sont réparties en quatre groupes de routes : `app/(site)`, `app/(auth)` (connexion), `app/(apisite)` (site de l'API) et `app/(admin)` (admin et webmail), chacun avec son en-tête.
 
@@ -29,7 +30,7 @@ Tables alimentées par dataparl/collaborateurs : `parlementaires`, `mandats`, `a
 
 - **Supabase `dataparl`** : données publiques (mouvements, affectations), alimentées par [dataparl/collaborateurs](https://github.com/dataparl/collaborateurs). Lecture seule avec la clé publique.
 - **Supabase `dataparl-auth`** : comptes (Supabase Auth), abonnés, alertes, préférences, historique des consentements, jetons, emails, campagnes, admins. Toutes les tables sont fermées par RLS ; seul le serveur y accède avec la clé `service_role`.
-- **Resend** : envoi depuis `noreply@mail.cavaparlement.eu` (API en `fetch` brut). `hello@cavaparlement.eu` reste chez Infomaniak.
+- **Resend** : envoi depuis `noreply@dataparl.fr` (API en `fetch` brut). Le domaine `dataparl.fr` est déclaré chez Resend en envoi et en réception (MX racine) : toutes les adresses @dataparl.fr arrivent dans la webmail.
 
 ## Alertes : parcours
 
@@ -48,13 +49,13 @@ Les visiteurs se connectent par code email, Google ou GitHub ; un même compte p
 2. la présence dans `admin_users` (un login listé dans `ADMIN_GITHUB_LOGINS` y est ajouté à sa première visite) ;
 3. un second facteur TOTP : à la première visite, QR code à scanner ; ensuite un code à 6 chiffres ouvre 15 minutes d'accès. Le secret est chiffré (AES-256-GCM, `ADMIN_VAULT_KEY`), un code ne sert qu'une fois, 5 échecs en 15 minutes bloquent. L'accès est porté par un cookie HttpOnly signé (`ADMIN_OTP_SECRET`), limité à `/api`, partagé entre `admin` et `webmail` ; chaque appel doit en plus porter le jeton de session en en-tête.
 
-Tous les emails partent par `expedier()` (`lib/mail.ts`) : gabarit DataParl' commun (`lib/gabarit.ts`), lien « consulte-le en ligne » vers `mail.cavaparlement.eu/lire/<jeton>` (seul le hash du jeton est stocké), copie rangée dans la table `emails`. Un message du formulaire de contact arrive dans la webmail et déclenche un accusé de réception ; un email reçu sur une adresse @mail.cavaparlement.eu aussi, sauf s'il s'agit d'une réponse, d'un transfert, d'un message automatique ou d'une liste (`lib/autoReponse.ts`), et au plus un accusé par expéditeur et par 24 h. La clé `RESEND_API_KEY` doit être « Full access » : la lecture des emails reçus est refusée aux clés « Sending access ».
+Tous les emails partent par `expedier()` (`lib/mail.ts`) : gabarit DataParl' commun (`lib/gabarit.ts`), lien « consulte-le en ligne » vers `mail.dataparl.fr/lire/<jeton>` (seul le hash du jeton est stocké), copie rangée dans la table `emails`. Un message du formulaire de contact arrive dans la webmail et déclenche un accusé de réception ; un email reçu sur une adresse @dataparl.fr aussi, sauf s'il s'agit d'une réponse, d'un transfert, d'un message automatique ou d'une liste (`lib/autoReponse.ts`), et au plus un accusé par expéditeur et par 24 h. La clé `RESEND_API_KEY` doit être « Full access » : la lecture des emails reçus est refusée aux clés « Sending access ».
 
 Toutes les actions sensibles sont inscrites dans `admin_audit` (page Journal).
 
 Sections de l'admin : tableau de bord (chiffres, passages du robot), messages de contact (statut, note, réponse), abonnés (recherche, désinscription), oppositions (masquage des emails déduits), clés API (usage, quota, révocation), admins (ajout par login GitHub, réinitialisation du TOTP), journal.
 
-Webmail : dossiers Reçus, Envoyés, Archives, Corbeille ; lecture dans une iframe isolée (sans script, images distantes bloquées par défaut) ; réponse, réponse à tous, transfert ; pièces jointes par lien signé Resend. Réception : webhook Resend `POST /api/webhooks/resend` (signature Svix vérifiée), événement `email.received` puis récupération du message complet ; les autres événements (`email.delivered`, `email.bounced`…) sont journalisés dans `email_events`. `hello@cavaparlement.eu` reste chez Infomaniak : une redirection avec copie vers `hello@mail.cavaparlement.eu` fait arriver ses emails dans la webmail, et le domaine d'envoi `cavaparlement.eu` de Resend permet d'y répondre depuis `hello@cavaparlement.eu`.
+Webmail : dossiers Reçus, Envoyés, Archives, Corbeille ; lecture dans une iframe isolée (sans script, images distantes bloquées par défaut) ; réponse, réponse à tous, transfert ; pièces jointes par lien signé Resend. Réception : webhook Resend `POST /api/webhooks/resend` (signature Svix vérifiée), événement `email.received` puis récupération du message complet ; les autres événements (`email.delivered`, `email.bounced`…) sont journalisés dans `email_events`. Adresses d'envoi : `lib/env.ts` (`EXPEDITEURS`).
 
 ## Variables d'environnement
 
