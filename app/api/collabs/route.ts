@@ -3,6 +3,8 @@ import { dataQueryTout, normaliser } from "@/lib/data";
 import { emailCollab, emailElu } from "@/lib/emails";
 import { idParlementaire } from "@/lib/format";
 import { authAdmin } from "@/lib/supabaseAdmin";
+import { siglesDe } from "@/lib/familles";
+import { cleElus } from "@/lib/referentiel";
 import { utilisateur } from "@/lib/userAuth";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +14,8 @@ type Ligne = {
   collab_cle: string; collab_nom: string; collab_prenom: string; collab_civilite: string; fonction: string; statut: string;
 };
 
-const TEXTE = /^[\p{L}\p{N} .'’()-]{1,80}$/u;
+const TEXTE = /^[\p{L}\p{N} .'’()/&_-]{1,80}$/u;
+const q_ = (v: string) => `"${v.replace(/"/g, "")}"`;
 
 // Équipes actuelles, avec adresses déduites. Réservé aux comptes connectés.
 export async function GET(req: Request) {
@@ -34,8 +37,11 @@ export async function GET(req: Request) {
     order: "elu_nom,collab_nom",
   });
   if (chambre) p.set("chambre", `eq.${chambre}`);
-  if (groupe) p.set("elu_groupe", `eq.${groupe}`);
-  if (elu) p.set("or", `(elu_cle.eq."${elu}",elu_id.eq."${elu}")`);
+  if (groupe) p.set("elu_groupe", `in.(${siglesDe(groupe, chambre || undefined).map(q_).join(",")})`);
+  if (elu) {
+    const liste = (await cleElus(elu)).map(q_).join(",");
+    p.set("or", `(elu_cle.in.(${liste}),elu_id.in.(${liste}))`);
+  }
   if (texte) {
     const et = texte.split(/[\s-]+/).filter(Boolean).slice(0, 6).map((m) => {
       const n = normaliser(m).replace(/ /g, "");

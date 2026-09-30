@@ -13,3 +13,18 @@ test("clé de nom identique au pipeline", () => {
   assert.equal(cleNom("Marie-Hélène", "D'ARTOIS"), "artois d helene marie");
   assert.equal(cleNom("Zoé", "Le Guen"), "guen le zoe");
 });
+
+import { nomAffiche, prenomNom } from "./format.ts";
+test("noms au format Prénom NOM", () => {
+  assert.equal(prenomNom("Léo", "Bares"), "Léo BARES");
+  assert.equal(prenomNom("JEAN-MARC", "Arnaud-Deromedi"), "Jean-Marc ARNAUD-DEROMEDI");
+  assert.equal(prenomNom("Ségolène", "de Maupeou"), "Ségolène de MAUPEOU");
+  assert.equal(prenomNom("Anne", "d'Artois"), "Anne d'ARTOIS");
+  assert.equal(nomAffiche("François Ruffin"), "François RUFFIN");
+  assert.equal(nomAffiche("Corinne NARASSIGUIN"), "Corinne NARASSIGUIN");
+  assert.equal(nomAffiche("Annaïg Le Meur"), "Annaïg LE MEUR");
+  assert.equal(nomAffiche("de LEGGE Dominique"), "Dominique de LEGGE");
+  assert.equal(nomAffiche("Christine LANFRANCHI DORGAL"), "Christine LANFRANCHI DORGAL");
+  assert.equal(nomAffiche("Evelyne YONNET-SALVATOR"), "Evelyne YONNET-SALVATOR");
+  assert.equal(prenomNom("Alexandra", "Martin (Alpes-Maritimes)"), "Alexandra MARTIN (Alpes-Maritimes)");
+});

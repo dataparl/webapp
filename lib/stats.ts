@@ -44,3 +44,26 @@ export function partFemmes(x: { femmes: number; hommes: number }): number | null
 }
 
 export const pct = (v: number | null, d = 0) => (v === null ? "–" : `${(v * 100).toLocaleString("fr-FR", { maximumFractionDigits: d, minimumFractionDigits: d })} %`);
+
+// ── Séries annuelles et durées (vues stats_annuelles, stats_durees) ─────
+export type StatAnnuelle = { chambre: string; an: number; effectif: number; femmes: number; hommes: number; effectif_suivant: number; departs: number; arrivees: number };
+export type StatDuree = { chambre: string; duree_mediane_jours: number | null; postes_termines: number; anciennete_mediane_jours: number | null; postes_en_cours_dates: number };
+
+// Premières années exploitables : avant, les archives ne couvrent pas l'année entière.
+export const PREMIERE_ANNEE: Record<string, number> = { assemblee: 2018, senat: 2016 };
+
+export async function statsAnnuelles(): Promise<StatAnnuelle[]> {
+  const rows = await dataQueryTout<StatAnnuelle>("stats_annuelles", new URLSearchParams({ select: "*", order: "chambre,an" }), 3600);
+  return rows.filter((r) => r.an >= (PREMIERE_ANNEE[r.chambre] ?? 0));
+}
+
+export async function statsDurees(): Promise<StatDuree[]> {
+  return dataQueryTout<StatDuree>("stats_durees", new URLSearchParams({ select: "*" }), 3600);
+}
+
+export function turnoverAnnuel(r: StatAnnuelle): number | null {
+  const moyen = (r.effectif + r.effectif_suivant) / 2;
+  return moyen > 0 ? r.departs / moyen : null;
+}
+
+export const mois = (jours: number | null) => (jours === null ? "–" : `${Math.round(jours / 30.44)} mois`);

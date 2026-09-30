@@ -1,34 +1,24 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
+import Autocompletion from "@/app/_components/Autocompletion";
 import ListeMouvements from "@/app/_components/ListeMouvements";
-import { CHAMBRE_LONG, type MouvementAffiche } from "@/lib/format";
+import type { MouvementAffiche } from "@/lib/format";
 import { authBrowser } from "@/lib/supabaseBrowser";
-
-type Elu = { chambre: string; cle: string; id: string; nom: string; groupe: string };
-type Ref = { elus: Elu[]; groupes: Record<string, string[]> };
 
 const PAGE = 50;
 
 export default function Recherche({ chambre }: { chambre?: "assemblee" | "senat" | "europarl" }) {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
-  const [ref, setRef] = useState<Ref>({ elus: [], groupes: {} });
   const [filtres, setFiltres] = useState<Record<string, string>>({ chambre: chambre ?? "" });
-  const [eluSaisi, setEluSaisi] = useState("");
+  const [raz, setRaz] = useState(0); // remet à zéro les champs d'autocomplétion
   const [resultats, setResultats] = useState<MouvementAffiche[]>([]);
   const [total, setTotal] = useState<number | null>(null);
   const [etat, setEtat] = useState<"idle" | "chargement" | "erreur">("idle");
 
   useEffect(() => { authBrowser().auth.getSession().then(({ data }) => setSession(data.session)); }, []);
-  useEffect(() => { fetch("/api/referentiel").then((r) => (r.ok ? r.json() : null)).then((d) => d && setRef(d)); }, []);
 
   const chambreActive = chambre ?? filtres.chambre ?? "";
-  const elusFiltres = useMemo(() => ref.elus.filter((e) => !chambreActive || e.chambre === chambreActive), [ref, chambreActive]);
-  const groupes = useMemo(
-    () => (chambreActive ? ref.groupes[chambreActive] ?? [] : [...new Set(Object.values(ref.groupes).flat())].sort()),
-    [ref, chambreActive],
-  );
-  const libelleElu = (e: Elu) => `${e.nom} (${CHAMBRE_LONG[e.chambre]}${e.groupe ? `, ${e.groupe}` : ""})`;
 
   const chercher = useCallback(async (offset = 0) => {
     if (!session) return;
@@ -75,7 +65,7 @@ export default function Recherche({ chambre }: { chambre?: "assemblee" | "senat"
           {!chambre && (
             <div>
               <label htmlFor="chambre">Chambre</label>
-              <select id="chambre" value={filtres.chambre ?? ""} onChange={(e) => { maj("chambre", e.target.value); maj("groupe", ""); maj("elu", ""); setEluSaisi(""); }}>
+              <select id="chambre" value={filtres.chambre ?? ""} onChange={(e) => { maj("chambre", e.target.value); maj("elu", ""); setRaz((n) => n + 1); }}>
                 <option value="">Les trois</option>
                 <option value="assemblee">Assemblée nationale</option>
                 <option value="senat">Sénat</option>
@@ -84,11 +74,9 @@ export default function Recherche({ chambre }: { chambre?: "assemblee" | "senat"
             </div>
           )}
           <div>
-            <label htmlFor="groupe">Groupe</label>
-            <select id="groupe" value={filtres.groupe ?? ""} onChange={(e) => maj("groupe", e.target.value)}>
-              <option value="">Tous</option>
-              {groupes.map((g) => <option key={g} value={g}>{g}</option>)}
-            </select>
+            <label htmlFor="groupe">Groupe ou famille</label>
+            <Autocompletion key={`g${raz}`} id="groupe" source="groupes" placeholder="ex. GEST, EcoS, écolo…"
+              onChoix={(o) => maj("groupe", o?.valeur ?? "")} />
           </div>
           <div>
             <label htmlFor="type">Mouvement</label>
@@ -118,26 +106,14 @@ export default function Recherche({ chambre }: { chambre?: "assemblee" | "senat"
         </div>
 
         <label htmlFor="elu">Élu</label>
-        <input
-          id="elu"
-          list="liste-elus"
-          placeholder="Commence à taper un nom"
-          value={eluSaisi}
-          onChange={(e) => {
-            setEluSaisi(e.target.value);
-            const trouve = elusFiltres.find((x) => libelleElu(x) === e.target.value);
-            maj("elu", trouve ? trouve.cle : "");
-          }}
-        />
-        <datalist id="liste-elus">
-          {elusFiltres.map((e) => <option key={`${e.chambre}-${e.cle}`} value={libelleElu(e)} />)}
-        </datalist>
+        <Autocompletion key={`e${raz}`} id="elu" source="elus" chambre={chambreActive || undefined} placeholder="Commence à taper un nom"
+          onChoix={(o) => maj("elu", o?.valeur ?? "")} />
 
         <button type="submit" disabled={etat === "chargement"}>Rechercher</button>{" "}
         <button
           type="button"
           className="secondaire"
-          onClick={() => { setFiltres({ chambre: chambre ?? "" }); setEluSaisi(""); }}
+          onClick={() => { setFiltres({ chambre: chambre ?? "" }); setRaz((n) => n + 1); }}
         >
           Effacer
         </button>

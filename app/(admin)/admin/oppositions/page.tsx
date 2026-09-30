@@ -30,7 +30,7 @@ export default function Oppositions() {
   return (
     <>
       <h1>Oppositions (emails masqués)</h1>
-      <p className="lead">Quand un(e) collaborateur(rice) exerce son droit d&apos;opposition, son email déduit n&apos;est plus affiché sur /collabs ni exporté. La fiche reste publique (données publiées par les assemblées).</p>
+      <p className="lead">Quand un(e) collaborateur(rice) exerce son droit d&apos;opposition, son email déduit n&apos;est plus affiché sur /collab ni exporté. La fiche reste publique (données publiées par les assemblées).</p>
       <form onSubmit={ajouter} className="card">
         <div className="grille-filtres">
           <div><label>Chambre</label>

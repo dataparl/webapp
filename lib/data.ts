@@ -1,5 +1,6 @@
 import "server-only";
 import { DATA_SUPABASE_KEY, DATA_SUPABASE_URL } from "./env";
+import { siglesDe } from "./familles";
 
 // Lecture des données publiques (base dataparl, RLS : select ouvert).
 
@@ -8,6 +9,7 @@ export type Mouvement = {
   date_event: string;
   chambre: "assemblee" | "senat" | "europarl";
   type: "arrivee" | "depart" | "transfert";
+  collab_cle: string;
   collab_nom: string;
   collab_prenom: string;
   collab_civilite: string;
@@ -24,7 +26,7 @@ export type Mouvement = {
 };
 
 export const COLONNES_PUBLIQUES =
-  "id,date_event,chambre,type,collab_nom,collab_prenom,collab_civilite,elu_cle,elu_id,elu_nom,elu_groupe," +
+  "id,date_event,chambre,type,collab_cle,collab_nom,collab_prenom,collab_civilite,elu_cle,elu_id,elu_nom,elu_groupe," +
   "elu_origine_nom,elu_origine_groupe,fonction,contexte,source,confiance";
 
 export async function dataQuery<T>(table: string, params: URLSearchParams, revalidate = 300): Promise<{ rows: T[]; total: number | null }> {
@@ -51,7 +53,7 @@ export async function derniersMouvements(limit = 10): Promise<Mouvement[]> {
 
 export async function compteAffectations(): Promise<Record<string, number>> {
   const out: Record<string, number> = {};
-  for (const chambre of ["assemblee", "senat"]) {
+  for (const chambre of ["assemblee", "senat", "europarl"]) {
     const p = new URLSearchParams({ select: "elu_cle", chambre: `eq.${chambre}`, limit: "1" });
     out[chambre] = (await dataQuery<unknown>("affectations", p, 3600)).total ?? 0;
   }
@@ -101,13 +103,16 @@ export function groupesDe(elus: Elu[]): Record<string, string[]> {
 
 export type Filtres = {
   chambre?: string; type?: string; groupe?: string; elu?: string; q?: string;
+  elus?: string[]; // identifiants et clés d'un même élu (voir cleElus)
   depuis?: string; jusqua?: string; limit?: number; offset?: number;
 };
 
 const CHAMBRES_OK = new Set(["assemblee", "senat", "europarl"]);
 const TYPES_OK = new Set(["arrivee", "depart", "transfert"]);
 const DATE_OK = /^\d{4}-\d{2}-\d{2}$/;
-const TEXTE_OK = /^[\p{L}\p{N} .'’-]{1,80}$/u;
+const TEXTE_OK = /^[\p{L}\p{N} .'’_-]{1,80}$/u;
+const GROUPE_OK = /^[\p{L}\p{N} .'’/&-]{1,40}$/u;
+const q_ = (v: string) => `"${v.replace(/"/g, "")}"`;
 
 export function normaliser(t: string): string {
   return t.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/[-'’.]/g, " ").replace(/[^a-z0-9 ]/g, "").trim();
@@ -125,12 +130,16 @@ export function parametresRecherche(f: Filtres): URLSearchParams | null {
   if (f.chambre) { if (!CHAMBRES_OK.has(f.chambre)) return null; p.set("chambre", `eq.${f.chambre}`); }
   if (f.type) { if (!TYPES_OK.has(f.type)) return null; p.set("type", `eq.${f.type}`); }
   if (f.groupe) {
-    if (!TEXTE_OK.test(f.groupe)) return null;
-    et.push(`or(elu_groupe.eq."${f.groupe}",elu_origine_groupe.eq."${f.groupe}")`);
+    // Un code de famille (« ECO ») couvre tous ses groupes dans les trois chambres.
+    if (!GROUPE_OK.test(f.groupe)) return null;
+    const liste = siglesDe(f.groupe, f.chambre).map(q_).join(",");
+    et.push(`or(elu_groupe.in.(${liste}),elu_origine_groupe.in.(${liste}))`);
   }
-  if (f.elu) {
-    if (!TEXTE_OK.test(f.elu)) return null;
-    et.push(`or(elu_cle.eq."${f.elu}",elu_id.eq."${f.elu}",elu_origine_cle.eq."${f.elu}",elu_origine_id.eq."${f.elu}")`);
+  const elus = f.elus?.length ? f.elus : f.elu ? [f.elu] : [];
+  if (elus.length) {
+    if (!elus.every((e) => TEXTE_OK.test(e))) return null;
+    const liste = elus.map(q_).join(",");
+    et.push(`or(elu_cle.in.(${liste}),elu_id.in.(${liste}),elu_origine_cle.in.(${liste}),elu_origine_id.in.(${liste}))`);
   }
   if (f.depuis) { if (!DATE_OK.test(f.depuis)) return null; et.push(`date_event.gte.${f.depuis}`); }
   if (f.jusqua) { if (!DATE_OK.test(f.jusqua)) return null; et.push(`date_event.lte.${f.jusqua}`); }

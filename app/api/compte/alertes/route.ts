@@ -5,7 +5,7 @@ import { authAdmin } from "@/lib/supabaseAdmin";
 import { normalizeEmail } from "@/lib/tokens";
 import { utilisateur } from "@/lib/userAuth";
 
-const Texte = z.string().trim().min(1).max(80).regex(/^[\p{L}\p{N} .'’()-]+$/u);
+const Texte = z.string().trim().min(1).max(80).regex(/^[\p{L}\p{N} .'’()/&_-]+$/u);
 
 const Corps = z.object({
   actives: z.boolean(),

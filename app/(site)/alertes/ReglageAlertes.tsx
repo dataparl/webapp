@@ -1,10 +1,13 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { CHAMBRE_LONG } from "@/lib/format";
+import Autocompletion, { chargerElus } from "@/app/_components/Autocompletion";
+import { familleDe, FAMILLES } from "@/lib/familles";
+import { CHAMBRE_LONG, nomAffiche, prenomNom } from "@/lib/format";
 import { authBrowser } from "@/lib/supabaseBrowser";
 
 type Elu = { chambre: string; cle: string; nom: string; groupe: string };
+type EluCompact = { s: string; p: string; n: string; c: string };
 type Reglage = {
   actives: boolean; frequence: "quotidienne" | "hebdomadaire"; chambres: string[]; types: string[];
   groupes: string[]; elus: string[]; partis: string[]; commissions: string[];
@@ -17,8 +20,8 @@ export default function ReglageAlertes() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [r, setR] = useState<Reglage | null>(null);
   const [elus, setElus] = useState<Elu[]>([]);
-  const [groupes, setGroupes] = useState<Record<string, string[]>>({});
-  const [saisie, setSaisie] = useState("");
+  const [compacts, setCompacts] = useState<EluCompact[]>([]);
+  const [raz, setRaz] = useState(0);
   const [cgu, setCgu] = useState(false);
   const [consent, setConsent] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; t: string } | null>(null);
@@ -26,7 +29,8 @@ export default function ReglageAlertes() {
 
   useEffect(() => { authBrowser().auth.getSession().then(({ data }) => setSession(data.session)); }, []);
   useEffect(() => {
-    fetch("/api/referentiel").then((x) => (x.ok ? x.json() : null)).then((d) => { if (d) { setElus(d.elus); setGroupes(d.groupes); } });
+    fetch("/api/referentiel").then((x) => (x.ok ? x.json() : null)).then((d) => { if (d) setElus(d.elus); });
+    chargerElus().then(setCompacts);
   }, []);
   useEffect(() => {
     if (!session) return;
@@ -35,8 +39,19 @@ export default function ReglageAlertes() {
       .then((d) => d && setR({ ...d.alertes, actives: d.alertes.actives }));
   }, [session]);
 
-  const libelle = (e: Elu) => `${e.nom} (${CHAMBRE_LONG[e.chambre]}${e.groupe ? `, ${e.groupe}` : ""})`;
-  const parCle = useMemo(() => new Map(elus.map((e) => [e.cle, e])), [elus]);
+  // Élus enregistrés : identifiant de fiche (slug) ou, pour les anciens réglages, clé de nom.
+  const nomDe = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const e of elus) m.set(e.cle, nomAffiche(e.nom));
+    for (const e of compacts) m.set(e.s, prenomNom(e.p, e.n));
+    return m;
+  }, [elus, compacts]);
+  const libelleGroupe = (v: string) => {
+    const f = FAMILLES.find((x) => x.code === v);
+    if (f) return `${f.code} · ${f.libelle}`;
+    const fam = ["assemblee", "senat", "europarl"].map((c) => familleDe(c, v)).find(Boolean);
+    return fam ? `${v} (${fam.code})` : v;
+  };
 
   if (session === undefined) return <p className="meta">Chargement…</p>;
   if (!session) {
@@ -51,14 +66,10 @@ export default function ReglageAlertes() {
 
   const basculer = (k: "chambres" | "types" | "groupes", v: string) =>
     setR({ ...r, [k]: r[k].includes(v) ? r[k].filter((x) => x !== v) : [...r[k], v] });
-
-  const ajouterElu = (valeur: string) => {
-    setSaisie(valeur);
-    const e = elus.find((x) => libelle(x) === valeur);
-    if (e && !r.elus.includes(e.cle)) { setR({ ...r, elus: [...r.elus, e.cle] }); setSaisie(""); }
+  const ajouter = (k: "groupes" | "elus", v: string) => {
+    if (!r[k].includes(v)) setR({ ...r, [k]: [...r[k], v] });
+    setRaz((n) => n + 1);
   };
-
-  const groupesVisibles = [...new Set(r.chambres.flatMap((c) => groupes[c] ?? []))].sort();
   const pret = cgu && consent && r.chambres.length > 0 && r.types.length > 0;
 
   async function enregistrer(actives: boolean) {
@@ -92,24 +103,25 @@ export default function ReglageAlertes() {
         <label key={t.v} className="check"><input type="checkbox" checked={r.types.includes(t.v)} onChange={() => basculer("types", t.v)} /> {t.l}</label>
       ))}
 
-      <label>Groupes <span className="meta">(aucun coché = tous)</span></label>
+      <label htmlFor="groupe-alerte">Groupes ou familles politiques <span className="meta">(aucun = tous)</span></label>
+      <Autocompletion key={`g${raz}`} id="groupe-alerte" source="groupes" placeholder="ex. GEST, EcoS, écolo… (ECO couvre les trois chambres)"
+        onChoix={(o) => o && ajouter("groupes", o.valeur)} />
       <div className="puces">
-        {groupesVisibles.map((g) => (
-          <label key={g} className="check" style={{ margin: 0 }}>
-            <input type="checkbox" checked={r.groupes.includes(g)} onChange={() => basculer("groupes", g)} /> {g}
-          </label>
+        {r.groupes.map((g) => (
+          <span key={g} className="puce">
+            {libelleGroupe(g)}
+            <button type="button" aria-label="Retirer" onClick={() => setR({ ...r, groupes: r.groupes.filter((x) => x !== g) })}>×</button>
+          </span>
         ))}
       </div>
 
       <label htmlFor="elu-alerte">Élus <span className="meta">(aucun = tous)</span></label>
-      <input id="elu-alerte" list="elus-alertes" placeholder="Commence à taper un nom" value={saisie} onChange={(e) => ajouterElu(e.target.value)} />
-      <datalist id="elus-alertes">
-        {elus.filter((e) => r.chambres.includes(e.chambre)).map((e) => <option key={`${e.chambre}-${e.cle}`} value={libelle(e)} />)}
-      </datalist>
+      <Autocompletion key={`e${raz}`} id="elu-alerte" source="elus" placeholder="Commence à taper un nom"
+        onChoix={(o) => o && ajouter("elus", o.valeur)} />
       <div className="puces">
         {r.elus.map((k) => (
           <span key={k} className="puce">
-            {parCle.get(k)?.nom ?? k}
+            {nomDe.get(k) ?? k}
             <button type="button" aria-label="Retirer" onClick={() => setR({ ...r, elus: r.elus.filter((x) => x !== k) })}>×</button>
           </span>
         ))}

@@ -62,7 +62,7 @@ export default function CGU() {
 
       <h2>6. Adresses email déduites</h2>
       <p>
-        La rubrique <a href="/collabs">Collaborateurs</a>, réservée aux comptes, affiche des adresses email déduites des
+        La rubrique <a href="/collab">Collaborateurs</a>, réservée aux comptes, affiche des adresses email déduites des
         règles de nommage des assemblées. Elles ne sont publiées par aucune institution, ne sont pas vérifiées et peuvent
         être inexactes. Elles servent à contacter les équipes parlementaires dans le cadre de leurs fonctions.
       </p>

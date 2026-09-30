@@ -1,19 +1,19 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { CHAMBRE_LONG } from "@/lib/format";
+import Autocompletion, { chargerElus } from "@/app/_components/Autocompletion";
+import { CHAMBRE_LONG, nomAffiche, prenomNom } from "@/lib/format";
 import { authBrowser } from "@/lib/supabaseBrowser";
 
 type Collab = { nom: string; prenom: string; civilite: string; fonction: string; statut: string; email: string | null };
 type Equipe = { chambre: string; elu_id: string; elu_cle: string; elu_nom: string; elu_groupe: string; elu_email: string | null; id_page: string; collabs: Collab[] };
-type Elu = { chambre: string; cle: string; nom: string; groupe: string };
 
 function csv(equipes: Equipe[]): string {
   const cell = (v: string) => `"${(v ?? "").replace(/"/g, '""')}"`;
   const lignes = [["Chambre", "Élu", "Groupe", "Email élu (déduit)", "Civilité", "Prénom", "Nom", "Fonction", "Email collaborateur (déduit)"].map(cell).join(";")];
   for (const e of equipes) {
     for (const c of e.collabs) {
-      lignes.push([CHAMBRE_LONG[e.chambre], e.elu_nom, e.elu_groupe, e.elu_email ?? "", c.civilite, c.prenom, c.nom, c.fonction, c.email ?? ""].map(cell).join(";"));
+      lignes.push([CHAMBRE_LONG[e.chambre], nomAffiche(e.elu_nom), e.elu_groupe, e.elu_email ?? "", c.civilite, c.prenom, c.nom.toLocaleUpperCase("fr-FR"), c.fonction, c.email ?? ""].map(cell).join(";"));
     }
   }
   return "﻿" + lignes.join("\r\n");
@@ -32,26 +32,35 @@ const slug = (s: string) => s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCas
 
 export default function Equipes() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
-  const [ref, setRef] = useState<{ elus: Elu[]; groupes: Record<string, string[]> }>({ elus: [], groupes: {} });
   const [f, setF] = useState<Record<string, string>>({ chambre: "", groupe: "", elu: "", q: "" });
   const [eluSaisi, setEluSaisi] = useState("");
+  const [depuisUrl, setDepuisUrl] = useState(false);
   const [equipes, setEquipes] = useState<Equipe[] | null>(null);
   const [etat, setEtat] = useState<"idle" | "chargement">("idle");
   const [erreur, setErreur] = useState("");
 
   useEffect(() => { authBrowser().auth.getSession().then(({ data }) => setSession(data.session)); }, []);
-  useEffect(() => { fetch("/api/referentiel").then((r) => (r.ok ? r.json() : null)).then((d) => d && setRef(d)); }, []);
+  // Lien « Contacts et export de l'équipe » depuis une fiche : ?elu=<identifiant>.
+  useEffect(() => {
+    const elu = new URLSearchParams(window.location.search).get("elu");
+    if (!elu) return;
+    setF((x) => ({ ...x, elu }));
+    setDepuisUrl(true);
+    chargerElus().then((liste) => {
+      const e = liste.find((x) => x.s.toLowerCase() === elu.toLowerCase());
+      if (e) setEluSaisi(prenomNom(e.p, e.n));
+    });
+  }, []);
 
-  const elus = useMemo(() => ref.elus.filter((e) => !f.chambre || e.chambre === f.chambre), [ref, f.chambre]);
-  const groupes = f.chambre ? ref.groupes[f.chambre] ?? [] : [...new Set(Object.values(ref.groupes).flat())].sort();
-  const libelle = (e: Elu) => `${e.nom} (${CHAMBRE_LONG[e.chambre]}${e.groupe ? `, ${e.groupe}` : ""})`;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (session && depuisUrl && f.elu) chercher(); }, [session, depuisUrl]);
 
   if (session === undefined) return <p className="meta">Chargement…</p>;
   if (!session) {
     return (
       <div className="card" style={{ maxWidth: "none" }}>
         <p style={{ marginTop: 0 }}><strong>La recherche des collaborateurs est réservée aux comptes DataParl&apos;</strong>, gratuits.</p>
-        <a className="btn" href="/connexion?suite=/collabs">Créer un compte ou se connecter</a>
+        <a className="btn" href="/connexion?suite=/collab">Créer un compte ou se connecter</a>
       </div>
     );
   }
@@ -85,11 +94,9 @@ export default function Equipes() {
             </select>
           </div>
           <div>
-            <label htmlFor="c-groupe">Groupe</label>
-            <select id="c-groupe" value={f.groupe} onChange={(e) => setF({ ...f, groupe: e.target.value })}>
-              <option value="">Tous</option>
-              {groupes.map((g) => <option key={g} value={g}>{g}</option>)}
-            </select>
+            <label htmlFor="c-groupe">Groupe ou famille politique</label>
+            <Autocompletion id="c-groupe" source="groupes" placeholder="ex. GEST, EcoS, écolo…" valeurInitiale={f.groupe}
+              onChoix={(o) => setF((x) => ({ ...x, groupe: o?.valeur ?? "" }))} />
           </div>
           <div>
             <label htmlFor="c-commission">Commission</label>
@@ -97,9 +104,8 @@ export default function Equipes() {
           </div>
         </div>
         <label htmlFor="c-elu">Élu</label>
-        <input id="c-elu" list="c-elus" placeholder="Commence à taper un nom" value={eluSaisi}
-          onChange={(e) => { setEluSaisi(e.target.value); const t = elus.find((x) => libelle(x) === e.target.value); setF({ ...f, elu: t ? t.cle : "" }); }} />
-        <datalist id="c-elus">{elus.map((e) => <option key={`${e.chambre}-${e.cle}`} value={libelle(e)} />)}</datalist>
+        <Autocompletion id="c-elu" source="elus" chambre={f.chambre || undefined} placeholder="Commence à taper un nom" valeurInitiale={eluSaisi}
+          onChoix={(o) => setF((x) => ({ ...x, elu: o?.valeur ?? "" }))} />
         <label htmlFor="c-q">Nom d&apos;un collaborateur</label>
         <input id="c-q" type="text" value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} placeholder="ex. Martin" />
         <button type="submit" disabled={etat === "chargement"}>Rechercher</button>
@@ -118,7 +124,7 @@ export default function Equipes() {
           {equipes.map((e) => (
             <section key={`${e.chambre}-${e.elu_cle}`} className="section-compte">
               <h2 style={{ marginBottom: 4 }}>
-                <a href={`/parlementaires/${encodeURIComponent(e.id_page)}`} style={{ color: "inherit" }}>{e.elu_nom}</a>
+                <a href={`/parlementaires/${encodeURIComponent(e.id_page)}`} style={{ color: "inherit" }}>{nomAffiche(e.elu_nom)}</a>
               </h2>
               <p className="meta" style={{ marginTop: 0 }}>
                 {CHAMBRE_LONG[e.chambre]}{e.elu_groupe ? ` · ${e.elu_groupe}` : ""}{e.elu_email ? ` · ${e.elu_email}` : ""}
@@ -128,14 +134,14 @@ export default function Equipes() {
                 <tbody>
                   {e.collabs.map((c, i) => (
                     <tr key={i}>
-                      <td>{`${c.civilite} ${c.prenom} ${c.nom}`.trim()}{c.statut === "conge_sans_solde" && <span className="meta"> (congé)</span>}</td>
+                      <td>{prenomNom(c.prenom, c.nom)}{c.statut === "conge_sans_solde" && <span className="meta"> (congé)</span>}</td>
                       <td>{c.fonction || "Collaborateur"}</td>
                       <td>{c.email ?? <span className="meta">masquée</span>}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <button className="secondaire" onClick={() => telecharger(`dataparl-equipe-${slug(e.elu_nom)}.csv`, csv([e]))}>Exporter l&apos;équipe (CSV)</button>{" "}
+              <button className="secondaire" onClick={() => telecharger(`dataparl-equipe-${slug(nomAffiche(e.elu_nom))}.csv`, csv([e]))}>Exporter l&apos;équipe (CSV)</button>{" "}
               <button className="secondaire" onClick={() => navigator.clipboard?.writeText([e.elu_email, ...e.collabs.map((c) => c.email)].filter(Boolean).join("; "))}>
                 Copier les emails
               </button>

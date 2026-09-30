@@ -15,6 +15,16 @@ Site public, alertes par email, connexion, compte, administration et API de Data
 
 Les pages sont réparties en quatre groupes de routes : `app/(site)`, `app/(auth)` (connexion), `app/(apisite)` (site de l'API) et `app/(admin)` (admin et webmail), chacun avec son en-tête.
 
+## Fiches et parcours
+
+- `/parlementaires/<id>` : photo officielle, circonscription, groupe et famille politique, commissions, mandats dans les trois chambres (avec groupes et commissions de chaque mandat), équipe et statistiques. `<id>` : PA… (AN), slug senat.fr (Sénat), identifiant européen (PE).
+- `/parlementaires/<id>/historique` : tous les collaborateurs de l'élu, toutes chambres (compte requis).
+- `/collab` : recherche des équipes ; `/collab/<nom>_<prenom><id>` : fiche d'un collaborateur, parcours complet réservé aux comptes, jamais indexée.
+- Autocomplétion partout (`app/_components/Autocompletion.tsx`) : élus (`/api/elus`), groupes et familles politiques (`lib/familles.ts`, ex. ECO = GEST au Sénat, EcoS à l'AN, Verts/ALE au PE ; à compléter à chaque changement de groupe), recherche globale élus + collaborateurs (`/api/recherche`).
+- Noms affichés au format « Prénom NOM » (`prenomNom`, `nomAffiche` dans `lib/format.ts`).
+
+Tables alimentées par dataparl/collaborateurs : `parlementaires`, `mandats`, `appartenances`, `collaborateurs`, `periodes`, et les vues `stats_annuelles` et `stats_durees` (VigiParl', MixiParl').
+
 ## Données et services
 
 - **Supabase `dataparl`** : données publiques (mouvements, affectations), alimentées par [dataparl/collaborateurs](https://github.com/dataparl/collaborateurs). Lecture seule avec la clé publique.

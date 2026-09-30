@@ -212,3 +212,35 @@ button.lien:disabled { opacity: .4; text-decoration: none; }
   .webmail:not(.avec-lecture) .wm-lecture { display: none; }
   .retour { display: inline; }
 }
+
+/* Autocomplétion */
+.autocompletion { position: relative; }
+.suggestions { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px; list-style: none; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: 0 10px 28px rgba(7, 26, 65, .14); max-height: 360px; overflow-y: auto; }
+.suggestions li { display: flex; flex-direction: column; gap: 1px; padding: 8px 10px; border-radius: 8px; cursor: pointer; }
+.suggestions li[aria-selected=true] { background: color-mix(in srgb, var(--bleu) 12%, transparent); }
+.suggestion-libelle { font-weight: 600; }
+.suggestion-detail { color: var(--muted); font-size: .85rem; }
+.recherche-globale { margin: 20px 0 8px; max-width: 640px; }
+.recherche-globale input { font-size: 1.05rem; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+.chiffres div.principal { border-color: var(--bleu); }
+.chiffres div.principal strong { color: var(--ink); }
+
+/* Fiches élu et collaborateur */
+.entete-elu { display: flex; gap: 20px; align-items: center; margin-bottom: 8px; }
+.entete-elu.petite { gap: 14px; }
+.photo { border-radius: 14px; object-fit: cover; object-position: top; background: var(--line); flex: none; }
+.photo-vide { display: inline-flex; align-items: center; justify-content: center; font-family: "Spectral", serif; font-weight: 700; font-size: 1.4rem; color: var(--muted); border-radius: 14px; background: color-mix(in srgb, var(--line) 70%, transparent); flex: none; }
+ul.organes { list-style: none; padding: 0; margin: 8px 0; }
+ul.organes li { padding: 8px 0; border-bottom: 1px solid var(--line); }
+ul.organes .puce, td .puce, .parcours-titre .puce { margin-left: 8px; font-size: .78rem; padding: 2px 8px; }
+ol.parcours { list-style: none; padding: 0; margin: 8px 0; border-left: 2px solid var(--line); }
+ol.parcours > li { position: relative; padding: 4px 0 16px 18px; }
+ol.parcours > li::before { content: ""; position: absolute; left: -7px; top: 10px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--bleu); }
+.parcours-titre { margin: 0; }
+li.parcours-collab { display: flex; gap: 12px; align-items: flex-start; }
+details summary { cursor: pointer; color: var(--bleu); font-size: .92rem; margin: 4px 0; }
+@media (max-width: 560px) { .entete-elu { flex-direction: column; align-items: flex-start; } }
+.graphiques { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px 28px; margin: 12px 0; }
+figure.graphique { margin: 0; }
+figure.graphique figcaption { font-weight: 600; font-size: .95rem; margin-bottom: 6px; }

@@ -5,3 +5,7 @@ node_modules/
 *.tsbuildinfo
 next-env.d.ts
 .vercel
+
+# Fichiers générés par next dev
+AGENTS.md
+CLAUDE.md
