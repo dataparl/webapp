@@ -11,7 +11,12 @@ export const AUTH_SUPABASE_KEY = process.env.NEXT_PUBLIC_AUTH_SUPABASE_KEY ?? "s
 
 export const MAIL_FROM = process.env.MAIL_FROM ?? "\"DataParl'\" <noreply@mail.cavaparlement.eu>";
 // Boîte qui reçoit les messages du formulaire de contact (jamais affichée sur le site).
-export const CONTACT_INBOX = process.env.CONTACT_INBOX ?? "hello@cavaparlement.eu";
+// Copie facultative des messages de contact vers une boîte externe (vide = aucune ;
+// les messages arrivent de toute façon dans la webmail).
+export const CONTACT_INBOX = process.env.CONTACT_INBOX ?? "";
+
+// Hôte des versions en ligne des emails (/lire/<jeton>).
+export const MAIL_WEB_URL = (process.env.MAIL_WEB_URL ?? "https://mail.cavaparlement.eu").replace(/\/$/, "");
 export const PRIVACY_VERSION = process.env.PRIVACY_VERSION ?? "2026-09";
 
 // Comptes GitHub autorisés à administrer (séparés par des virgules). Ils sont

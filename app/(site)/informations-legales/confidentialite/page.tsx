@@ -72,8 +72,14 @@ export default function Confidentialite() {
         </tbody>
       </table>
       <p>
-        Aucune mesure d&apos;audience, aucun suivi des ouvertures ou des clics dans les emails, aucun cookie
-        publicitaire. Voir la page <a href="/informations-legales/cookies">Cookies</a>.
+        Aucune mesure d&apos;audience sur le site et aucun cookie publicitaire. Voir la page{" "}
+        <a href="/informations-legales/cookies">Cookies</a>.
+      </p>
+      <p>
+        Les emails envoyés par DataParl&apos; (depuis les adresses en @mail.cavaparlement.eu) mesurent leur
+        ouverture et les clics sur leurs liens, via notre prestataire d&apos;envoi Resend, pour vérifier qu&apos;ils sont
+        bien délivrés. Chaque email dispose aussi d&apos;une version en ligne, accessible uniquement par le lien
+        unique qu&apos;il contient.
       </p>
 
       <h2>3. Personnes citées dans les données</h2>

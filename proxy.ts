@@ -9,7 +9,8 @@ import { NextResponse, type NextRequest } from "next/server";
 //                           tout le reste -> /espace-api/* (site de l'API)
 //   admin.cavaparlement.eu  /x -> /admin/x, sauf /connexion et /api/*
 //   webmail.cavaparlement.eu /x -> /webmail/x, sauf /connexion et /api/*
-// Sur admin et webmail : pas d'indexation, pas d'intégration en iframe,
+//   mail.cavaparlement.eu    /lire/<jeton> (version en ligne des emails), le reste -> www
+// Sur admin, webmail et mail : pas d'indexation, pas d'intégration en iframe,
 // pas de Referer transmis.
 // Tout autre hôte (localhost, aperçus Vercel) : pas de réécriture.
 
@@ -47,6 +48,12 @@ export function proxy(req: NextRequest) {
     if (path.startsWith("/api/") || path === "/connexion" || path.startsWith("/espace-api")) return NextResponse.next();
     url.pathname = `/espace-api${path === "/" ? "" : path}`;
     return NextResponse.rewrite(url);
+  }
+
+  // mail.cavaparlement.eu : uniquement les versions en ligne des emails.
+  if (host === `mail.${DOMAINE}`) {
+    if (path.startsWith("/lire/")) return protege(NextResponse.next());
+    return vers(req, `www.${DOMAINE}`, "/", 307);
   }
 
   for (const espace of ["admin", "webmail"] as const) {

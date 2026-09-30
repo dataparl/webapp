@@ -9,6 +9,7 @@ Site public, alertes par email, connexion, compte, administration et API de Data
 | `api.cavaparlement.eu` | site de l'API (`/`, `/docs/*`, `/request-access`, `/mon-espace-api`, réécrits vers `/espace-api/*`) et API elle-même (`/v1/*`, réécrit vers `/api/v1/*`) |
 | `admin.cavaparlement.eu` | administration, réécrite vers `/admin/*` |
 | `webmail.cavaparlement.eu` | webmail de l'équipe, réécrite vers `/webmail/*` |
+| `mail.cavaparlement.eu` | versions en ligne des emails (`/lire/<jeton>`) ; le reste redirige vers `www` (le domaine sert aussi à Resend : MX et enregistrement A cohabitent) |
 
 `/connexion` est servie telle quelle sur chaque hôte : le flux OAuth (PKCE) doit rester sur l'origine qui l'a lancé. La session, elle, est stockée dans des cookies du domaine `.cavaparlement.eu` (`lib/cookieStorage.ts`, découpés en morceaux de 3 Ko) : une seule connexion vaut pour `www`, `api` et `admin`.
 
@@ -36,6 +37,8 @@ Les visiteurs se connectent par code email, Google ou GitHub ; un même compte p
 1. une session ouverte avec GitHub ;
 2. la présence dans `admin_users` (un login listé dans `ADMIN_GITHUB_LOGINS` y est ajouté à sa première visite) ;
 3. un second facteur TOTP : à la première visite, QR code à scanner ; ensuite un code à 6 chiffres ouvre 15 minutes d'accès. Le secret est chiffré (AES-256-GCM, `ADMIN_VAULT_KEY`), un code ne sert qu'une fois, 5 échecs en 15 minutes bloquent. L'accès est porté par un cookie HttpOnly signé (`ADMIN_OTP_SECRET`), limité à `/api`, partagé entre `admin` et `webmail` ; chaque appel doit en plus porter le jeton de session en en-tête.
+
+Tous les emails partent par `expedier()` (`lib/mail.ts`) : gabarit DataParl' commun (`lib/gabarit.ts`), lien « consulte-le en ligne » vers `mail.cavaparlement.eu/lire/<jeton>` (seul le hash du jeton est stocké), copie rangée dans la table `emails`. Un message du formulaire de contact arrive dans la webmail et déclenche un accusé de réception ; un email reçu sur une adresse @mail.cavaparlement.eu aussi, sauf s'il s'agit d'une réponse, d'un transfert, d'un message automatique ou d'une liste (`lib/autoReponse.ts`), et au plus un accusé par expéditeur et par 24 h. La clé `RESEND_API_KEY` doit être « Full access » : la lecture des emails reçus est refusée aux clés « Sending access ».
 
 Toutes les actions sensibles sont inscrites dans `admin_audit` (page Journal).
 

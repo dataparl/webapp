@@ -5,8 +5,8 @@ import { useAdmin } from "@/app/_components/admin/Porte";
 import { dateHeure } from "@/app/_components/admin/utils";
 import { EXPEDITEURS } from "@/lib/env";
 
-type Dossier = "inbox" | "sent" | "archive" | "trash";
-const DOSSIERS: [Dossier, string][] = [["inbox", "Reçus"], ["sent", "Envoyés"], ["archive", "Archives"], ["trash", "Corbeille"]];
+type Dossier = "inbox" | "sent" | "auto" | "archive" | "trash";
+const DOSSIERS: [Dossier, string][] = [["inbox", "Reçus"], ["sent", "Envoyés"], ["auto", "Automatiques"], ["archive", "Archives"], ["trash", "Corbeille"]];
 
 type Resume = { id: string; direction: "in" | "out"; from_addr: string; to_addr: string; subject: string; date: string; read: boolean; flagged: boolean; pieces: number; bounced_at: string | null };
 type Complet = Resume & {
@@ -79,7 +79,7 @@ export default function Webmail() {
     });
   }
 
-  const nonLus = liste?.non_lus ?? { inbox: 0, sent: 0, archive: 0, trash: 0 };
+  const nonLus = liste?.non_lus ?? { inbox: 0, sent: 0, auto: 0, archive: 0, trash: 0 };
 
   return (
     <div className={`webmail ${ouvert || brouillon ? "avec-lecture" : ""}`}>

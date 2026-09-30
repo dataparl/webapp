@@ -1,20 +1,15 @@
 import "server-only";
 import { audit, type Admin } from "./adminAuth";
+import { adresseNue, doitRepondre, entetes } from "./autoReponse";
 import { EXPEDITEURS, secret } from "./env";
+import { esc, expedier, texteVersHtml } from "./mail";
 import { authAdmin } from "./supabaseAdmin";
 
-// Webmail : envoi via Resend depuis les adresses @mail.cavaparlement.eu,
-// réception par le webhook Resend (email.received), tout est rangé dans la
-// table emails de dataparl-auth.
+// Webmail : envoi via Resend depuis les adresses autorisées, réception par le
+// webhook Resend (email.received), tout est rangé dans la table emails.
 
 const RESEND = "https://api.resend.com";
-
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
-
-export function texteVersHtml(t: string): string {
-  const lignes = esc(t).split("\n").map((l) => (l.startsWith("&gt;") ? `<span style="color:#4A5670">${l}</span>` : l));
-  return `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#071A41">${lignes.join("<br>")}</div>`;
-}
+const REPLI = "hello@mail.cavaparlement.eu"; // adresse toujours vérifiée chez Resend
 
 export type Brouillon = {
   from: string;
@@ -29,60 +24,98 @@ export type Brouillon = {
 export async function envoyerDepuisWebmail(a: Admin, b: Brouillon): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const from = b.from.toLowerCase();
   if (!EXPEDITEURS.includes(from)) return { ok: false, error: "adresse d'expédition non autorisée" };
-  const headers: Record<string, string> = {};
-  if (b.inReplyTo) {
-    headers["In-Reply-To"] = b.inReplyTo;
-    headers["References"] = [b.references, b.inReplyTo].filter(Boolean).join(" ");
-  }
-  const html = texteVersHtml(b.text);
-  const r = await fetch(`${RESEND}/emails`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${secret("RESEND_API_KEY")}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: `DataParl' <${from}>`, to: b.to, cc: b.cc?.length ? b.cc : undefined, subject: b.subject, text: b.text, html, headers }),
+  const r = await expedier({
+    from, to: b.to, cc: b.cc, subject: b.subject, corpsHtml: texteVersHtml(b.text), text: b.text,
+    inReplyTo: b.inReplyTo, references: b.references, type: "webmail",
   });
-  if (!r.ok) {
-    const detail = await r.text();
-    console.error("Resend webmail", r.status, detail);
-    let msg = "";
-    try { msg = (JSON.parse(detail) as { message?: string }).message ?? ""; } catch { /* corps non JSON */ }
-    return { ok: false, error: `envoi refusé par Resend${msg ? ` : ${msg}` : ""}` };
-  }
-  const id = ((await r.json()) as { id: string }).id;
-  const { error } = await authAdmin().from("emails").insert({
-    direction: "out", communication_type: "webmail", from_addr: from, to_addr: b.to.join(", "), cc_addr: b.cc?.join(", ") || null,
-    subject: b.subject, body_text: b.text, body_html: html, in_reply_to: b.inReplyTo ?? null, resend_id: id,
-    folder: "sent", read: true, source: "resend",
-  });
-  if (error) console.error("emails insert", error);
-  await audit(a, "webmail.envoi", id, { to: b.to, subject: b.subject });
-  return { ok: true, id };
+  if (!r.ok) return r;
+  await audit(a, "webmail.envoi", r.resendId, { from, to: b.to, subject: b.subject });
+  return { ok: true, id: r.resendId };
 }
 
 type Recu = {
   id: string; from: string; to: string[]; cc?: string[] | null; reply_to?: string[] | null; subject: string;
   html?: string | null; text?: string | null; message_id?: string | null; created_at: string;
-  headers?: Record<string, string> | null;
+  headers?: unknown;
   attachments?: { id: string; filename: string; content_type: string; size?: number }[];
 };
 
-// Récupère un email reçu complet (corps compris) et le range dans « Reçus ».
-// Idempotent : resend_id est unique.
+// Récupère un email reçu complet (corps compris), le range dans « Reçus » et
+// envoie l'accusé de réception s'il y a lieu. Idempotent (resend_id unique).
+// Nécessite une clé Resend « Full access » (la lecture des emails reçus est
+// refusée aux clés « Sending access »).
 export async function importerRecu(emailId: string): Promise<void> {
   const r = await fetch(`${RESEND}/emails/receiving/${encodeURIComponent(emailId)}`, {
     headers: { Authorization: `Bearer ${secret("RESEND_API_KEY")}` },
   });
-  if (!r.ok) throw new Error(`Resend receiving ${r.status}`);
+  if (!r.ok) throw new Error(`Resend receiving ${r.status} ${await r.text()}`);
   const m = (await r.json()) as Recu;
-  const entetes = Object.fromEntries(Object.entries(m.headers ?? {}).map(([k, v]) => [k.toLowerCase(), v]));
-  const { error } = await authAdmin().from("emails").upsert({
+  const h = entetes(m.headers);
+  const { data, error } = await authAdmin().from("emails").upsert({
     direction: "in", communication_type: "webmail", from_addr: m.from, to_addr: (m.to ?? []).join(", "),
     cc_addr: m.cc?.length ? m.cc.join(", ") : null, reply_to: m.reply_to?.length ? m.reply_to.join(", ") : null,
     subject: m.subject ?? "", body_html: m.html ?? null, body_text: m.text ?? null,
-    message_id: m.message_id ?? entetes["message-id"] ?? null, in_reply_to: entetes["in-reply-to"] ?? null,
+    message_id: m.message_id ?? h["message-id"] ?? null, in_reply_to: h["in-reply-to"] ?? null,
     resend_id: m.id, attachments: (m.attachments ?? []).map((p) => ({ id: p.id, filename: p.filename, content_type: p.content_type, size: p.size ?? null })),
     folder: "inbox", read: false, date: m.created_at, source: "resend",
-  }, { onConflict: "resend_id", ignoreDuplicates: true });
+  }, { onConflict: "resend_id", ignoreDuplicates: true }).select("id");
   if (error) throw error;
+  if (!data?.length) return; // déjà importé : pas de second accusé
+  if (!doitRepondre({ from: m.from, subject: m.subject ?? "", headers: h })) return;
+
+  const expediteur = adresseNue(m.reply_to?.[0] ?? m.from);
+  const recuSur = [...(m.to ?? []), h["to"] ?? "", h["delivered-to"] ?? ""]
+    .flatMap((x) => x.split(",")).map(adresseNue).find((x) => EXPEDITEURS.includes(x));
+  await accuserReception({
+    to: expediteur,
+    from: recuSur ?? REPLI,
+    objet: m.subject ?? "",
+    messageId: m.message_id ?? h["message-id"] ?? null,
+    extrait: (m.text ?? "").trim(),
+  });
+}
+
+// Une seule réponse automatique par expéditeur et par 24 h.
+async function dejaRepondu(to: string): Promise<boolean> {
+  const depuis = new Date(Date.now() - 86400_000).toISOString();
+  const { count } = await authAdmin().from("emails").select("id", { count: "exact", head: true })
+    .eq("communication_type", "auto").eq("to_addr", to).gte("date", depuis);
+  return (count ?? 0) > 0;
+}
+
+export async function accuserReception(p: {
+  to: string; from: string; objet: string; messageId?: string | null; extrait: string; prenom?: string; contact?: boolean;
+}): Promise<void> {
+  if (await dejaRepondu(p.to)) return;
+  const bonjour = p.prenom ? `Bonjour ${p.prenom},` : "Bonjour,";
+  const extrait = p.extrait.length > 1500 ? p.extrait.slice(0, 1500) + "…" : p.extrait;
+  const text = `${bonjour}
+
+Merci pour ton message : il est bien arrivé chez DataParl'. On le lit et on te répond dès que possible, en général sous quelques jours ouvrés.
+
+Si tu as quelque chose à ajouter, réponds simplement à cet email.
+
+L'équipe DataParl'
+
+Ton message :
+${extrait.split("\n").map((l) => `> ${l}`).join("\n")}`;
+  const corpsHtml = `<p style="margin:0 0 16px">${esc(bonjour)}</p>
+<p style="margin:0 0 16px">Merci pour ton message : il est bien arrivé chez DataParl'. On le lit et on te répond dès que possible, en général sous quelques jours ouvrés.</p>
+<p style="margin:0 0 16px">Si tu as quelque chose à ajouter, réponds simplement à cet email.</p>
+<p style="margin:0 0 24px">L'équipe DataParl'</p>
+<p style="margin:0 0 8px;font-size:14px;color:#4A5670">Ton message${p.objet && !p.contact ? ` « ${esc(p.objet)} »` : ""} :</p>
+<blockquote style="margin:0;padding:0 0 0 12px;border-left:3px solid #E6E3D8;color:#4A5670;font-size:14px;white-space:pre-wrap">${esc(extrait)}</blockquote>`;
+  const message = {
+    to: [p.to],
+    subject: p.contact ? "Ton message à DataParl' est bien arrivé" : `Bien reçu : ${p.objet || "ton message"}`,
+    titre: "Ton message est bien arrivé",
+    corpsHtml, text, type: "auto" as const,
+    inReplyTo: p.messageId ?? null,
+    headers: { "Auto-Submitted": "auto-replied", "X-Auto-Response-Suppress": "All" },
+  };
+  let r = await expedier({ ...message, from: p.from });
+  if (!r.ok && p.from !== REPLI) r = await expedier({ ...message, from: REPLI }); // domaine racine pas encore vérifié
+  if (!r.ok) console.error("accusé de réception", r.error);
 }
 
 // Lien de téléchargement signé (temporaire) d'une pièce jointe reçue.
@@ -99,8 +132,6 @@ const CHAMP_EVENEMENT: Record<string, string> = {
   "email.opened": "opened_at", "email.clicked": "clicked_at", "email.bounced": "bounced_at", "email.complained": "bounced_at",
 };
 
-// Événements d'envoi (délivré, rebond, plainte…) : journalisés, et reportés
-// sur l'email envoyé correspondant.
 export async function enregistrerEvenement(type: string, emailId: string, payload: unknown): Promise<void> {
   const db = authAdmin();
   await db.from("email_events").insert({ message_id: emailId, type, payload: payload ?? {} });

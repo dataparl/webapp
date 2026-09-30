@@ -3,9 +3,10 @@ import { z } from "zod";
 import { clientFingerprint } from "@/lib/consent";
 import { SUJETS } from "@/lib/contact";
 import { CONTACT_INBOX } from "@/lib/env";
-import { layoutEmail, sendEmail } from "@/lib/mail";
+import { esc, expedier } from "@/lib/mail";
 import { authAdmin } from "@/lib/supabaseAdmin";
 import { normalizeEmail } from "@/lib/tokens";
+import { accuserReception } from "@/lib/webmail";
 
 const Corps = z.object({
   prenom: z.string().trim().min(1).max(80),
@@ -15,8 +16,6 @@ const Corps = z.object({
   message: z.string().trim().min(5).max(5000),
   site: z.string().max(200).optional().nullable(),
 });
-
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 export async function POST(req: Request) {
   const parsed = Corps.safeParse(await req.json().catch(() => null));
@@ -40,12 +39,26 @@ export async function POST(req: Request) {
   if (error) return NextResponse.json({ error: "Envoi impossible, réessaie plus tard." }, { status: 500 });
 
   const libelle = SUJETS.find((s) => s.v === d.sujet)?.l ?? d.sujet;
-  await sendEmail({
-    to: CONTACT_INBOX,
-    replyTo: email,
-    subject: `[Contact · ${libelle}] ${d.prenom} ${d.nom}`,
-    html: layoutEmail(libelle, `<p><strong>${esc(d.prenom)} ${esc(d.nom)}</strong> &lt;${esc(email)}&gt;</p><p style="white-space:pre-wrap;line-height:1.6">${esc(d.message)}</p>`, "Message reçu via le formulaire de contact DataParl'. Réponds directement à cet email."),
-    text: `${libelle}\n${d.prenom} ${d.nom} <${email}>\n\n${d.message}`,
+  const objet = `[Contact · ${libelle}] ${d.prenom} ${d.nom}`;
+
+  // 1. Le message arrive dans la webmail (Reçus) ; « Répondre » vise l'expéditeur.
+  await db.from("emails").insert({
+    direction: "in", communication_type: "contact", from_addr: `${d.prenom} ${d.nom} <${email}>`,
+    to_addr: "hello@cavaparlement.eu", reply_to: email, subject: objet, body_text: d.message,
+    folder: "inbox", read: false, source: "site",
   });
+
+  // 2. Accusé de réception à l'expéditeur.
+  await accuserReception({ to: email, from: "hello@mail.cavaparlement.eu", objet: libelle, extrait: d.message, prenom: d.prenom, contact: true });
+
+  // 3. Copie facultative vers une boîte externe (variable CONTACT_INBOX).
+  if (CONTACT_INBOX) {
+    await expedier({
+      to: [CONTACT_INBOX], replyTo: email, subject: objet, titre: libelle, type: "transactionnel",
+      corpsHtml: `<p><strong>${esc(d.prenom)} ${esc(d.nom)}</strong> &lt;${esc(email)}&gt;</p><p style="white-space:pre-wrap;line-height:1.6">${esc(d.message)}</p>`,
+      text: `${libelle}\n${d.prenom} ${d.nom} <${email}>\n\n${d.message}`,
+      pied: "Message reçu via le formulaire de contact DataParl'. Réponds directement à cet email.",
+    });
+  }
   return ok;
 }

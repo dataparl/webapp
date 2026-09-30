@@ -3,7 +3,19 @@ import { authAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
 
-const DOSSIERS = ["inbox", "sent", "archive", "trash"] as const;
+const DOSSIERS = ["inbox", "sent", "auto", "archive", "trash"] as const;
+const AUTOMATIQUES = "(transactionnel,auto,alerte)";
+
+// « Envoyés » = emails écrits depuis la webmail ; « Automatiques » = accusés
+// de réception, emails transactionnels et alertes (même dossier en base).
+interface Filtrable { eq(c: string, v: string): Filtrable; in(c: string, v: string[]): Filtrable; not(c: string, o: string, v: string): Filtrable }
+function filtrer<Q>(requete: Q, dossier: string): Q {
+  const q = requete as unknown as Filtrable;
+  const r = dossier === "auto" ? q.eq("folder", "sent").in("communication_type", ["transactionnel", "auto", "alerte"])
+    : dossier === "sent" ? q.eq("folder", "sent").not("communication_type", "in", AUTOMATIQUES)
+    : q.eq("folder", dossier);
+  return r as unknown as Q;
+}
 const PAGE = 50;
 
 export async function GET(req: Request) {
@@ -16,13 +28,14 @@ export async function GET(req: Request) {
     const db = authAdmin();
     let req1 = db.from("emails")
       .select("id, direction, from_addr, to_addr, subject, date, read, flagged, attachments, bounced_at", { count: "exact" })
-      .eq("folder", dossier).order("date", { ascending: false }).range(page * PAGE, page * PAGE + PAGE - 1);
+      .order("date", { ascending: false }).range(page * PAGE, page * PAGE + PAGE - 1);
+    req1 = filtrer(req1, dossier);
     if (q) req1 = req1.or(`subject.ilike.%${q}%,from_addr.ilike.%${q}%,to_addr.ilike.%${q}%,body_text.ilike.%${q}%`);
     const { data, count, error } = await req1;
     if (error) throw error;
     const nonLus: Record<string, number> = {};
     await Promise.all(DOSSIERS.map(async (d) => {
-      const { count: c } = await db.from("emails").select("id", { count: "exact", head: true }).eq("folder", d).eq("read", false);
+      const { count: c } = await filtrer(db.from("emails").select("id", { count: "exact", head: true }).eq("read", false), d);
       nonLus[d] = c ?? 0;
     }));
     return {

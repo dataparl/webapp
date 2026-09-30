@@ -1,56 +1,86 @@
 import "server-only";
-import { MAIL_FROM, secret } from "./env";
+import { createHash, randomBytes } from "node:crypto";
+import { MAIL_FROM, MAIL_WEB_URL, secret } from "./env";
+import { gabarit } from "./gabarit";
+import { authAdmin } from "./supabaseAdmin";
 
-// Envoi via l'API Resend en fetch brut (comme sur PasDeVelib).
+export { esc, texteVersHtml } from "./gabarit";
 
-type Envoi = {
-  to: string;
+// Point d'envoi unique (API Resend en fetch brut). Chaque email :
+//   - est habillé du gabarit DataParl' ;
+//   - a une version en ligne (mail.cavaparlement.eu/lire/<jeton>, seul le
+//     hash du jeton est stocké) ;
+//   - est rangé dans la table emails (visible dans la webmail).
+
+export type TypeEnvoi = "transactionnel" | "webmail" | "auto" | "alerte";
+
+export type Message = {
+  from?: string; // adresse nue ; défaut : MAIL_FROM
+  to: string[];
+  cc?: string[];
   subject: string;
-  html: string;
+  titre?: string; // titre dans la carte ; défaut : l'objet
+  corpsHtml: string;
   text: string;
-  // Présents pour la communication opt-in : désinscription en un clic (RFC 8058).
-  unsubscribeUrl?: string;
+  pied?: string;
   replyTo?: string;
+  unsubscribeUrl?: string; // communication opt-in : désinscription en un clic (RFC 8058)
+  inReplyTo?: string | null;
+  references?: string | null;
+  headers?: Record<string, string>;
+  type: TypeEnvoi;
 };
 
-export async function sendEmail(e: Envoi): Promise<string | null> {
-  const headers: Record<string, string> = {};
-  if (e.unsubscribeUrl) {
-    headers["List-Unsubscribe"] = `<${e.unsubscribeUrl}>`;
+export type Resultat = { ok: true; resendId: string } | { ok: false; error: string };
+
+export const hashJeton = (t: string) => createHash("sha256").update(t).digest("hex");
+
+export async function expedier(m: Message): Promise<Resultat> {
+  const jeton = randomBytes(20).toString("hex");
+  const lireUrl = `${MAIL_WEB_URL}/lire/${jeton}`;
+  const html = gabarit({ titre: m.titre ?? m.subject, corpsHtml: m.corpsHtml, lireUrl, pied: m.pied });
+  const text = `${m.text}\n\n--\nDataParl' · version en ligne : ${lireUrl}`;
+  const from = m.from ? `DataParl' <${m.from}>` : MAIL_FROM;
+
+  const headers: Record<string, string> = { ...(m.headers ?? {}) };
+  if (m.unsubscribeUrl) {
+    headers["List-Unsubscribe"] = `<${m.unsubscribeUrl}>`;
     headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click";
   }
+  if (m.inReplyTo) {
+    headers["In-Reply-To"] = m.inReplyTo;
+    headers["References"] = [m.references, m.inReplyTo].filter(Boolean).join(" ");
+  }
+
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${secret("RESEND_API_KEY")}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: MAIL_FROM, to: [e.to], subject: e.subject, html: e.html, text: e.text, headers,
-      ...(e.replyTo ? { reply_to: e.replyTo } : {}),
+      from, to: m.to, cc: m.cc?.length ? m.cc : undefined, subject: m.subject, html, text, headers,
+      ...(m.replyTo ? { reply_to: m.replyTo } : {}),
     }),
   });
   if (!r.ok) {
-    console.error("Resend", r.status, await r.text());
-    return null;
+    const detail = await r.text();
+    console.error("Resend", r.status, detail);
+    let msg = "";
+    try { msg = (JSON.parse(detail) as { message?: string }).message ?? ""; } catch { /* corps non JSON */ }
+    return { ok: false, error: `envoi refusé par Resend${msg ? ` : ${msg}` : ""}` };
   }
-  return ((await r.json()) as { id?: string }).id ?? null;
-}
-
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
-
-export function layoutEmail(titre: string, corpsHtml: string, pied: string): string {
-  return `<!doctype html><html lang="fr"><body style="margin:0;background:#FFFDF5;font-family:Arial,Helvetica,sans-serif;color:#071A41">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
-<table role="presentation" width="100%" style="max-width:560px;background:#ffffff;border:1px solid #E6E3D8;border-radius:10px;padding:32px">
-<tr><td>
-<p style="margin:0 0 16px;font-family:Georgia,serif;font-weight:bold;font-size:20px;color:#071A41">Data<span style="background:#FFD23F;padding:0 2px">Parl'</span></p>
-<h1 style="margin:0 0 20px;font-family:Georgia,serif;font-size:24px;color:#071A41">${esc(titre)}</h1>
-${corpsHtml}
-</td></tr></table>
-<p style="max-width:560px;font-size:12px;line-height:1.5;color:#4A5670;margin:16px auto 0">${pied}</p>
-</td></tr></table></body></html>`;
+  const resendId = ((await r.json()) as { id: string }).id;
+  const { error } = await authAdmin().from("emails").insert({
+    direction: "out", communication_type: m.type, from_addr: m.from ?? MAIL_FROM, to_addr: m.to.join(", "),
+    cc_addr: m.cc?.length ? m.cc.join(", ") : null, reply_to: m.replyTo ?? null,
+    subject: m.subject, body_text: m.text, body_html: html, in_reply_to: m.inReplyTo ?? null,
+    resend_id: resendId, web_token_hash: hashJeton(jeton), folder: "sent", read: true, source: "resend",
+  });
+  if (error) console.error("emails insert", error);
+  return { ok: true, resendId };
 }
 
 export function bouton(url: string, libelle: string): string {
-  return `<p style="margin:24px 0"><a href="${esc(url)}" style="display:inline-block;background:#F0444F;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:6px;font-weight:bold">${esc(libelle)}</a></p>`;
+  const e = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+  return `<p style="margin:24px 0"><a href="${e(url)}" style="display:inline-block;background:#F0444F;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:6px;font-weight:bold">${e(libelle)}</a></p>`;
 }
 
 export function piedObligatoire(): string {
@@ -58,5 +88,5 @@ export function piedObligatoire(): string {
 }
 
 export function piedOptIn(prefsUrl: string, unsubUrl: string): string {
-  return `Tu reçois ce message parce que tu es abonné(e) aux alertes DataParl'. <a href="${esc(prefsUrl)}" style="color:#4A5670">Régler mes préférences</a> · <a href="${esc(unsubUrl)}" style="color:#4A5670">Me désinscrire</a>`;
+  return `Tu reçois ce message parce que tu es abonné(e) aux alertes DataParl'. <a href="${prefsUrl}" style="color:#4A5670">Régler mes préférences</a> · <a href="${unsubUrl}" style="color:#4A5670">Me désinscrire</a>`;
 }
