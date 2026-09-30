@@ -101,7 +101,15 @@ export default function Confidentialite() {
           caractère public de ces informations.
         </li>
         <li>
-          <strong>Limites.</strong> Aucune donnée sensible, aucune adresse ni téléphone personnels, aucun profilage.
+          <strong>Fiches de parcours.</strong> Pour chaque collaborateur, DataParl&apos; rassemble sur une fiche les
+          élus pour lesquels la personne a figuré sur les listes officielles, avec les dates et la chambre. Ces fiches ne
+          sont pas indexées par les moteurs de recherche, et le parcours complet n&apos;est visible que par les comptes
+          connectés. Une personne est reconnue à son nom : deux homonymes peuvent être confondus, ce qui se corrige sur
+          simple demande.
+        </li>
+        <li>
+          <strong>Limites.</strong> Aucune donnée sensible, aucune adresse ni téléphone personnels, aucune évaluation
+          des personnes : seules les informations des listes officielles sont reprises.
         </li>
         <li>
           <strong>Conservation.</strong> Ces informations constituent une archive de la vie parlementaire et sont
