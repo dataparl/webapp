@@ -6,7 +6,7 @@ import { eluDepuisFiche, eluDepuisId, equipe, lienOfficiel, mouvementsElu, stats
 import { familleDe } from "@/lib/familles";
 import { CHAMBRE_LONG, nomAffiche, prenomNom } from "@/lib/format";
 import { chevauche, fusionner, libellePeriode, moisAnnee } from "@/lib/periodes";
-import { parlementaireDepuisId, periodesElu, personne, type Appartenance, type Mandat, type Parlementaire } from "@/lib/referentiel";
+import { collaborateurDeLaPersonne, parlementaireDepuisId, periodesElu, personne, type Appartenance, type Mandat, type Parlementaire } from "@/lib/referentiel";
 import { partFemmes, pct, tauxTurnover } from "@/lib/stats";
 
 export const revalidate = 3600;
@@ -18,7 +18,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const f = await parlementaireDepuisId(id).catch(() => null);
   if (f) {
     const nom = prenomNom(f.prenom, f.nom);
-    return { title: `${nom} : équipe et parcours`, description: `Les collaborateurs de ${nom} (${CHAMBRE_LONG[f.chambre]}), leurs mouvements, ses mandats et ses commissions.` };
+    const role = `${f.actif ? titre(f) : `${ancien(f)} ${titre(f).toLowerCase()}`}${f.circonscription && f.chambre !== "europarl" ? ` (${f.circonscription})` : ""}`;
+    const description = `${nom}, ${role.charAt(0).toLowerCase()}${role.slice(1)}${f.groupe ? `, groupe ${f.groupe}` : ""} : collaborateurs parlementaires, mouvements de l'équipe, mandats et commissions.`;
+    const url = `https://www.cavaparlement.eu/parlementaires/${encodeURIComponent(f.slug)}`;
+    return {
+      title: `${nom} : équipe et parcours`, description,
+      alternates: { canonical: url },
+      openGraph: { title: `${nom} · DataParl'`, description, url, type: "profile", images: f.photo_url ? [{ url: f.photo_url }] : undefined },
+    };
   }
   const e = await eluDepuisId(id).catch(() => null);
   return e ? { title: `${nomAffiche(e.nom)} : son équipe` } : { title: "Parlementaire" };
@@ -62,11 +69,12 @@ export default async function Parlementaire({ params }: Props) {
 
   const { fiches, mandats, appartenances } = await personne(f.personne_id);
   const e = eluDepuisFiche(f);
-  const [collabs, mouvements, stats, periodes] = await Promise.all([
+  const [collabs, mouvements, stats, periodes, commeCollab] = await Promise.all([
     f.actif && f.chambre !== "europarl" ? equipe(e) : Promise.resolve([]),
     mouvementsElu(e, 5).catch(() => []),
     f.actif ? statsElu(e).catch(() => null) : Promise.resolve(null),
     periodesElu(fiches).catch(() => []),
+    collaborateurDeLaPersonne(f.personne_id).catch(() => null),
   ]);
   const nom = prenomNom(f.prenom, f.nom);
   const nbCollabs = new Set(periodes.map((p) => p.collab_id)).size;
@@ -74,8 +82,16 @@ export default async function Parlementaire({ params }: Props) {
   const commissionsActuelles = fusionner(appartenances.filter((a) => a.chambre === f.chambre && a.elu_id === f.elu_id && a.type !== "groupe")).filter((a) => !a.fin);
   const autres = fiches.filter((x) => x.chambre !== f.chambre);
 
+  const jsonLd = {
+    "@context": "https://schema.org", "@type": "Person", name: nom, givenName: f.prenom, familyName: f.nom,
+    image: f.photo_url || undefined, url: `https://www.cavaparlement.eu/parlementaires/${f.slug}`,
+    jobTitle: f.actif ? titre(f) : undefined, sameAs: f.url_officielle ? [f.url_officielle] : undefined,
+    memberOf: f.actif ? { "@type": "GovernmentOrganization", name: CHAMBRE_LONG[f.chambre] } : undefined,
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <div className="entete-elu">
         <Photo src={f.photo_url} nom={nom} />
         <div>
@@ -152,6 +168,16 @@ export default async function Parlementaire({ params }: Props) {
       )}
       {!f.actif && nbCollabs > 0 && (
         <p><a className="btn secondaire" href={`/parlementaires/${encodeURIComponent(f.slug)}/historique`}>Historique des collaborateurs</a></p>
+      )}
+
+      {commeCollab && (
+        <p className="card" style={{ maxWidth: "none" }}>
+          Avant ou après ses mandats, {nom} figure aussi sur les listes de collaborateurs parlementaires
+          ({commeCollab.chambres.split(" ").map((c) => CHAMBRE_LONG[c]).join(", ")}, {commeCollab.premiere_date.slice(0, 4)}
+          {commeCollab.derniere_date.slice(0, 4) !== commeCollab.premiere_date.slice(0, 4) ? `-${commeCollab.derniere_date.slice(0, 4)}` : ""}).{" "}
+          <a href={`/collab/${commeCollab.slug}`}>Voir son parcours de {f.civilite === "Mme" ? "collaboratrice" : "collaborateur"}</a>
+          <span className="meta"> · rapprochement par le nom, sans chevauchement avec ses mandats</span>
+        </p>
       )}
 
       <h2>Parcours parlementaire</h2>

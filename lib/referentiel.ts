@@ -17,6 +17,7 @@ export type Appartenance = { personne_id: string; chambre: Chambre; elu_id: stri
 export type Collaborateur = {
   collab_id: string; collab_cle: string; slug: string; prenom: string; nom: string; civilite: string; genre: string;
   chambres: string; n_elus: number; premiere_date: string; derniere_date: string; actif: boolean;
+  personne_id?: string; parlementaire_slug?: string;
 };
 export type Periode = {
   collab_id: string; chambre: Chambre; elu_cle: string; elu_id: string; elu_nom: string; debut: string; debut_connu: boolean;
@@ -136,4 +137,10 @@ export async function cleElus(valeur: string): Promise<string[]> {
   const p = await parlementaireDepuisId(valeur).catch(() => null);
   if (!p) return [valeur];
   return [...new Set([p.elu_id, p.cle].filter(Boolean))];
+}
+
+// Fiche de collaborateur d'une personne qui a aussi été parlementaire.
+export async function collaborateurDeLaPersonne(personneId: string): Promise<Collaborateur | null> {
+  const { rows } = await dataQuery<Collaborateur>("collaborateurs", new URLSearchParams({ select: "*", personne_id: `eq.${personneId}`, limit: "1" }), 3600);
+  return rows[0] ?? null;
 }

@@ -10,7 +10,7 @@ type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const f = await parlementaireDepuisId(decodeURIComponent((await params).id)).catch(() => null);
-  return { title: f ? `${prenomNom(f.prenom, f.nom)} : historique des collaborateurs` : "Historique des collaborateurs" };
+  return { title: f ? `${prenomNom(f.prenom, f.nom)} : historique des collaborateurs` : "Historique des collaborateurs", robots: { index: false, follow: true } };
 }
 
 export default async function Historique({ params }: Props) {

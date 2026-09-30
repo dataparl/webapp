@@ -20,7 +20,8 @@ function Barre({ v }: { v: number | null }) {
 export default async function MixiParl() {
   let rows: StatElu[] = [];
   let annees: StatAnnuelle[] = [];
-  try { [rows, annees] = await Promise.all([statsElus(), statsAnnuelles().catch(() => [])]); } catch {}
+  let indisponible = false;
+  try { [rows, annees] = await Promise.all([statsElus(), statsAnnuelles().catch(() => [])]); } catch { indisponible = true; }
   const familles = agreger(rows, (r) => familleDe(r.chambre, r.elu_groupe)?.code ?? "Autres")
     .filter((f) => f.femmes + f.hommes >= 10)
     .sort((a, b) => (partFemmes(b) ?? 0) - (partFemmes(a) ?? 0));
@@ -34,6 +35,7 @@ export default async function MixiParl() {
       <h1>Mixi<span className="surligne-mixi">Parl&apos;</span></h1>
       <p className="lead">Les équipes parlementaires sont-elles mixtes ? La part de femmes et d&apos;hommes parmi les collaborateurs, élu par élu.</p>
 
+      {indisponible && <p className="erreur">Les statistiques sont momentanément indisponibles. Réessaie dans quelques minutes.</p>}
       <div className="chiffres mixi">
         {CHAMBRES.map((c) => parChambre[c] && (
           <div key={c}>

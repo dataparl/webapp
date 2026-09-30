@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CHAMBRE_LONG, prenomNom } from "@/lib/format";
 import { libellePeriode, moisAnnee } from "@/lib/periodes";
-import { collaborateurDepuisSlug, parlementairesParElu, periodesCollab } from "@/lib/referentiel";
+import { collaborateurDepuisSlug, parlementaireDepuisId, parlementairesParElu, periodesCollab } from "@/lib/referentiel";
 import { nomAffiche } from "@/lib/format";
 import ParcoursCollab from "./ParcoursCollab";
 
@@ -21,7 +21,10 @@ export default async function FicheCollab({ params }: Props) {
   if (!c) notFound();
   const periodes = await periodesCollab(c.collab_id);
   const actuelles = periodes.filter((p) => p.en_cours);
-  const fiches = await parlementairesParElu(actuelles).catch(() => []);
+  const [fiches, commeElu] = await Promise.all([
+    parlementairesParElu(actuelles).catch(() => []),
+    c.parlementaire_slug ? parlementaireDepuisId(c.parlementaire_slug).catch(() => null) : Promise.resolve(null),
+  ]);
   const nom = prenomNom(c.prenom, c.nom);
   const role = c.genre === "F" ? "Collaboratrice parlementaire" : c.genre === "H" ? "Collaborateur parlementaire" : "Collaborateur(rice) parlementaire";
 
@@ -34,6 +37,18 @@ export default async function FicheCollab({ params }: Props) {
         {c.n_elus > 1 ? `A travaillé pour ${c.n_elus} élus` : "A travaillé pour 1 élu"}
         {c.premiere_date ? ` depuis ${c.premiere_date.slice(0, 4)}` : ""}.
       </p>
+
+      {commeElu && (
+        <p className="card" style={{ maxWidth: "none" }}>
+          {nom} a aussi été {commeElu.actif ? "élu(e)" : "parlementaire"} :{" "}
+          <a href={`/parlementaires/${encodeURIComponent(commeElu.slug)}`}>
+            {commeElu.chambre === "senat" ? (commeElu.civilite === "Mme" ? "sénatrice" : "sénateur") : commeElu.chambre === "europarl" ? (commeElu.civilite === "Mme" ? "députée européenne" : "député européen") : (commeElu.civilite === "Mme" ? "députée" : "député")}
+            {commeElu.circonscription && commeElu.chambre !== "europarl" ? ` (${commeElu.circonscription})` : ""}
+          </a>
+          {commeElu.actif ? ", en fonction" : commeElu.fin_mandat ? `, jusqu'en ${commeElu.fin_mandat.slice(0, 4)}` : ""}.
+          <span className="meta"> Rapprochement par le nom, sans chevauchement entre ses mandats et ses postes de collaborateur.</span>
+        </p>
+      )}
 
       {actuelles.length > 0 && (
         <>

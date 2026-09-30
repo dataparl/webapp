@@ -20,7 +20,8 @@ export default async function VigiParl() {
   let rows: StatElu[] = [];
   let annees: StatAnnuelle[] = [];
   let durees: StatDuree[] = [];
-  try { [rows, annees, durees] = await Promise.all([statsElus(), statsAnnuelles().catch(() => []), statsDurees().catch(() => [])]); } catch {}
+  let indisponible = false;
+  try { [rows, annees, durees] = await Promise.all([statsElus(), statsAnnuelles().catch(() => []), statsDurees().catch(() => [])]); } catch { indisponible = true; }
   const parChambre = Object.fromEntries(agreger(rows, (r) => r.chambre).map((a) => [a.cle, a]));
   const duree = Object.fromEntries(durees.map((d) => [d.chambre, d]));
   const anneeCourante = new Date().getFullYear();
@@ -36,6 +37,7 @@ export default async function VigiParl() {
         12 derniers mois, élu par élu.
       </p>
 
+      {indisponible && <p className="erreur">Les statistiques sont momentanément indisponibles. Réessaie dans quelques minutes.</p>}
       <div className="chiffres vigi">
         {CHAMBRES.map((c) => parChambre[c] && (
           <div key={c}>
