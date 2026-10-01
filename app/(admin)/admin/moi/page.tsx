@@ -100,15 +100,15 @@ export default function MonEspace() {
               <h2 style={{ marginTop: 0 }}>Mon profil</h2>
               <div className="grille-2">
                 <div><label htmlFor="p-prenom">Prénom</label>
-                  <input id="p-prenom" value={brouillon.prenom} onChange={(e) => setBrouillon({ ...brouillon, prenom: e.target.value })} autoComplete="given-name" /></div>
+                  <input type="text" id="p-prenom" value={brouillon.prenom} onChange={(e) => setBrouillon({ ...brouillon, prenom: e.target.value })} autoComplete="given-name" /></div>
                 <div><label htmlFor="p-nom">Nom</label>
-                  <input id="p-nom" value={brouillon.nom_famille} onChange={(e) => setBrouillon({ ...brouillon, nom_famille: e.target.value })} autoComplete="family-name" /></div>
+                  <input type="text" id="p-nom" value={brouillon.nom_famille} onChange={(e) => setBrouillon({ ...brouillon, nom_famille: e.target.value })} autoComplete="family-name" /></div>
               </div>
               <label htmlFor="p-affiche">Nom affiché</label>
-              <input id="p-affiche" value={brouillon.nom} onChange={(e) => setBrouillon({ ...brouillon, nom: e.target.value })} placeholder="ex. Théo de DataParl'" />
+              <input type="text" id="p-affiche" value={brouillon.nom} onChange={(e) => setBrouillon({ ...brouillon, nom: e.target.value })} placeholder="ex. Théo de DataParl'" />
               <p className="meta" style={{ marginTop: 4 }}>Nom d&apos;expéditeur de tes emails et nom dans l&apos;espace admin.</p>
               <label htmlFor="p-poste">Poste</label>
-              <input id="p-poste" value={brouillon.poste} onChange={(e) => setBrouillon({ ...brouillon, poste: e.target.value })} placeholder={LIBELLE_ROLE[role]} />
+              <input type="text" id="p-poste" value={brouillon.poste} onChange={(e) => setBrouillon({ ...brouillon, poste: e.target.value })} placeholder={LIBELLE_ROLE[role]} />
               {role === "admin" && (
                 <>
                   <label htmlFor="p-email">Adresse email</label>

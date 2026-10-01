@@ -12,6 +12,13 @@ const config: NextConfig = {
   async redirects() {
     return [
       { source: "/collabs", destination: "/collab", permanent: true },
+      { source: "/collaborateurs", destination: "/collab", permanent: true },
+      { source: "/collaborateur", destination: "/collab", permanent: true },
+      { source: "/equipes", destination: "/collab", permanent: true },
+      { source: "/espace-presse", destination: "/presse", permanent: true },
+      { source: "/espace-presse/:chemin*", destination: "/presse/:chemin*", permanent: true },
+      { source: "/vigiparl/methodologie", destination: "/vigiparl/methode", permanent: true },
+      { source: "/mixiparl/methodologie", destination: "/mixiparl/methode", permanent: true },
       { source: "/parlementaires/:id/PAhistory", destination: "/parlementaires/:id/historique", permanent: true },
     ];
   },

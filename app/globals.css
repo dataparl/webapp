@@ -316,3 +316,39 @@ h1.marque { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .selecteur-mois { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
 .grille-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
 @media (max-width: 520px) { .grille-2 { grid-template-columns: 1fr; } }
+
+/* Presse */
+.atouts.colonnes-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 12px 0 24px; }
+.atouts.colonnes-3 > div { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--card); padding: 16px; }
+.atouts.colonnes-3 strong { display: block; font-family: "Spectral", serif; font-size: 1.1rem; margin-bottom: 4px; }
+.atouts.colonnes-3 span { color: var(--muted); font-size: .92rem; }
+.verifs { padding-left: 1.2em; }
+.verifs li { margin: 0 0 12px; }
+.verifs li a { white-space: nowrap; }
+.kit-logos { display: flex; gap: 28px; flex-wrap: wrap; align-items: center; padding: 18px 20px; border: 1px dashed var(--line); border-radius: var(--radius-card); margin: 8px 0 20px; }
+.logo-presse { font-family: "Spectral", serif; font-weight: 700; font-size: 1.8rem; }
+.citation { margin: 12px 0; padding: 14px 18px; border-left: 4px solid var(--jaune); background: var(--card); font-family: "Spectral", serif; font-size: 1.1rem; }
+
+/* Recherche globale : groupes de résultats et raccourci clavier */
+.suggestions li.suggestion-groupe { cursor: default; padding: 10px 10px 2px; font-size: .74rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.recherche-globale { position: relative; }
+.recherche-globale .autocompletion input { padding-right: 44px; }
+.recherche-globale .raccourci { position: absolute; right: 12px; top: 14px; min-width: 22px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 6px; font-size: .8rem; color: var(--muted); background: var(--bg); pointer-events: none; }
+@media (hover: none) { .recherche-globale .raccourci { display: none; } }
+.chiffres .definition { display: block; margin-top: 4px; font-size: .78rem; color: var(--muted); }
+
+/* Pages de méthode */
+.version-methode { font-size: .88rem; color: var(--muted); border-left: 3px solid var(--line); padding: 4px 0 4px 12px; margin: 12px 0 20px; }
+.formule { margin: 12px 0 16px; padding: 14px 18px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-card); font-family: "DM Sans", sans-serif; }
+.formule code { font-size: 1rem; }
+.formule p { margin: 4px 0; }
+.exemple { margin: 12px 0 20px; padding: 14px 18px; border-left: 4px solid var(--jaune); background: var(--card); }
+.methode h2 { scroll-margin-top: 16px; }
+.methode h2:target, .methode h3:target { background: color-mix(in srgb, var(--jaune) 35%, transparent); }
+
+/* 404 enrichie */
+.recherche-404 { max-width: 560px; margin: 20px auto 0; text-align: left; }
+.recherche-404 .recherche-globale { margin: 0; }
+.rattrapage { list-style: none; padding: 0; margin: 18px 0 22px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.rattrapage a { display: inline-block; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--ink); text-decoration: none; font-weight: 600; }
+.rattrapage a:hover { border-color: var(--ink); }

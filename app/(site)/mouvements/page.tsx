@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Onglets from "./Onglets";
 import Recherche from "./Recherche";
 
-export const metadata: Metadata = { title: "Mouvements" };
+export const metadata: Metadata = { title: "Mouvements", alternates: { canonical: "/mouvements" } };
 
 export default function Mouvements() {
   return (

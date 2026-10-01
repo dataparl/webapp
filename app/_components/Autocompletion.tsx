@@ -1,12 +1,12 @@
 "use client";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useId, useMemo, useRef, useState } from "react";
 import { suggererGroupes } from "@/lib/familles";
 import { prenomNom } from "@/lib/format";
 
 // Champ de saisie avec autocomplétion (combobox ARIA) : élus, groupes
 // politiques (familles inter-chambres) ou recherche globale élus + collabs.
 
-export type Option = { valeur: string; libelle: string; detail?: string; href?: string; image?: string };
+export type Option = { valeur: string; libelle: string; detail?: string; href?: string; image?: string; groupe?: string };
 type EluCompact = { s: string; p: string; n: string; c: string; g: string; a: boolean; d: string };
 
 const CHAMBRE_COURT: Record<string, string> = { assemblee: "AN", senat: "Sénat", europarl: "PE" };
@@ -72,10 +72,10 @@ export default function Autocompletion({ id, source, chambre, placeholder, valeu
     if (minuteur.current) clearTimeout(minuteur.current);
     if (norm(saisie).length < 2) { setOptions([]); return; }
     minuteur.current = setTimeout(async () => {
-      const r = await fetch(`/api/recherche?q=${encodeURIComponent(saisie)}`).catch(() => null);
+      const r = await fetch(`/api/search?q=${encodeURIComponent(saisie)}&limit=8`).catch(() => null);
       const d = r?.ok ? await r.json() : { resultats: [] };
       setOptions(d.resultats ?? []);
-    }, 180);
+    }, 200);
   }, [locales, saisie]);
 
   function choisir(o: Option) {
@@ -116,11 +116,14 @@ export default function Autocompletion({ id, source, chambre, placeholder, valeu
       {visible && (
         <ul id={idListe} role="listbox" className="suggestions">
           {options.map((o, i) => (
-            <li key={`${o.valeur}-${i}`} id={`${idListe}-${i}`} role="option" aria-selected={i === actif}
-              onMouseDown={(e) => { e.preventDefault(); choisir(o); }} onMouseEnter={() => setActif(i)}>
-              <span className="suggestion-libelle">{o.libelle}</span>
-              {o.detail && <span className="suggestion-detail">{o.detail}</span>}
-            </li>
+            <Fragment key={`${o.valeur}-${i}`}>
+              {o.groupe && o.groupe !== options[i - 1]?.groupe && <li role="presentation" aria-hidden="true" className="suggestion-groupe">{o.groupe}</li>}
+              <li id={`${idListe}-${i}`} role="option" aria-selected={i === actif} aria-label={o.groupe ? `${o.libelle}${o.detail ? `, ${o.detail}` : ""} (${o.groupe})` : undefined}
+                onMouseDown={(e) => { e.preventDefault(); choisir(o); }} onMouseEnter={() => setActif(i)}>
+                <span className="suggestion-libelle">{o.libelle}</span>
+                {o.detail && <span className="suggestion-detail">{o.detail}</span>}
+              </li>
+            </Fragment>
           ))}
         </ul>
       )}

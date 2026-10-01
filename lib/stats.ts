@@ -46,8 +46,9 @@ export function partFemmes(x: { femmes: number; hommes: number }): number | null
 export const pct = (v: number | null, d = 0) => (v === null ? "–" : `${(v * 100).toLocaleString("fr-FR", { maximumFractionDigits: d, minimumFractionDigits: d })} %`);
 
 // ── Séries annuelles et durées (vues stats_annuelles, stats_durees) ─────
-export type StatAnnuelle = { chambre: string; an: number; effectif: number; femmes: number; hommes: number; effectif_suivant: number; departs: number; arrivees: number };
-export type StatDuree = { chambre: string; duree_mediane_jours: number | null; postes_termines: number; anciennete_mediane_jours: number | null; postes_en_cours_dates: number };
+export type StatAnnuelle = { chambre: string; an: number; effectif: number; femmes: number; hommes: number; effectif_suivant: number; departs: number; arrivees: number; departs_fin_mandat?: number; arrivees_debut_mandat?: number };
+export type StatDuree = { chambre: string; duree_mediane_jours: number | null; postes_termines: number; anciennete_mediane_jours: number | null; postes_en_cours_dates: number; postes_termines_tous?: number };
+export type StatFenetre = { chambre: string; departs: number; departs_fin_mandat: number; arrivees: number; arrivees_debut_mandat: number };
 
 // Premières années exploitables : avant, les archives ne couvrent pas l'année entière.
 export const PREMIERE_ANNEE: Record<string, number> = { assemblee: 2018, senat: 2016 };
@@ -67,3 +68,20 @@ export function turnoverAnnuel(r: StatAnnuelle): number | null {
 }
 
 export const mois = (jours: number | null) => (jours === null ? "–" : `${Math.round(jours / 30.44)} mois`);
+
+// Mouvements des 12 derniers mois, avec ceux exclus du taux (fin ou début de mandat de l'élu).
+export async function statsFenetre(): Promise<StatFenetre[]> {
+  return dataQueryTout<StatFenetre>("stats_fenetre_12m", new URLSearchParams({ select: "*" }), 3600);
+}
+
+export { mixite } from "./mixite";
+
+// Version de la méthode : toute évolution est datée et décrite ici.
+export const HISTORIQUE_METHODE: Record<"vigiparl" | "mixiparl", { date: string; texte: string }[]> = {
+  vigiparl: [
+    { date: "2026-10-01", texte: "Publication de la méthode détaillée ; départs exclus (fin de mandat de l'élu) et taux de couverture des durées affichés." },
+  ],
+  mixiparl: [
+    { date: "2026-10-01", texte: "Les équipes comptant un membre de genre indéterminé sont exclues des indicateurs de parité et de non-mixité (auparavant, seuls les membres de genre déterminé étaient comptés)." },
+  ],
+};

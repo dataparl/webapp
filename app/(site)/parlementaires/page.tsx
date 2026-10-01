@@ -4,7 +4,7 @@ import { familleDe } from "@/lib/familles";
 import { CHAMBRE_LONG, prenomNom } from "@/lib/format";
 import { tousLesParlementaires, type EluCompact } from "@/lib/referentiel";
 
-export const metadata: Metadata = { title: "Parlementaires" };
+export const metadata: Metadata = { title: "Parlementaires", alternates: { canonical: "/parlementaires" } };
 export const revalidate = 3600;
 
 export default async function Parlementaires() {

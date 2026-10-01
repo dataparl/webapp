@@ -40,16 +40,18 @@ export async function POST(req: Request) {
 
   const libelle = SUJETS.find((s) => s.v === d.sujet)?.l ?? d.sujet;
   const objet = `[Contact · ${libelle}] ${d.prenom} ${d.nom}`;
+  // Les demandes presse arrivent (et sont accusées) sur presse@dataparl.fr.
+  const boite = d.sujet === "presse" ? "presse@dataparl.fr" : "hello@dataparl.fr";
 
   // 1. Le message arrive dans la webmail (Reçus) ; « Répondre » vise l'expéditeur.
   await db.from("emails").insert({
     direction: "in", communication_type: "contact", from_addr: `${d.prenom} ${d.nom} <${email}>`,
-    to_addr: "hello@dataparl.fr", reply_to: email, subject: objet, body_text: d.message,
+    to_addr: boite, reply_to: email, subject: objet, body_text: d.message,
     folder: "inbox", read: false, source: "site",
   });
 
   // 2. Accusé de réception à l'expéditeur.
-  await accuserReception({ to: email, from: "hello@dataparl.fr", objet: libelle, extrait: d.message, prenom: d.prenom, contact: true });
+  await accuserReception({ to: email, from: boite, objet: libelle, extrait: d.message, prenom: d.prenom, contact: true });
 
   // 3. Copie facultative vers une boîte externe (variable CONTACT_INBOX).
   if (CONTACT_INBOX) {

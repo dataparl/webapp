@@ -62,7 +62,7 @@ export async function GET(req: Request) {
   const erreurs: string[] = [];
   for (const s of abonnes) {
     const ids = await idsDe(s.elus ?? []);
-    const a: Abonnement = { ...s, groupes: s.groupes ?? [], elus: s.elus ?? [] };
+    const a: Abonnement = { ...s, chambres: s.chambres ?? [], types: s.types ?? [], groupes: s.groupes ?? [], elus: s.elus ?? [] };
     let choisis: MvtAlerte[] = [];
     let nouvelles: string[] = [];
     if (s.frequence === "hebdomadaire") {

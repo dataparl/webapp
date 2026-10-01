@@ -1,4 +1,8 @@
+import ListeMouvements from "./_components/ListeMouvements";
 import Logo from "./_components/Logo";
+import PhraseRejetee from "./_components/PhraseRejetee";
+import RechercheGlobale from "./_components/RechercheGlobale";
+import { derniersMouvements, type Mouvement } from "@/lib/data";
 
 // Urne vide : dessin original, trait marine, fente sur le dessus.
 function UrneVide() {
@@ -14,7 +18,8 @@ function UrneVide() {
   );
 }
 
-export default function NotFound() {
+export default async function NotFound() {
+  const recents: Mouvement[] = await derniersMouvements(3).catch(() => []);
   return (
     <div className="page">
       <header className="site"><div className="wrap"><Logo /></div></header>
@@ -22,9 +27,22 @@ export default function NotFound() {
         <div className="wrap" style={{ textAlign: "center", paddingTop: 24 }}>
           <div style={{ color: "var(--ink)" }}><UrneVide /></div>
           <h1><span className="surligne">Motion rejetée.</span></h1>
-          <p className="lead" style={{ margin: "0 auto" }}>Cette page n&apos;existe pas (ou plus). Pas grave, l&apos;hémicycle t&apos;attend.</p>
+          <PhraseRejetee />
+          <div className="recherche-404"><RechercheGlobale id="recherche-404" placeholder="Chercher un élu, un collaborateur, une page…" /></div>
+          <ul className="rattrapage">
+            <li><a href="https://www.dataparl.fr/mouvements/parlement">Mouvements</a></li>
+            <li><a href="https://www.dataparl.fr/parlementaires">Parlementaires</a></li>
+            <li><a href="https://www.dataparl.fr/vigiparl">Vigi<span className="surligne-vigi">Parl&apos;</span></a></li>
+            <li><a href="https://www.dataparl.fr/mixiparl">Mixi<span className="surligne-mixi">Parl&apos;</span></a></li>
+          </ul>
           <a className="btn" href="https://www.dataparl.fr/">Retour à l&apos;accueil</a>
         </div>
+        {recents.length > 0 && (
+          <div className="wrap" style={{ marginTop: 40 }}>
+            <h2>Pendant ce temps, au Parlement</h2>
+            <ListeMouvements mouvements={recents} />
+          </div>
+        )}
       </main>
     </div>
   );

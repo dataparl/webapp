@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Questions fréquentes" };
+export const metadata: Metadata = { title: "Questions fréquentes", alternates: { canonical: "/faq" } };
 
 export default function FAQ() {
   return (

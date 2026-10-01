@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import FormulaireContact from "./FormulaireContact";
 
-export const metadata: Metadata = { title: "Contact" };
+export const metadata: Metadata = { title: "Contact", alternates: { canonical: "/contact" } };
 
 export default async function Contact({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const { sujet } = await searchParams;

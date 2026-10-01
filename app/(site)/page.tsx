@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import ListeMouvements from "../_components/ListeMouvements";
 import RechercheGlobale from "../_components/RechercheGlobale";
 import { compteAffectations, dataQuery, derniersMouvements, type Mouvement } from "@/lib/data";
@@ -8,6 +9,7 @@ async function compteFiches(): Promise<number> {
 }
 
 export const revalidate = 300;
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default async function Accueil() {
   let mouvements: Mouvement[] = [];

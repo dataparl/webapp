@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ListeMouvements from "@/app/_components/ListeMouvements";
+import Partage from "@/app/_components/Partage";
 import Photo from "@/app/_components/Photo";
 import { eluDepuisFiche, eluDepuisId, equipe, lienOfficiel, mouvementsElu, statsElu } from "@/lib/elus";
 import { familleDe } from "@/lib/familles";
@@ -107,6 +108,8 @@ export default async function Parlementaire({ params }: Props) {
             {f.url_officielle && <> · <a href={f.url_officielle}>fiche officielle</a></>}
             {autres.map((x) => <span key={x.chambre}> · <a href={`/parlementaires/${encodeURIComponent(x.slug)}`}>fiche {CHAMBRE_LONG[x.chambre]}</a></span>)}
           </p>
+          <Partage compact url={`https://www.dataparl.fr/parlementaires/${encodeURIComponent(f.slug)}`} titre={nom}
+            texte={`${nom} : son équipe de collaborateurs, ses arrivées et ses départs, sur DataParl'`} />
         </div>
       </div>
 

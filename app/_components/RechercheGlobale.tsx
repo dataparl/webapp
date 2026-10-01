@@ -1,12 +1,28 @@
 "use client";
+import { useEffect } from "react";
 import Autocompletion from "./Autocompletion";
 
-// Recherche globale : un collaborateur ou un élu, ouvre sa fiche.
-export default function RechercheGlobale({ placeholder = "Un élu ou un collaborateur…" }: { placeholder?: string }) {
+// Recherche globale : élus, collaborateurs, groupes et pages. La touche « / »
+// place le curseur dans le champ (hors saisie en cours ailleurs).
+export default function RechercheGlobale({ placeholder = "Un élu ou un collaborateur…", id = "recherche-globale" }: { placeholder?: string; id?: string }) {
+  useEffect(() => {
+    const surTouche = (e: KeyboardEvent) => {
+      if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName))) return;
+      const champ = document.getElementById(id) as HTMLInputElement | null;
+      if (!champ) return;
+      e.preventDefault();
+      champ.focus();
+    };
+    window.addEventListener("keydown", surTouche);
+    return () => window.removeEventListener("keydown", surTouche);
+  }, [id]);
   return (
     <div className="recherche-globale">
-      <label htmlFor="recherche-globale" className="sr-only">Rechercher un élu ou un collaborateur</label>
-      <Autocompletion id="recherche-globale" source="global" placeholder={placeholder} navigation ariaLabel="Rechercher un élu ou un collaborateur" />
+      <label htmlFor={id} className="sr-only">Rechercher un élu, un collaborateur, un groupe ou une page</label>
+      <Autocompletion id={id} source="global" placeholder={placeholder} navigation ariaLabel="Rechercher un élu, un collaborateur, un groupe ou une page" />
+      <span className="raccourci" aria-hidden="true">/</span>
     </div>
   );
 }

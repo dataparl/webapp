@@ -17,6 +17,11 @@ export default function Recherche({ chambre }: { chambre?: "assemblee" | "senat"
   const [etat, setEtat] = useState<"idle" | "chargement" | "erreur">("idle");
 
   useEffect(() => { authBrowser().auth.getSession().then(({ data }) => setSession(data.session)); }, []);
+  // Lien direct depuis la recherche de l'accueil : /mouvements/parlement?groupe=ECO
+  useEffect(() => {
+    const g = new URLSearchParams(window.location.search).get("groupe");
+    if (g) setFiltres((f) => ({ ...f, groupe: g }));
+  }, []);
 
   const chambreActive = chambre ?? filtres.chambre ?? "";
 
@@ -37,14 +42,15 @@ export default function Recherche({ chambre }: { chambre?: "assemblee" | "senat"
 
   if (session === undefined) return <p className="meta">Chargement…</p>;
   if (!session) {
+    const suite = `/connexion?suite=${encodeURIComponent(typeof window === "undefined" ? "/mouvements" : window.location.pathname + window.location.search)}`;
     return (
       <div className="card" style={{ maxWidth: "none" }}>
         <p style={{ marginTop: 0 }}>
           <strong>La recherche complète est réservée aux comptes DataParl&apos;.</strong> C&apos;est gratuit : tout
           l&apos;historique depuis 2015, les filtres par élu, groupe et date, et les alertes.
         </p>
-        <a className="btn" href="/connexion?suite=/mouvements">Créer un compte gratuit</a>{" "}
-        <a className="btn secondaire" href="/connexion?suite=/mouvements">Se connecter</a>
+        <a className="btn" href={suite}>Créer un compte gratuit</a>{" "}
+        <a className="btn secondaire" href={suite}>Se connecter</a>
       </div>
     );
   }
@@ -75,7 +81,7 @@ export default function Recherche({ chambre }: { chambre?: "assemblee" | "senat"
           )}
           <div>
             <label htmlFor="groupe">Groupe ou famille</label>
-            <Autocompletion key={`g${raz}`} id="groupe" source="groupes" placeholder="ex. GEST, EcoS, écolo…"
+            <Autocompletion key={`g${raz}`} id="groupe" source="groupes" placeholder="ex. GEST, EcoS, écolo…" valeurInitiale={filtres.groupe ?? ""}
               onChoix={(o) => maj("groupe", o?.valeur ?? "")} />
           </div>
           <div>

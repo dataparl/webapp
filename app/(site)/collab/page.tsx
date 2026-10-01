@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import RechercheGlobale from "@/app/_components/RechercheGlobale";
 import Equipes from "./Equipes";
 
-export const metadata: Metadata = { title: "Collaborateurs" };
+export const metadata: Metadata = { title: "Collaborateurs", alternates: { canonical: "/collab" } };
 
 export default function Collabs() {
   return (

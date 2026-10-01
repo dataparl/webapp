@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import Marque from "@/app/_components/Marque";
+import Partage from "@/app/_components/Partage";
 import BarresAnnuelles from "@/app/_components/BarresAnnuelles";
 import TableauElus from "@/app/_components/TableauStats";
 import { familleDe, FAMILLES } from "@/lib/familles";
 import { CHAMBRE_LONG } from "@/lib/format";
-import { agreger, partFemmes, pct, statsAnnuelles, statsElus, type StatAnnuelle, type StatElu } from "@/lib/stats";
+import { agreger, mixite, partFemmes, pct, statsAnnuelles, statsElus, type StatAnnuelle, type StatElu } from "@/lib/stats";
 
 export const metadata: Metadata = {
   title: { absolute: "MixiParl' : la mixité des équipes parlementaires" },
   description: "Part de femmes et d'hommes parmi les collaborateurs parlementaires, par élu, groupe et chambre.",
+  alternates: { canonical: "/mixiparl" },
 };
 export const revalidate = 3600;
 
@@ -27,9 +29,8 @@ export default async function MixiParl() {
     .filter((f) => f.femmes + f.hommes >= 10)
     .sort((a, b) => (partFemmes(b) ?? 0) - (partFemmes(a) ?? 0));
   const parChambre = Object.fromEntries(agreger(rows, (r) => r.chambre).map((a) => [a.cle, a]));
-  const avecEquipe = rows.filter((r) => r.femmes + r.hommes >= 2);
-  const paritaires = avecEquipe.filter((r) => { const p = partFemmes(r) ?? 0; return p >= 0.4 && p <= 0.6; }).length;
-  const nonMixtes = avecEquipe.filter((r) => r.femmes === 0 || r.hommes === 0).length;
+  const m = mixite(rows.filter((r) => r.chambre !== "europarl"));
+  const partParite = m.eligibles ? m.paritaires / m.eligibles : null;
 
   return (
     <>
@@ -42,11 +43,18 @@ export default async function MixiParl() {
           <div key={c}>
             <strong>{pct(partFemmes(parChambre[c]))}</strong>
             <span>de femmes parmi les collaborateurs {c === "assemblee" ? "de l'Assemblée" : "du Sénat"}</span>
+            <a className="definition" href="/mixiparl/methode#part-femmes">Définition</a>
           </div>
         ))}
-        <div><strong>{avecEquipe.length ? pct(paritaires / avecEquipe.length) : "–"}</strong><span>des équipes à parité (40 à 60 %)</span></div>
-        <div><strong>{nonMixtes}</strong><span>équipes non mixtes (2 personnes ou plus)</span></div>
+        <div><strong>{pct(partParite)}</strong><span>des équipes à parité (40 à 60 % de femmes)</span><a className="definition" href="/mixiparl/methode#parite">Définition</a></div>
+        <div><strong>{m.nonMixtes}</strong><span>équipes non mixtes (2 personnes ou plus)</span><a className="definition" href="/mixiparl/methode#non-mixite">Définition</a></div>
       </div>
+
+      <p className="meta">Calculé sur {m.eligibles.toLocaleString("fr-FR")} équipes de 2 personnes ou plus ; {m.exclues.toLocaleString("fr-FR")} équipes comptant un membre de genre indéterminé sont écartées de ces deux indicateurs.</p>
+      {partParite !== null && (
+        <Partage url="https://www.dataparl.fr/mixiparl" titre="MixiParl'"
+          texte={`${pct(partParite)} des équipes parlementaires à parité, ${m.nonMixtes} équipes non mixtes : la mixité élu par élu sur MixiParl'`} />
+      )}
 
       {annees.length > 0 && (
         <>
@@ -135,18 +143,12 @@ export default async function MixiParl() {
       })}
 
       <h2>Méthode</h2>
-      <ul>
-        <li>Sénat : le genre vient de la civilité (M. / Mme) publiée par l&apos;assemblée.</li>
-        <li>
-          Assemblée nationale : la liste officielle ne donne pas la civilité. Le genre est déduit du prénom, à partir de
-          plus de 2 000 prénoms observés avec leur civilité dans les publications 2012-2024. Les prénoms portés par les
-          deux genres (Camille, Dominique…) ou inconnus restent indéterminés
-          {parChambre.assemblee ? ` (${parChambre.assemblee.indetermines} collaborateurs, soit ${pct(parChambre.assemblee.indetermines / parChambre.assemblee.effectif)})` : ""}
-          {" "}et sont exclus des pourcentages.
-        </li>
-        <li>Les statistiques portent sur les équipes actuelles, telles que publiées à la dernière mise à jour.</li>
-        <li>Parlement européen : suivi en pause, pas de statistiques pour l&apos;instant.</li>
-      </ul>
+      <p>
+        Sénat : genre d&apos;après la civilité publiée. Assemblée : genre déduit du prénom ; les prénoms mixtes ou inconnus
+        restent indéterminés{parChambre.assemblee ? ` (${parChambre.assemblee.indetermines} collaborateurs, soit ${pct(parChambre.assemblee.indetermines / parChambre.assemblee.effectif)})` : ""} et sont exclus des pourcentages.
+        Parlement européen : suivi en pause.{" "}
+        <a href="/mixiparl/methode">La méthode complète, avec des exemples →</a>
+      </p>
     </>
   );
 }

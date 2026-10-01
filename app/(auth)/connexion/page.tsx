@@ -42,7 +42,7 @@ export default function Connexion() {
 
   function destination(): string {
     const suite = new URLSearchParams(window.location.search).get("suite");
-    if (suite && suite.startsWith("/") && !suite.startsWith("//")) return suite;
+    if (suite && suite.startsWith("/") && !suite.startsWith("//") && !suite.includes("\\")) return suite;
     return window.location.hostname.startsWith("admin.") ? "/" : "/mon-compte";
   }
 

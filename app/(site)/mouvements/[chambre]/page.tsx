@@ -19,7 +19,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ chambre: string }> }): Promise<Metadata> {
   const { chambre } = await params;
   const page = PAGES[chambre as Slug];
-  return { title: page ? `Mouvements : ${page.titre}` : "Mouvements" };
+  return { title: page ? `Mouvements : ${page.titre}` : "Mouvements", alternates: { canonical: `/mouvements/${chambre}` } };
 }
 
 export default async function MouvementsChambre({ params }: { params: Promise<{ chambre: string }> }) {

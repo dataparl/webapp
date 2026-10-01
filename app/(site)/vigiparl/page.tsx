@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Marque from "@/app/_components/Marque";
+import Partage from "@/app/_components/Partage";
 import BarresAnnuelles from "@/app/_components/BarresAnnuelles";
 import TableauElus from "@/app/_components/TableauStats";
 import { familleDe, FAMILLES } from "@/lib/familles";
@@ -12,6 +13,7 @@ import {
 export const metadata: Metadata = {
   title: { absolute: "VigiParl' : le renouvellement des équipes parlementaires" },
   description: "Taux de renouvellement (turnover) des équipes de collaborateurs, par élu, groupe et chambre.",
+  alternates: { canonical: "/vigiparl" },
 };
 export const revalidate = 3600;
 
@@ -43,27 +45,35 @@ export default async function VigiParl() {
         {CHAMBRES.map((c) => parChambre[c] && (
           <div key={c}>
             <strong>{pct(tauxTurnover(parChambre[c]))}</strong>
-            <span>de renouvellement {c === "assemblee" ? "à l'Assemblée" : "au Sénat"}</span>
+            <span>de renouvellement {c === "assemblee" ? "à l'Assemblée" : "au Sénat"} sur 12 mois</span>
+            <a className="definition" href="/vigiparl/methode#taux-12-mois">Définition</a>
           </div>
         ))}
         {CHAMBRES.map((c) => parChambre[c] && (
           <div key={`d-${c}`}>
             <strong>{parChambre[c].departs_12m.toLocaleString("fr-FR")}</strong>
             <span>départs en 12 mois ({c === "assemblee" ? "AN" : "Sénat"})</span>
+            <a className="definition" href="/vigiparl/methode#exclusions">Définition</a>
           </div>
         ))}
         {CHAMBRES.map((c) => duree[c] && (
           <div key={`m-${c}`}>
             <strong>{mois(duree[c].duree_mediane_jours)}</strong>
             <span>durée médiane d&apos;un poste ({c === "assemblee" ? "AN" : "Sénat"})</span>
+            <a className="definition" href="/vigiparl/methode#duree-mediane">Définition</a>
           </div>
         ))}
       </div>
 
+      {parChambre.assemblee && (
+        <Partage url="https://www.dataparl.fr/vigiparl" titre="VigiParl'"
+          texte={`${pct(tauxTurnover(parChambre.assemblee))} de renouvellement des collaborateurs de l'Assemblée en 12 mois, élu par élu sur VigiParl'`} />
+      )}
+
       {annees.length > 0 && (
         <>
           <h2>L&apos;évolution année par année</h2>
-          <p className="meta">Départs de l&apos;année ÷ effectif moyen (1er janvier de l&apos;année et de la suivante). Hors départs liés à la fin de mandat de l&apos;élu. L&apos;année en cours est partielle (barre atténuée).</p>
+          <p className="meta">Départs de l&apos;année ÷ effectif moyen (1er janvier de l&apos;année et de la suivante). Hors départs liés à la fin de mandat de l&apos;élu. L&apos;année en cours est partielle (barre atténuée). <a href="/vigiparl/methode#taux-annuel">Définition</a></p>
           <div className="graphiques">
             {CHAMBRES.map((c) => (
               <BarresAnnuelles key={c} titre={`Renouvellement annuel · ${CHAMBRE_LONG[c]}`} couleur="var(--vigi)" enCours={anneeCourante}
@@ -156,25 +166,11 @@ export default async function VigiParl() {
       })}
 
       <h2>Méthode</h2>
-      <ul>
-        <li>
-          <strong>Taux de renouvellement</strong> = départs sur 12 mois ÷ effectif moyen de l&apos;équipe, l&apos;effectif
-          moyen étant la moyenne entre l&apos;effectif d&apos;il y a un an et l&apos;effectif actuel. Un taux supérieur à
-          100 % signifie que l&apos;équipe a été renouvelée plus d&apos;une fois dans l&apos;année.
-        </li>
-        <li>Un départ vers l&apos;équipe d&apos;un autre élu (transfert) compte comme un départ pour l&apos;élu quitté.</li>
-        <li>Les départs liés à la fin de mandat de l&apos;élu lui-même ne sont pas comptés.</li>
-        <li>Les élus dont l&apos;équipe compte moins de 3 personnes sur la période sont écartés du classement.</li>
-        <li>
-          <strong>Durée médiane d&apos;un poste</strong> : parmi les postes terminés dont l&apos;arrivée et le départ sont datés
-          (archives depuis 2015 au Sénat, 2017 à l&apos;Assemblée). Un collaborateur est reconnu à son nom : deux homonymes sont confondus.
-        </li>
-        <li>
-          Les dates sont celles auxquelles les changements apparaissent dans les publications officielles. Sur les
-          périodes couvertes par des archives espacées, plusieurs mouvements peuvent être regroupés à une même date.
-        </li>
-        <li>Parlement européen : suivi en pause, pas de statistiques pour l&apos;instant.</li>
-      </ul>
+      <p>
+        Taux de renouvellement = départs ÷ effectif moyen de l&apos;équipe, hors départs liés à la fin de mandat de l&apos;élu.
+        Dates de publication officielles, archives depuis 2015. Parlement européen : suivi en pause.{" "}
+        <a href="/vigiparl/methode">La méthode complète, avec un exemple chiffré →</a>
+      </p>
     </>
   );
 }
