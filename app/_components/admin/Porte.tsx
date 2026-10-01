@@ -2,13 +2,16 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { authBrowser } from "@/lib/supabaseBrowser";
 
-// Porte d'entrée de l'admin et de la webmail. Vérifie la session (GitHub),
-// l'appartenance aux admins, puis demande le code TOTP (ou l'enrôlement).
+// Porte d'entrée de l'admin et de la webmail. Connexion (compte d'équipe par
+// email + mot de passe, ou GitHub pour les admins), changement du mot de passe
+// provisoire, puis code TOTP (ou enrôlement).
 // Fournit à la page un `api()` qui ajoute le jeton de session et renvoie à
 // la porte si l'accès renforcé expire.
 
 type Api = <T = unknown>(chemin: string, init?: { method?: string; body?: unknown; query?: Record<string, string | number | undefined> }) => Promise<T>;
-type Ctx = { github: string; api: Api; verrouiller: () => void };
+export type Role = "admin" | "editeur" | "utilisateur";
+export type Moi = { nom: string; email: string; role: Role };
+type Ctx = Moi & { github: string; api: Api; verrouiller: () => void };
 
 const AdminCtx = createContext<Ctx | null>(null);
 export const useAdmin = () => useContext(AdminCtx)!;
@@ -19,7 +22,7 @@ export class ErreurApi extends Error {
 
 type Etat =
   | { e: "chargement" } | { e: "anonyme" } | { e: "refuse" } | { e: "erreur" }
-  | { e: "enrolement"; github: string } | { e: "code"; github: string } | { e: "ok"; github: string };
+  | ({ e: "mdp" } & Moi) | ({ e: "enrolement" } & Moi) | ({ e: "code" } & Moi) | ({ e: "ok" } & Moi);
 
 async function jeton(): Promise<string | null> {
   const { data } = await authBrowser().auth.getSession();
@@ -36,8 +39,9 @@ export default function Porte({ titre, children }: { titre: string; children: Re
     if (r.status === 401) return setEtat({ e: "anonyme" });
     if (r.status === 403) return setEtat({ e: "refuse" });
     if (!r.ok) return setEtat({ e: "erreur" });
-    const j = (await r.json()) as { github: string; otp: "ok" | "requis" | "a_enroler" };
-    setEtat(j.otp === "ok" ? { e: "ok", github: j.github } : j.otp === "a_enroler" ? { e: "enrolement", github: j.github } : { e: "code", github: j.github });
+    const j = (await r.json()) as { nom: string; email: string; role: Role; mdp: boolean; otp: "ok" | "requis" | "a_enroler" };
+    const moi: Moi = { nom: j.nom, email: j.email, role: j.role };
+    setEtat(j.mdp ? { e: "mdp", ...moi } : j.otp === "ok" ? { e: "ok", ...moi } : j.otp === "a_enroler" ? { e: "enrolement", ...moi } : { e: "code", ...moi });
   }, []);
 
   useEffect(() => { verifier(); }, [verifier]);
@@ -52,7 +56,8 @@ export default function Porte({ titre, children }: { titre: string; children: Re
       cache: "no-store",
     });
     const j = await r.json().catch(() => ({}));
-    if (r.status === 401 || r.status === 403) { verifier(); throw new ErreurApi(r.status, "accès expiré"); }
+    const message = (j as { error?: string }).error;
+    if (r.status === 401 || (r.status === 403 && message !== "réservé à un autre rôle")) { verifier(); throw new ErreurApi(r.status, "accès expiré"); }
     if (!r.ok) throw new ErreurApi(r.status, (j as { error?: string }).error ?? `erreur ${r.status}`);
     return j;
   }, [verifier]);
@@ -63,26 +68,26 @@ export default function Porte({ titre, children }: { titre: string; children: Re
     verifier();
   }, [verifier]);
 
-  if (etat.e === "ok") return <AdminCtx.Provider value={{ github: etat.github, api, verrouiller }}>{children}</AdminCtx.Provider>;
+  if (etat.e === "ok") {
+    const moi = { nom: etat.nom, email: etat.email, role: etat.role };
+    return <AdminCtx.Provider value={{ ...moi, github: etat.nom, api, verrouiller }}>{children}</AdminCtx.Provider>;
+  }
 
   return (
     <div className="porte">
       <p className="marque-admin">Data<span className="surligne">Parl&apos;</span> <span>{titre}</span></p>
       <div className="card">
         {etat.e === "chargement" && <p className="meta">Vérification de l&apos;accès…</p>}
-        {etat.e === "anonyme" && <>
-          <h1>Connexion requise</h1>
-          <p>Cet espace est réservé à l&apos;équipe. Connecte-toi avec ton compte GitHub.</p>
-          <a className="btn" href={`/connexion?suite=${encodeURIComponent(window.location.pathname)}`}>Se connecter avec GitHub</a>
-        </>}
+        {etat.e === "anonyme" && <ConnexionEquipe onOk={verifier} />}
+        {etat.e === "mdp" && <NouveauMotDePasse moi={etat} onOk={verifier} />}
         {etat.e === "refuse" && <>
           <h1>Accès refusé</h1>
-          <p>Ce compte n&apos;est pas administrateur. La connexion doit se faire avec GitHub, avec un compte ajouté par un admin.</p>
+          <p>Ce compte ne fait pas partie de l&apos;équipe DataParl&apos;, ou il est suspendu.</p>
           <button className="secondaire" onClick={async () => { await authBrowser().auth.signOut(); setEtat({ e: "anonyme" }); }}>Changer de compte</button>
         </>}
         {etat.e === "erreur" && <p className="erreur">Service indisponible. Réessaie dans un instant.</p>}
-        {etat.e === "enrolement" && <Enrolement github={etat.github} onOk={verifier} />}
-        {etat.e === "code" && <SaisieCode github={etat.github} onOk={verifier} />}
+        {etat.e === "enrolement" && <Enrolement github={etat.nom} onOk={verifier} />}
+        {etat.e === "code" && <SaisieCode github={etat.nom} onOk={verifier} />}
       </div>
     </div>
   );
@@ -147,6 +152,65 @@ function Enrolement({ github, onOk }: { github: string; onOk: () => void }) {
         <button disabled={f.envoi || f.code.length !== 6}>Activer</button>
       </>}
       {err && <p className="erreur">{err}</p>}
+    </form>
+  );
+}
+
+// Connexion d'un membre de l'équipe : adresse @dataparl.fr et mot de passe, ou GitHub.
+function ConnexionEquipe({ onOk }: { onOk: () => void }) {
+  const [email, setEmail] = useState("");
+  const [mdp, setMdp] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  const [envoi, setEnvoi] = useState(false);
+  async function valider(e: React.FormEvent) {
+    e.preventDefault();
+    setEnvoi(true); setErr(null);
+    const { error } = await authBrowser().auth.signInWithPassword({ email: email.trim().toLowerCase(), password: mdp });
+    setEnvoi(false);
+    if (error) return setErr("Adresse ou mot de passe incorrect.");
+    onOk();
+  }
+  return (
+    <form onSubmit={valider}>
+      <h1>Espace équipe</h1>
+      <p>Connecte-toi avec ton adresse DataParl&apos; et ton mot de passe.</p>
+      <label htmlFor="eq-email">Adresse</label>
+      <input id="eq-email" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="prenom@dataparl.fr" />
+      <label htmlFor="eq-mdp">Mot de passe</label>
+      <input id="eq-mdp" type="password" autoComplete="current-password" required value={mdp} onChange={(e) => setMdp(e.target.value)} />
+      {err && <p className="erreur">{err}</p>}
+      <button disabled={envoi}>{envoi ? "Connexion…" : "Se connecter"}</button>
+      <p className="meta" style={{ marginTop: 18 }}>
+        Administrateur avec GitHub ? <a href={`/connexion?suite=${encodeURIComponent(window.location.pathname)}`}>Se connecter avec GitHub</a>
+      </p>
+    </form>
+  );
+}
+
+// Premier accès : le mot de passe provisoire donné par un admin doit être remplacé.
+function NouveauMotDePasse({ moi, onOk }: { moi: Moi; onOk: () => void }) {
+  const [mdp, setMdp] = useState("");
+  const [conf, setConf] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  async function valider(e: React.FormEvent) {
+    e.preventDefault();
+    if (mdp.length < 8) return setErr("Au moins 8 caractères.");
+    if (mdp !== conf) return setErr("Les deux saisies ne correspondent pas.");
+    const t = await jeton();
+    const r = await fetch("/api/admin/moi", { method: "POST", headers: { Authorization: `Bearer ${t ?? ""}`, "Content-Type": "application/json" }, body: JSON.stringify({ mot_de_passe: mdp }) });
+    if (!r.ok) return setErr(((await r.json().catch(() => ({}))) as { error?: string }).error ?? "Erreur, réessaie.");
+    onOk();
+  }
+  return (
+    <form onSubmit={valider}>
+      <h1>Choisis ton mot de passe</h1>
+      <p>Bienvenue {moi.nom} ({moi.email}). Remplace le mot de passe provisoire avant de continuer.</p>
+      <label htmlFor="n-mdp">Nouveau mot de passe</label>
+      <input id="n-mdp" type="password" autoComplete="new-password" value={mdp} onChange={(e) => setMdp(e.target.value)} />
+      <label htmlFor="n-conf">Confirmation</label>
+      <input id="n-conf" type="password" autoComplete="new-password" value={conf} onChange={(e) => setConf(e.target.value)} />
+      {err && <p className="erreur">{err}</p>}
+      <button>Enregistrer</button>
     </form>
   );
 }

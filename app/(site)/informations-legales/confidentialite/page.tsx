@@ -153,6 +153,7 @@ export default function Confidentialite() {
           <tr><td>Supabase</td><td>Base de données, comptes</td><td>Union européenne (Irlande)</td></tr>
           <tr><td>Vercel</td><td>Hébergement du site</td><td>États-Unis, réseau mondial</td></tr>
           <tr><td>Resend</td><td>Envoi des emails</td><td>Envoi depuis l&apos;Union européenne (Irlande) ; société américaine</td></tr>
+          <tr><td>AppLixir (et ses régies)</td><td>Vidéo publicitaire, seulement si tu choisis de la regarder pour débloquer une fiche ; reçoit un jeton aléatoire, pas ton compte</td><td>Société américaine ; responsable de ses propres traitements publicitaires (voir la page Cookies)</td></tr>
           <tr><td>Google, GitHub</td><td>Connexion, uniquement si tu choisis ces services</td><td>Union européenne et États-Unis</td></tr>
           <tr><td>Infomaniak</td><td>Réception des messages du formulaire de contact</td><td>Suisse</td></tr>
         </tbody>

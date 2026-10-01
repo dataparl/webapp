@@ -60,7 +60,17 @@ export default function CGU() {
         appliquées dans les meilleurs délais.
       </p>
 
-      <h2>6. Adresses email déduites</h2>
+      <h2>6. Fiches collaborateurs et vidéo publicitaire</h2>
+      <p>
+        Le parcours complet d&apos;un collaborateur (les élus pour qui il ou elle a travaillé, avec les dates) est
+        réservé aux comptes. Il se débloque gratuitement en regardant une courte vidéo publicitaire, pour{" "}
+        24 heures et pour la fiche concernée. Le déblocage n&apos;est accordé qu&apos;une fois la vidéo vue jusqu&apos;au
+        bout, sur confirmation de notre partenaire publicitaire. Contourner ce mécanisme (blocage, automatisation,
+        extraction massive des fiches) est interdit. Ces fiches servent l&apos;information sur le fonctionnement des
+        assemblées : elles ne doivent pas être utilisées pour profiler, démarcher ou nuire aux personnes.
+      </p>
+
+      <h2>6 bis. Adresses email déduites</h2>
       <p>
         La rubrique <a href="/collab">Collaborateurs</a>, réservée aux comptes, affiche des adresses email déduites des
         règles de nommage des assemblées. Elles ne sont publiées par aucune institution, ne sont pas vérifiées et peuvent

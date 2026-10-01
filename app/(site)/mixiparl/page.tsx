@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Marque from "@/app/_components/Marque";
 import BarresAnnuelles from "@/app/_components/BarresAnnuelles";
 import TableauElus from "@/app/_components/TableauStats";
 import { familleDe, FAMILLES } from "@/lib/familles";
@@ -32,7 +33,7 @@ export default async function MixiParl() {
 
   return (
     <>
-      <h1>Mixi<span className="surligne-mixi">Parl&apos;</span></h1>
+      <div style={{ margin: "0 0 .8rem" }}><Marque prefixe="Mixi" couleur="mixi" titre /></div>
       <p className="lead">Les équipes parlementaires sont-elles mixtes ? La part de femmes et d&apos;hommes parmi les collaborateurs, élu par élu.</p>
 
       {indisponible && <p className="erreur">Les statistiques sont momentanément indisponibles. Réessaie dans quelques minutes.</p>}

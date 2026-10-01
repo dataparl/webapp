@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { audit } from "@/lib/adminAuth";
-import { avecAdmin, corps, erreur } from "@/lib/adminRoute";
+import { avecAdmin, EDITION, corps, erreur } from "@/lib/adminRoute";
 import { EXPEDITEURS } from "@/lib/env";
 import { authAdmin } from "@/lib/supabaseAdmin";
 import { envoyerDepuisWebmail } from "@/lib/webmail";
@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     const { data, error } = await q;
     if (error) throw error;
     return { messages: data };
-  });
+  }, EDITION);
 }
 
 const Maj = z.object({ id: z.string().uuid(), statut: z.enum(STATUTS).optional(), note_admin: z.string().max(2000).optional() });
@@ -32,7 +32,7 @@ export async function PATCH(req: Request) {
     await authAdmin().from("contact_messages").update(champs).eq("id", id);
     await audit(a, "contact.maj", id, champs);
     return { ok: true };
-  });
+  }, EDITION);
 }
 
 const Reponse = z.object({ id: z.string().uuid(), texte: z.string().trim().min(1).max(20000), from: z.string().email().optional() });
@@ -57,5 +57,5 @@ export async function POST(req: Request) {
     await db.from("contact_messages").update({ statut: "traite", repondu_at: new Date().toISOString() }).eq("id", p.data.id);
     await audit(a, "contact.reponse", p.data.id);
     return { ok: true };
-  });
+  }, EDITION);
 }

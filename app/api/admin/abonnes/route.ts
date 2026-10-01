@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { audit } from "@/lib/adminAuth";
-import { avecAdmin, corps, erreur } from "@/lib/adminRoute";
+import { avecAdmin, EDITION, corps, erreur } from "@/lib/adminRoute";
 import { desinscrire } from "@/lib/consent";
 import { authAdmin } from "@/lib/supabaseAdmin";
 
@@ -29,7 +29,7 @@ export async function GET(req: Request) {
       total: count ?? 0, page, par_page: PAGE,
       abonnes: (abonnes ?? []).map((x) => ({ ...x, alerte: parEmail.get(x.email) ?? null })),
     };
-  });
+  }, EDITION);
 }
 
 const Desinscription = z.object({ email: z.string().email() });
@@ -41,5 +41,5 @@ export async function DELETE(req: Request) {
     await desinscrire(p.data.email.toLowerCase());
     await audit(a, "abonne.desinscription", p.data.email.toLowerCase());
     return { ok: true };
-  });
+  }, EDITION);
 }

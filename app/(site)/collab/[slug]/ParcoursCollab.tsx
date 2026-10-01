@@ -5,6 +5,7 @@ import Photo from "@/app/_components/Photo";
 import { CHAMBRE_LONG } from "@/lib/format";
 import { libellePeriode } from "@/lib/periodes";
 import { authBrowser } from "@/lib/supabaseBrowser";
+import VideoDeblocage from "./VideoDeblocage";
 
 type Periode = {
   chambre: string; debut: string; debut_connu: boolean; fin: string; fin_connue: boolean; en_cours: boolean; fonction: string;
@@ -16,13 +17,20 @@ export default function ParcoursCollab({ id, suite }: { id: string; suite: strin
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [periodes, setPeriodes] = useState<Periode[] | null>(null);
   const [erreur, setErreur] = useState(false);
+  const [pub, setPub] = useState(false);
+  const [essai, setEssai] = useState(0);
 
   useEffect(() => { authBrowser().auth.getSession().then(({ data }) => setSession(data.session)); }, []);
   useEffect(() => {
     if (!session) return;
-    fetch(`/api/parcours/collab?id=${id}`, { headers: { Authorization: `Bearer ${session.access_token}` } })
-      .then((r) => (r.ok ? r.json() : Promise.reject())).then((d) => setPeriodes(d.periodes)).catch(() => setErreur(true));
-  }, [session, id]);
+    fetch(`/api/parcours/collab?id=${id}`, { headers: { Authorization: `Bearer ${session.access_token}` }, cache: "no-store" })
+      .then((r) => {
+        if (r.status === 402) { setPub(true); return null; }
+        return r.ok ? r.json() : Promise.reject();
+      })
+      .then((d) => { if (d) { setPub(false); setPeriodes(d.periodes); } })
+      .catch(() => setErreur(true));
+  }, [session, id, essai]);
 
   if (session === undefined) return <p className="meta">Chargement…</p>;
   if (!session) {
@@ -34,6 +42,7 @@ export default function ParcoursCollab({ id, suite }: { id: string; suite: strin
     );
   }
   if (erreur) return <p className="erreur">Le parcours n&apos;a pas pu être chargé.</p>;
+  if (pub) return <VideoDeblocage session={session} collabId={id} onDebloque={() => setEssai((n) => n + 1)} />;
   if (!periodes) return <p className="meta">Chargement du parcours…</p>;
 
   const tries = [...periodes].sort((a, b) => Number(b.en_cours) - Number(a.en_cours) || (b.debut || "").localeCompare(a.debut || ""));

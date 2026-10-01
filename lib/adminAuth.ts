@@ -8,9 +8,11 @@ import { authAdmin } from "./supabaseAdmin";
 import { fournisseurs, utilisateur } from "./userAuth";
 
 // Accès à l'administration et à la webmail : trois verrous.
-//   1. session DataParl' Auth ouverte avec GitHub ;
-//   2. compte présent dans admin_users (ou login GitHub listé dans
-//      ADMIN_GITHUB_LOGINS, ajouté alors à admin_users à la première visite) ;
+//   1. session DataParl' Auth : compte d'équipe (email @dataparl.fr et mot de
+//      passe) ou connexion GitHub d'un administrateur ;
+//   2. compte présent et actif dans `staff`, avec un rôle (admin, editeur,
+//      utilisateur). Les admins GitHub historiques (admin_users, ou login listé
+//      dans ADMIN_GITHUB_LOGINS) y sont ajoutés comme admins à leur visite ;
 //   3. second facteur TOTP : un code valide ouvre 15 minutes d'accès, portées
 //      par un cookie HttpOnly signé (HMAC), lié au compte.
 // Le cookie seul ne suffit pas : chaque appel doit aussi porter le jeton de
@@ -20,7 +22,10 @@ export const COOKIE_OTP = "dp-admin-otp";
 const DUREE_OTP_S = 15 * 60;
 const MAX_ECHECS = 5;
 
-export type Admin = { userId: string; github: string };
+export type Role = "admin" | "editeur" | "utilisateur";
+export const ROLES: Role[] = ["admin", "editeur", "utilisateur"];
+// `github` : nom affiché dans le journal (historiquement le login GitHub).
+export type Admin = { userId: string; github: string; role: Role; email: string; doitChangerMdp: boolean };
 export type Refus = { ok: false; status: 401 | 403; otp?: "a_enroler" | "requis" };
 export type AdminCheck = ({ ok: true } & Admin) | Refus;
 
@@ -34,17 +39,22 @@ function loginGithub(user: { identities?: { provider: string; identity_data?: Re
 export async function identifierAdmin(req: Request): Promise<({ ok: true } & Admin) | Refus> {
   const user = await utilisateur(req);
   if (!user) return { ok: false, status: 401 };
-  if (!fournisseurs(user).includes("github")) return { ok: false, status: 403 };
   const db = authAdmin();
-  const { data: row } = await db.from("admin_users").select("github_login").eq("user_id", user.id).maybeSingle();
-  if (row) return { ok: true, userId: user.id, github: row.github_login as string };
-  const login = loginGithub(user);
-  if (login && ADMIN_GITHUB_LOGINS.includes(login.toLowerCase())) {
-    await db.from("admin_users").upsert({ user_id: user.id, github_login: login });
-    await audit({ userId: user.id, github: login }, "admin.ajout_auto", login);
-    return { ok: true, userId: user.id, github: login };
+  const { data: s } = await db.from("staff").select("nom, email, role, actif, doit_changer_mdp").eq("user_id", user.id).maybeSingle();
+  if (s) {
+    if (!s.actif) return { ok: false, status: 403 };
+    return { ok: true, userId: user.id, github: s.nom as string, role: s.role as Role, email: s.email as string, doitChangerMdp: !!s.doit_changer_mdp };
   }
-  return { ok: false, status: 403 };
+  // Administrateurs GitHub historiques : rattachés à l'équipe comme admins.
+  if (!fournisseurs(user).includes("github")) return { ok: false, status: 403 };
+  const { data: row } = await db.from("admin_users").select("github_login").eq("user_id", user.id).maybeSingle();
+  const login = (row?.github_login as string | undefined) ?? loginGithub(user);
+  if (!row && !(login && ADMIN_GITHUB_LOGINS.includes(login.toLowerCase()))) return { ok: false, status: 403 };
+  const a: Admin = { userId: user.id, github: login ?? user.email ?? "admin", role: "admin", email: user.email ?? "", doitChangerMdp: false };
+  await db.from("admin_users").upsert({ user_id: user.id, github_login: a.github });
+  await db.from("staff").upsert({ user_id: user.id, nom: a.github, email: a.email, role: "admin" });
+  await audit(a, "staff.ajout_auto", a.github);
+  return { ok: true, ...a };
 }
 
 function lireCookie(req: Request, nom: string): string | null {

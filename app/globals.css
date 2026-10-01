@@ -80,7 +80,7 @@ ul.mouvements li { padding: 12px 0; border-bottom: 1px solid var(--line); displa
 /* Cartes, formulaires, boutons */
 .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-card); padding: 24px; max-width: 560px; }
 label { display: block; font-weight: 600; margin: 14px 0 6px; }
-input[type=email], input[type=text], select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-btn); font: inherit; background: var(--bg); color: var(--ink); }
+input[type=email], input[type=text], input[type=password], select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-btn); font: inherit; background: var(--bg); color: var(--ink); }
 .check { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; }
 .check input { margin-top: 5px; }
 button, .btn { display: inline-block; background: var(--corail); color: var(--sur-corail); border: 1px solid var(--corail); border-radius: var(--radius-btn); padding: 11px 18px; font: inherit; font-weight: 600; cursor: pointer; text-decoration: none; margin-top: 18px; }
@@ -244,3 +244,35 @@ details summary { cursor: pointer; color: var(--bleu); font-size: .92rem; margin
 .graphiques { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px 28px; margin: 12px 0; }
 figure.graphique { margin: 0; }
 figure.graphique figcaption { font-weight: 600; font-size: .95rem; margin-bottom: 6px; }
+
+/* Espace équipe */
+header.site.admin .qui { display: flex; align-items: center; gap: 12px; font-size: .9rem; }
+.qui-nom { display: flex; flex-direction: column; line-height: 1.2; text-align: right; }
+.badge-role { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .8rem; font-weight: 700; border: 1px solid; }
+.badge-role.admin { color: var(--vigi); border-color: color-mix(in srgb, var(--vigi) 40%, transparent); background: color-mix(in srgb, var(--vigi) 8%, transparent); }
+.badge-role.editeur { color: var(--bleu); border-color: color-mix(in srgb, var(--bleu) 40%, transparent); background: color-mix(in srgb, var(--bleu) 8%, transparent); }
+.badge-role.utilisateur { color: var(--muted); border-color: var(--line); background: color-mix(in srgb, var(--line) 40%, transparent); }
+.onglets-admin { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 0; }
+.onglets-admin a { padding: 10px 12px; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; white-space: nowrap; font-size: .95rem; }
+.onglets-admin a[aria-current=page] { color: var(--ink); border-bottom-color: var(--bleu); font-weight: 600; }
+header.site.admin { padding-top: 6px; }
+.cartes-roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 6px; }
+.carte-role { all: unset; box-sizing: border-box; cursor: pointer; border: 1px solid var(--line); border-radius: var(--radius-card); padding: 12px; background: var(--card); font-size: .88rem; line-height: 1.35; }
+.carte-role strong { display: block; margin-bottom: 4px; font-size: .95rem; }
+.carte-role[aria-pressed=true] { border-color: var(--bleu); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bleu) 18%, transparent); }
+.carte-role:focus-visible { outline: 2px solid var(--bleu); }
+.deux-colonnes { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; align-items: start; }
+.deux-colonnes .card { max-width: none; }
+.apercu-adresse { background: color-mix(in srgb, var(--bleu) 6%, transparent); border-radius: var(--radius-btn); padding: 8px 12px; margin-top: 14px; }
+.recap-cree { border-color: var(--arrivee); }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.profil-carte { display: flex; gap: 16px; align-items: center; background: var(--ink); color: var(--bg); border-radius: var(--radius-card); padding: 18px; }
+.profil-carte .avatar { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--jaune); color: #071A41; font-family: "Spectral", serif; font-weight: 700; font-size: 1.5rem; flex: none; }
+.profil-carte .meta { color: color-mix(in srgb, var(--bg) 75%, transparent); }
+.lockup { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.lockup .marque { font-family: "Spectral", serif; font-weight: 700; font-size: 2rem; line-height: 1.1; color: var(--ink); }
+h1.marque { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+.lockup .marque span { color: #fff; padding: 0 .12em; }
+.lockup .par { font-size: .85rem; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+.lockup .par b { font-family: "Spectral", serif; color: var(--ink); font-size: 1rem; }
+@media (max-width: 700px) { header.site.admin .qui { width: 100%; justify-content: space-between; } .qui-nom { text-align: left; } }

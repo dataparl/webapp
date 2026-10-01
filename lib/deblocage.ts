@@ -1,0 +1,51 @@
+import "server-only";
+import { randomBytes } from "node:crypto";
+import { APPLIXIR_API_KEY, DUREE_DEBLOCAGE_H } from "./env";
+import { authAdmin } from "./supabaseAdmin";
+
+// Déblocage des fiches collaborateurs par une vidéo publicitaire. Le serveur
+// est seul juge : le parcours n'est jamais envoyé avant qu'un rappel signé
+// d'AppLixir (webhook) ait enregistré le déblocage. Le signal « vidéo
+// terminée » du navigateur ne sert qu'à déclencher la vérification.
+
+export function pubActive(): boolean {
+  return !!(APPLIXIR_API_KEY && process.env.APPLIXIR_SECRET);
+}
+
+// L'équipe (rôle actif) n'a pas à regarder de publicité.
+export async function estDebloque(userId: string, collabId: string): Promise<{ ok: boolean; expire_le?: string }> {
+  if (!pubActive()) return { ok: true };
+  const db = authAdmin();
+  const [{ data: staff }, { data: d }] = await Promise.all([
+    db.from("staff").select("actif").eq("user_id", userId).maybeSingle(),
+    db.from("deblocages").select("expire_le").eq("user_id", userId).eq("collab_id", collabId)
+      .gt("expire_le", new Date().toISOString()).order("expire_le", { ascending: false }).limit(1).maybeSingle(),
+  ]);
+  if (staff?.actif) return { ok: true };
+  return d ? { ok: true, expire_le: d.expire_le as string } : { ok: false };
+}
+
+// Demande de vidéo : jeton opaque transmis au lecteur, rattaché côté serveur au compte et à la fiche.
+export async function creerDemande(userId: string, collabId: string): Promise<string> {
+  const jeton = randomBytes(16).toString("hex");
+  await authAdmin().from("pub_demandes").insert({ jeton, user_id: userId, collab_id: collabId });
+  return jeton;
+}
+
+export async function demandeDe(jeton: string): Promise<{ userId: string; collabId: string } | null> {
+  const depuis = new Date(Date.now() - 2 * 3600_000).toISOString(); // une demande vaut 2 heures
+  const { data } = await authAdmin().from("pub_demandes").select("user_id, collab_id").eq("jeton", jeton).gt("cree_le", depuis).maybeSingle();
+  return data ? { userId: data.user_id as string, collabId: data.collab_id as string } : null;
+}
+
+export async function enregistrerDeblocage(userId: string, collabId: string, tid: string): Promise<"ok" | "deja"> {
+  const expire = new Date(Date.now() + DUREE_DEBLOCAGE_H * 3600_000).toISOString();
+  const { error } = await authAdmin().from("deblocages").insert({ user_id: userId, collab_id: collabId, tid, expire_le: expire });
+  if (error?.code === "23505") return "deja"; // même vue déjà comptée (rejeu)
+  if (error) throw error;
+  return "ok";
+}
+
+export async function journaliserRappel(valide: boolean, motif: string, userRef: string, tid: string): Promise<void> {
+  await authAdmin().from("pub_rappels").insert({ valide, motif, user_ref: userRef.slice(0, 120), tid: tid.slice(0, 120) });
+}

@@ -1,5 +1,6 @@
 "use client";
 import { lien } from "@/app/_components/admin/liens";
+import { useAdmin } from "@/app/_components/admin/Porte";
 import { dateHeure, useRessource } from "@/app/_components/admin/utils";
 
 type Stats = {
@@ -10,6 +11,22 @@ type Stats = {
 };
 
 export default function TableauDeBord() {
+  const { role, nom } = useAdmin();
+  if (role === "utilisateur") {
+    return (
+      <>
+        <h1>Bonjour {nom}</h1>
+        <ul className="sommaire">
+          <li><a href={lien("webmail")}><strong>Messagerie</strong><span>Ta boîte mail DataParl&apos; →</span></a></li>
+          <li><a href={lien("admin", "/moi")}><strong>Mon espace</strong><span>Mot de passe, fiche contact, signature →</span></a></li>
+        </ul>
+      </>
+    );
+  }
+  return <Stats_ />;
+}
+
+function Stats_() {
   const { data: s, err } = useRessource<Stats>("/api/admin/stats");
   if (err) return <p className="erreur">{err}</p>;
   if (!s) return <p className="meta">Chargement…</p>;

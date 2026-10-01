@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from "react";
 import { adresse, citer, documentLecture, listeAdresses, nomAffiche, prefixer } from "@/app/_components/admin/courriel";
 import { useAdmin } from "@/app/_components/admin/Porte";
 import { dateHeure } from "@/app/_components/admin/utils";
-import { EXPEDITEURS } from "@/lib/env";
 
 type Dossier = "inbox" | "sent" | "auto" | "archive" | "trash";
 const DOSSIERS: [Dossier, string][] = [["inbox", "Reçus"], ["sent", "Envoyés"], ["auto", "Automatiques"], ["archive", "Archives"], ["trash", "Corbeille"]];
@@ -13,13 +12,14 @@ type Complet = Resume & {
   cc_addr: string | null; reply_to: string | null; body_html: string | null; body_text: string | null; folder: Dossier;
   message_id: string | null; attachments: { id: string; filename: string; content_type: string; size: number | null }[];
 };
-type Liste = { total: number; page: number; par_page: number; non_lus: Record<Dossier, number>; messages: Resume[] };
+type Liste = { total: number; page: number; par_page: number; non_lus: Record<Dossier, number>; messages: Resume[]; boites: string[] | null; expediteurs: string[] };
 type Brouillon = { from: string; to: string; cc: string; subject: string; text: string; reponse_a?: string };
 
-const vide = (): Brouillon => ({ from: EXPEDITEURS[0], to: "", cc: "", subject: "", text: "" });
+
 
 export default function Webmail() {
-  const { api } = useAdmin();
+  const { api, email: monEmail, role } = useAdmin();
+  const [boite, setBoite] = useState("");
   const [dossier, setDossier] = useState<Dossier>("inbox");
   const [q, setQ] = useState("");
   const [recherche, setRecherche] = useState("");
@@ -31,9 +31,9 @@ export default function Webmail() {
   const [info, setInfo] = useState<string | null>(null);
 
   const charger = useCallback(async () => {
-    try { setListe(await api<Liste>("/api/webmail/messages", { query: { dossier, q: recherche, page } })); }
+    try { setListe(await api<Liste>("/api/webmail/messages", { query: { dossier, q: recherche, page, boite } })); }
     catch (e) { setInfo((e as Error).message); }
-  }, [api, dossier, recherche, page]);
+  }, [api, dossier, recherche, page, boite]);
   useEffect(() => { charger(); }, [charger]);
 
   async function ouvrir(id: string) {
@@ -61,12 +61,12 @@ export default function Webmail() {
   }
 
   function repondre(m: Complet, tous: boolean) {
-    const moi = new Set(EXPEDITEURS);
+    const moi = new Set(expediteurs);
     const dest = m.direction === "in" ? adresse(m.reply_to || m.from_addr) : listeAdresses(m.to_addr)[0] ?? "";
     const autres = tous ? [...listeAdresses(m.to_addr), ...listeAdresses(m.cc_addr ?? "")].filter((a) => a !== dest && !moi.has(a)) : [];
     const recuSur = listeAdresses(m.to_addr).find((a) => moi.has(a) && a.endsWith("@dataparl.fr"));
     setBrouillon({
-      from: m.direction === "out" ? adresse(m.from_addr) : recuSur ?? EXPEDITEURS[0],
+      from: m.direction === "out" ? adresse(m.from_addr) : recuSur ?? parDefaut,
       to: dest, cc: autres.join(", "), subject: prefixer(m.subject, "Re"),
       text: `\n\n${dateHeure(m.date)}, ${nomAffiche(m.from_addr)} a écrit :\n${citer(m.body_text ?? "")}`,
       reponse_a: m.id,
@@ -79,12 +79,21 @@ export default function Webmail() {
     });
   }
 
+  const expediteurs = liste?.expediteurs ?? [monEmail];
+  const parDefaut = expediteurs.includes(monEmail) && role !== "admin" ? monEmail : expediteurs[0] ?? monEmail;
+  const vide = (): Brouillon => ({ from: parDefaut, to: "", cc: "", subject: "", text: "" });
   const nonLus = liste?.non_lus ?? { inbox: 0, sent: 0, auto: 0, archive: 0, trash: 0 };
 
   return (
     <div className={`webmail ${ouvert || brouillon ? "avec-lecture" : ""}`}>
       <aside className="wm-dossiers">
         <button onClick={() => { setOuvert(null); setBrouillon(vide()); }}>Nouveau message</button>
+        {(role === "admin" || (liste?.boites?.length ?? 0) > 1) && (
+          <select aria-label="Boîte" value={boite} onChange={(e) => { setBoite(e.target.value); setPage(0); setOuvert(null); }} style={{ marginTop: 12 }}>
+            <option value="">{role === "admin" ? "Toutes les boîtes" : "Toutes mes boîtes"}</option>
+            {(liste?.boites ?? expediteurs.filter((x) => x.endsWith("@dataparl.fr"))).map((b) => <option key={b} value={b}>{b}</option>)}
+          </select>
+        )}
         <nav>
           {DOSSIERS.map(([d, l]) => (
             <a key={d} href="#" aria-current={dossier === d ? "page" : undefined}
@@ -129,7 +138,7 @@ export default function Webmail() {
 
       <section className="wm-lecture">
         {info && <p className="erreur">{info}</p>}
-        {brouillon && <Redaction b={brouillon} onChange={setBrouillon} onFin={(m) => { setBrouillon(null); setInfo(m); charger(); }} />}
+        {brouillon && <Redaction b={brouillon} expediteurs={expediteurs} onChange={setBrouillon} onFin={(m) => { setBrouillon(null); setInfo(m); charger(); }} />}
         {!brouillon && ouvert && (() => {
           const m = ouvert.message;
           return (
@@ -172,7 +181,7 @@ export default function Webmail() {
   );
 }
 
-function Redaction({ b, onChange, onFin }: { b: Brouillon; onChange: (b: Brouillon) => void; onFin: (message: string | null) => void }) {
+function Redaction({ b, expediteurs, onChange, onFin }: { b: Brouillon; expediteurs: string[]; onChange: (b: Brouillon) => void; onFin: (message: string | null) => void }) {
   const { api } = useAdmin();
   const [err, setErr] = useState<string | null>(null);
   const [envoi, setEnvoi] = useState(false);
@@ -193,7 +202,7 @@ function Redaction({ b, onChange, onFin }: { b: Brouillon; onChange: (b: Brouill
     <form onSubmit={envoyer} className="wm-redaction">
       <h1 className="wm-titre">{b.reponse_a ? "Réponse" : "Nouveau message"}</h1>
       <label>De</label>
-      <select value={b.from} onChange={maj("from")}>{EXPEDITEURS.map((x) => <option key={x} value={x}>DataParl&apos; &lt;{x}&gt;</option>)}</select>
+      <select value={b.from} onChange={maj("from")}>{expediteurs.map((x) => <option key={x} value={x}>DataParl&apos; &lt;{x}&gt;</option>)}</select>
       <label>À</label><input type="text" value={b.to} onChange={maj("to")} required placeholder="adresse@exemple.fr, autre@exemple.fr" />
       <label>Cc</label><input type="text" value={b.cc} onChange={maj("cc")} />
       <label>Objet</label><input type="text" value={b.subject} onChange={maj("subject")} required />

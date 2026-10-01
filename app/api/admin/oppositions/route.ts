@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { audit } from "@/lib/adminAuth";
-import { avecAdmin, corps, erreur } from "@/lib/adminRoute";
+import { avecAdmin, EDITION, corps, erreur } from "@/lib/adminRoute";
 import { cleNom } from "@/lib/format";
 import { authAdmin } from "@/lib/supabaseAdmin";
 
@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     const { data, error } = await authAdmin().from("opposition_emails").select("*").order("created_at", { ascending: false });
     if (error) throw error;
     return { oppositions: data };
-  });
+  }, EDITION);
 }
 
 const Ajout = z.object({
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     await authAdmin().from("opposition_emails").upsert({ chambre: p.data.chambre, collab_cle, motif: p.data.motif ?? null });
     await audit(a, "opposition.ajout", `${p.data.chambre}|${collab_cle}`);
     return { ok: true, collab_cle };
-  });
+  }, EDITION);
 }
 
 const Retrait = z.object({ chambre: z.string(), collab_cle: z.string().min(1) });
@@ -45,5 +45,5 @@ export async function DELETE(req: Request) {
     await authAdmin().from("opposition_emails").delete().eq("chambre", p.data.chambre).eq("collab_cle", p.data.collab_cle);
     await audit(a, "opposition.retrait", `${p.data.chambre}|${p.data.collab_cle}`);
     return { ok: true };
-  });
+  }, EDITION);
 }

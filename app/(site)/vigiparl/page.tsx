@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Marque from "@/app/_components/Marque";
 import BarresAnnuelles from "@/app/_components/BarresAnnuelles";
 import TableauElus from "@/app/_components/TableauStats";
 import { familleDe, FAMILLES } from "@/lib/familles";
@@ -31,7 +32,7 @@ export default async function VigiParl() {
 
   return (
     <>
-      <h1>Vigi<span className="surligne-vigi">Parl&apos;</span></h1>
+      <div style={{ margin: "0 0 .8rem" }}><Marque prefixe="Vigi" couleur="vigi" titre /></div>
       <p className="lead">
         Qui garde son équipe, qui la renouvelle sans cesse ? Le taux de renouvellement des collaborateurs sur les
         12 derniers mois, élu par élu.

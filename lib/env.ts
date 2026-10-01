@@ -29,9 +29,15 @@ export const ADMIN_GITHUB_LOGINS = (process.env.ADMIN_GITHUB_LOGINS ?? "").split
 export const EXPEDITEURS = ["hello@dataparl.fr", "contact@dataparl.fr", "presse@dataparl.fr", "rgpd@dataparl.fr", "noreply@dataparl.fr",
   "hello@mail.cavaparlement.eu"];
 
+// Publicité vidéo récompensée (AppLixir) : active seulement si la clé publique
+// et le secret de rappel serveur sont configurés.
+export const APPLIXIR_API_KEY = process.env.NEXT_PUBLIC_APPLIXIR_API_KEY ?? "";
+export const APPLIXIR_SDK = "https://cdn.applixir.com/applixir.app.v6.1.0.js";
+export const DUREE_DEBLOCAGE_H = 24;
+
 type Secret =
   | "AUTH_SUPABASE_SERVICE_ROLE_KEY" | "RESEND_API_KEY" | "CONSENT_SALT"
-  | "ADMIN_VAULT_KEY" | "ADMIN_OTP_SECRET" | "RESEND_WEBHOOK_SECRET";
+  | "ADMIN_VAULT_KEY" | "ADMIN_OTP_SECRET" | "RESEND_WEBHOOK_SECRET" | "APPLIXIR_SECRET";
 
 export function secret(name: Secret): string {
   const v = process.env[name];

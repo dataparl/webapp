@@ -1,4 +1,4 @@
-import { avecAdmin } from "@/lib/adminRoute";
+import { avecAdmin, EDITION } from "@/lib/adminRoute";
 import { dataQuery } from "@/lib/data";
 import { authAdmin } from "@/lib/supabaseAdmin";
 
@@ -37,5 +37,5 @@ export async function GET(req: Request) {
       cles_actives: cles,
       runs,
     };
-  });
+  }, EDITION);
 }

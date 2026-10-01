@@ -1,12 +1,17 @@
 import "server-only";
 import { NextResponse } from "next/server";
-import { checkAdmin, refus, type Admin } from "./adminAuth";
+import { checkAdmin, refus, type Admin, type Role } from "./adminAuth";
 
 // Enveloppe commune des routes d'admin et de webmail : les trois verrous,
-// puis réponse JSON jamais mise en cache.
-export async function avecAdmin(req: Request, fn: (a: Admin) => Promise<unknown>): Promise<NextResponse> {
+// le rôle requis (admin par défaut), puis réponse JSON jamais mise en cache.
+export const EQUIPE: Role[] = ["admin", "editeur", "utilisateur"];
+export const EDITION: Role[] = ["admin", "editeur"];
+
+export async function avecAdmin(req: Request, fn: (a: Admin) => Promise<unknown>, roles: Role[] = ["admin"]): Promise<NextResponse> {
   const a = await checkAdmin(req);
   if (!a.ok) return refus(a);
+  if (!roles.includes(a.role)) return NextResponse.json({ error: "réservé à un autre rôle" }, { status: 403, headers: { "Cache-Control": "no-store" } });
+  if (a.doitChangerMdp) return NextResponse.json({ error: "mot de passe à changer", mdp: true }, { status: 403, headers: { "Cache-Control": "no-store" } });
   try {
     const out = await fn(a);
     if (out instanceof NextResponse) {

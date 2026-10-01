@@ -21,9 +21,9 @@ export type Brouillon = {
   references?: string | null;
 };
 
-export async function envoyerDepuisWebmail(a: Admin, b: Brouillon): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
+export async function envoyerDepuisWebmail(a: Admin, b: Brouillon, permis: string[] = EXPEDITEURS): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const from = b.from.toLowerCase();
-  if (!EXPEDITEURS.includes(from)) return { ok: false, error: "adresse d'expédition non autorisée" };
+  if (!permis.includes(from)) return { ok: false, error: "adresse d'expédition non autorisée" };
   const r = await expedier({
     from, to: b.to, cc: b.cc, subject: b.subject, corpsHtml: texteVersHtml(b.text), text: b.text,
     inReplyTo: b.inReplyTo, references: b.references, type: "webmail",
