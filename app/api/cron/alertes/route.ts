@@ -3,6 +3,7 @@ import { timingSafeEqual } from "node:crypto";
 import { aujourdhuiParis, correspond, decaler, lundiDe, messageAlerte, type Abonnement, type MvtAlerte } from "@/lib/alertes";
 import { nouveauJetonPreferences } from "@/lib/consent";
 import { COLONNES_PUBLIQUES, dataQueryTout } from "@/lib/data";
+import { prenomNomAdresse } from "@/lib/gabarit";
 import { expedier, piedOptIn } from "@/lib/mail";
 import { cleElus } from "@/lib/referentiel";
 import { authAdmin } from "@/lib/supabaseAdmin";
@@ -23,7 +24,18 @@ function autorise(req: Request): boolean {
   return !!s && recu.length === attendu.length && timingSafeEqual(Buffer.from(recu), Buffer.from(attendu));
 }
 
-type Sub = Abonnement & { email: string };
+type Sub = Abonnement & { email: string; user_id: string | null; prenom: string | null; nom: string | null };
+
+// « Prénom NOM » : saisi dans les alertes, sinon le nom du compte (connexion Google, GitHub…).
+async function destinataire(s: Sub): Promise<string | undefined> {
+  if (s.prenom || s.nom) return prenomNomAdresse(s.prenom ?? "", s.nom ?? "");
+  if (!s.user_id) return undefined;
+  const { data } = await authAdmin().auth.admin.getUserById(s.user_id);
+  const complet = String(data.user?.user_metadata?.full_name ?? data.user?.user_metadata?.name ?? "").trim();
+  if (!complet.includes(" ")) return undefined;
+  const mots = complet.split(/\s+/);
+  return prenomNomAdresse(mots.slice(0, -1).join(" "), mots[mots.length - 1]);
+}
 
 export async function GET(req: Request) {
   if (!autorise(req)) return NextResponse.json({ error: "non autorisé" }, { status: 401 });
@@ -32,7 +44,7 @@ export async function GET(req: Request) {
   const db = authAdmin();
 
   const [{ data: subs, error }, { data: refus }] = await Promise.all([
-    db.from("alert_subscriptions").select("email, frequence, chambres, types, groupes, elus").eq("active", true),
+    db.from("alert_subscriptions").select("email, user_id, prenom, nom, frequence, chambres, types, groupes, elus").eq("active", true),
     db.from("communication_preferences").select("email").eq("alertes_enabled", false),
   ]);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -81,6 +93,7 @@ export async function GET(req: Request) {
       const jeton = await nouveauJetonPreferences(s.email);
       const r = await expedier({
         to: [s.email], subject: msg.sujet, titre: msg.titre, corpsHtml: msg.html, text: msg.texte, type: "alerte",
+        edition: msg.edition, adressage: { date: jour, pour: await destinataire(s).catch(() => undefined) },
         pied: piedOptIn(`${SITE}/preferences?id=${jeton}`, `${SITE}/desinscription?id=${jeton}`),
         unsubscribeUrl: `${SITE}/api/desinscription?id=${jeton}`,
       });

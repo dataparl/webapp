@@ -3,7 +3,8 @@ import { tousLesParlementaires } from "@/lib/referentiel";
 
 export const revalidate = 86400;
 
-const PAGES = ["", "/mouvements", "/collab", "/parlementaires", "/vigiparl", "/vigiparl/methode", "/mixiparl", "/mixiparl/methode",
+const PAGES = ["", "/mouvements", "/collab", "/parlementaires", "/vigiparl", "/vigiparl/methode", "/vigiparl/timeline", "/vigiparl/an/parlementaires", "/vigiparl/senat/parlementaires",
+  "/mixiparl", "/mixiparl/methode", "/mixiparl/timeline", "/mixiparl/an/parlementaires", "/mixiparl/senat/parlementaires",
   "/daily", "/alertes", "/faq", "/presse", "/contact", "/informations-legales"];
 
 // Plan du site : pages publiques et une fiche par parlementaire (anciens compris).

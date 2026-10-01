@@ -30,6 +30,8 @@ export type Message = {
   references?: string | null;
   headers?: Record<string, string>;
   type: TypeEnvoi;
+  edition?: "Daily" | "Weekly";
+  adressage?: { date: string; pour?: string };
 };
 
 export type Resultat = { ok: true; resendId: string } | { ok: false; error: string };
@@ -39,7 +41,7 @@ export const hashJeton = (t: string) => createHash("sha256").update(t).digest("h
 export async function expedier(m: Message): Promise<Resultat> {
   const jeton = randomBytes(20).toString("hex");
   const lireUrl = `${MAIL_WEB_URL}/lire/${jeton}`;
-  const html = gabarit({ titre: m.titre ?? m.subject, corpsHtml: m.corpsHtml, lireUrl, pied: m.pied });
+  const html = gabarit({ titre: m.titre ?? m.subject, corpsHtml: m.corpsHtml, lireUrl, pied: m.pied, edition: m.edition, adressage: m.adressage });
   const text = `${m.text}\n\n--\nDataParl' · version en ligne : ${lireUrl}`;
   const nom = (m.nomExpediteur ?? "DataParl'").replace(/["<>\r\n]/g, "").trim() || "DataParl'";
   const from = m.from ? `"${nom}" <${m.from}>` : MAIL_FROM;

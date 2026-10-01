@@ -29,7 +29,7 @@ async function apercus(): Promise<{ quotidien: string; hebdo: string; jour: stri
   const hebdoMvts = [...parGroupe.values()].sort((a, b) => b.length - a.length).slice(0, 3).flatMap((ms) => ms.slice(0, 2));
   const rendu = (ms: MvtAlerte[], f: "quotidienne" | "hebdomadaire") => {
     const m = messageAlerte(ms, f, jour);
-    return gabarit({ titre: m.titre, corpsHtml: m.html, pied: "Tu reçois ce message parce que tu es abonné(e) aux alertes DataParl'. Régler mes préférences · Me désinscrire" });
+    return gabarit({ titre: m.titre, corpsHtml: m.html, edition: m.edition, adressage: { date: jour, pour: "Émilie DURAND" }, lireUrl: "#", pied: "Tu reçois ce message parce que tu es abonné(e) aux alertes DataParl'. Régler mes préférences · Me désinscrire" });
   };
   return { quotidien: rendu(deux, "quotidienne"), hebdo: rendu(hebdoMvts, "hebdomadaire"), jour };
 }
@@ -55,7 +55,7 @@ export default async function Alertes() {
 
       <ul className="atouts">
         <li><strong>Vérifié chaque matin</strong><span>sur les listes officielles de l&apos;Assemblée nationale, du Sénat et du Parlement européen.</span></li>
-        <li><strong>Un email par jour au plus</strong><span>et seulement les jours où quelque chose bouge pour vous. Ou un récapitulatif le lundi.</span></li>
+        <li><strong>Daily ou Weekly</strong><span>DataParl&apos; Daily les jours où quelque chose bouge pour vous, ou DataParl&apos; Weekly, le récapitulatif du lundi.</span></li>
         <li><strong>Gratuit, sans pub</strong><span>désinscription en un clic depuis chaque message.</span></li>
         {n >= SEUIL_COMPTEUR && <li><strong>{n.toLocaleString("fr-FR")} lecteurs</strong><span>reçoivent déjà leurs alertes.</span></li>}
       </ul>
@@ -68,11 +68,11 @@ export default async function Alertes() {
           <p className="meta">Aperçus construits avec de vrais mouvements récents, tels qu&apos;ils arriveraient dans votre boîte.</p>
           <div className="apercus-mail">
             <figure>
-              <figcaption><strong>L&apos;alerte du jour</strong><span>Chaque matin où ça bouge</span></figcaption>
+              <figcaption><strong>DataParl&apos; Daily</strong><span>Chaque matin où ça bouge</span></figcaption>
               <iframe title="Exemple d'alerte quotidienne" srcDoc={ap.quotidien} sandbox="" loading="lazy" />
             </figure>
             <figure>
-              <figcaption><strong>Le récapitulatif du lundi</strong><span>La semaine, rangée par groupe suivi</span></figcaption>
+              <figcaption><strong>DataParl&apos; Weekly</strong><span>La semaine, rangée par groupe suivi</span></figcaption>
               <iframe title="Exemple de récapitulatif hebdomadaire" srcDoc={ap.hebdo} sandbox="" loading="lazy" />
             </figure>
           </div>

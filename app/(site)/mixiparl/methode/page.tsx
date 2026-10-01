@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import { PiedMethode, VersionMethode } from "@/app/_components/EnTeteMethode";
 import { derniersJours } from "@/lib/daily";
 import { CHAMBRE_LONG } from "@/lib/format";
-import { agreger, HISTORIQUE_METHODE, mixite, partFemmes, pct, statsAnnuelles, statsElus, type StatAnnuelle, type StatElu } from "@/lib/stats";
+import {
+  agreger, dernieresExtractions, HISTORIQUE_METHODE, mixite, mixiteMoyenne, partFemmes, pct, statsAnnuelles, statsElus, statsMixiteAnnuelle,
+  type StatAnnuelle, type StatElu, type StatMixiteAnnuelle,
+} from "@/lib/stats";
 
 export const metadata: Metadata = {
   title: "Méthode MixiParl' : la mixité des équipes",
-  description: "Comment DataParl' mesure la mixité des équipes parlementaires : détermination du genre, part de femmes, parité, non-mixité, exemples et limites.",
+  description: "Comment DataParl' mesure la mixité des équipes parlementaires : taux de mixité, détermination du genre, part de femmes, parité, exemples et limites.",
   alternates: { canonical: "/mixiparl/methode" },
 };
 export const revalidate = 3600;
@@ -15,12 +18,14 @@ const n = (x: number) => x.toLocaleString("fr-FR");
 const CH = ["assemblee", "senat"] as const;
 
 export default async function MethodeMixiParl() {
-  const [rows, annees, donnees] = await Promise.all([
+  const [rows, annees, mixAnnuelle, extractions, donnees] = await Promise.all([
     statsElus().catch(() => [] as StatElu[]), statsAnnuelles().catch(() => [] as StatAnnuelle[]),
+    statsMixiteAnnuelle().catch(() => [] as StatMixiteAnnuelle[]), dernieresExtractions().catch(() => []),
     derniersJours(1).then((j) => j[0]?.date ?? null).catch(() => null),
   ]);
   const parChambre = Object.fromEntries(agreger(rows, (r) => r.chambre).map((a) => [a.cle, a]));
   const m = mixite(rows.filter((r) => r.chambre !== "europarl"));
+  const mixDe = (a: StatAnnuelle) => mixAnnuelle.find((x) => x.chambre === a.chambre && x.an === a.an);
   const derniere = Math.max(0, ...annees.map((a) => a.an));
   const ex = annees.find((a) => a.chambre === "assemblee" && a.an === derniere);
 
@@ -29,7 +34,29 @@ export default async function MethodeMixiParl() {
       <p className="meta"><a href="/mixiparl">MixiParl&apos;</a></p>
       <h1>Méthode <span className="surligne-mixi">MixiParl&apos;</span></h1>
       <VersionMethode donnees={donnees} historique={HISTORIQUE_METHODE.mixiparl} />
-      <p className="lead">La question : <strong>les équipes parlementaires sont-elles mixtes ?</strong> Trois indicateurs y répondent : la part de femmes, la part d&apos;équipes à parité et le nombre d&apos;équipes non mixtes.</p>
+      <p className="lead">La question : <strong>les équipes parlementaires sont-elles mixtes ?</strong> L&apos;indicateur principal est le <strong>taux de mixité</strong> ; la part de femmes, la parité et le nombre d&apos;équipes non mixtes le complètent.</p>
+
+      <h2 id="taux-de-mixite">Le taux de mixité</h2>
+      <p>
+        La part de femmes ne mesure pas la mixité : une équipe 100 % féminine n&apos;est pas plus mixte qu&apos;une équipe 100 % masculine.
+        Le taux de mixité vaut 100 % pour une équipe à 50 % de femmes et 50 % d&apos;hommes, et 0 % pour une équipe composée d&apos;un seul genre.
+      </p>
+      <div className="formule">
+        <p><code>Taux de mixité = 1 − |2 × part de femmes − 1|</code></p>
+        <p>Calculé pour chaque équipe de <strong>2 personnes ou plus</strong>, dont tous les membres sont de genre déterminé.</p>
+        <p>Pour une chambre, un groupe ou une famille : <strong>moyenne</strong> des taux de mixité de ses équipes. On ne mélange pas les effectifs : deux équipes non mixtes, l&apos;une de femmes, l&apos;autre d&apos;hommes, donnent 0 %, pas 100 %.</p>
+      </div>
+      <div className="exemple">
+        <strong>Exemples</strong>
+        <p style={{ margin: "6px 0 0" }}>
+          50 % de femmes : 1 − |2 × 0,5 − 1| = <strong>100 %</strong> de mixité. 70 % de femmes : 1 − |1,4 − 1| = <strong>60 %</strong>.
+          30 % de femmes : 1 − |0,6 − 1| = <strong>60 %</strong>. 100 % de femmes ou d&apos;hommes : 1 − 1 = <strong>0 %</strong>.
+        </p>
+      </div>
+      {CH.filter((c) => parChambre[c]).map((c) => {
+        const mm = mixiteMoyenne(rows.filter((r) => r.chambre === c));
+        return <p key={c}>{CHAMBRE_LONG[c]} aujourd&apos;hui : <strong>{pct(mm.taux)}</strong> de mixité en moyenne, sur {n(mm.equipes)} équipes éligibles.</p>;
+      })}
 
       <h2 id="genre">Comment le genre est déterminé</h2>
       <ul>
@@ -70,7 +97,7 @@ export default async function MethodeMixiParl() {
 
       <h2 id="parite">La parité d&apos;une équipe</h2>
       <div className="formule">
-        <p><code>Une équipe est à parité si sa part de femmes est comprise entre 40 % et 60 % (bornes incluses)</code></p>
+        <p><code>Une équipe est à parité si sa part de femmes est comprise entre 40 % et 60 %, soit un taux de mixité de 80 % ou plus</code></p>
         <p>Calculé sur les équipes de <strong>2 personnes ou plus</strong>, dont tous les membres sont de genre déterminé.</p>
       </div>
       <p className="meta">
@@ -92,14 +119,14 @@ export default async function MethodeMixiParl() {
 
       <h2 id="exemples">Exemples</h2>
       <div className="defile"><table className="stats">
-        <thead><tr><th>Équipe (fictive)</th><th className="num">Part de femmes</th><th>Parité</th><th>Non mixte</th></tr></thead>
+        <thead><tr><th>Équipe (fictive)</th><th className="num">Part de femmes</th><th className="num">Taux de mixité</th><th>Parité</th><th>Non mixte</th></tr></thead>
         <tbody>
-          <tr><td>3 femmes, 2 hommes</td><td className="num">60 %</td><td>Oui</td><td>Non</td></tr>
-          <tr><td>4 femmes, 4 hommes</td><td className="num">50 %</td><td>Oui</td><td>Non</td></tr>
-          <tr><td>1 femme, 3 hommes</td><td className="num">25 %</td><td>Non</td><td>Non</td></tr>
-          <tr><td>3 femmes, 0 homme</td><td className="num">100 %</td><td>Non</td><td>Oui</td></tr>
-          <tr><td>1 personne</td><td className="num">–</td><td colSpan={2}>Hors périmètre (moins de 2 personnes)</td></tr>
-          <tr><td>2 femmes, 1 homme, 1 « Camille »</td><td className="num">–</td><td colSpan={2}>Écartée (un genre indéterminé)</td></tr>
+          <tr><td>3 femmes, 2 hommes</td><td className="num">60 %</td><td className="num">80 %</td><td>Oui</td><td>Non</td></tr>
+          <tr><td>4 femmes, 4 hommes</td><td className="num">50 %</td><td className="num">100 %</td><td>Oui</td><td>Non</td></tr>
+          <tr><td>1 femme, 3 hommes</td><td className="num">25 %</td><td className="num">50 %</td><td>Non</td><td>Non</td></tr>
+          <tr><td>3 femmes, 0 homme</td><td className="num">100 %</td><td className="num">0 %</td><td>Non</td><td>Oui</td></tr>
+          <tr><td>1 personne</td><td className="num">–</td><td className="num">–</td><td colSpan={2}>Hors périmètre (moins de 2 personnes)</td></tr>
+          <tr><td>2 femmes, 1 homme, 1 « Camille »</td><td className="num">–</td><td className="num">–</td><td colSpan={2}>Écartée (un genre indéterminé)</td></tr>
         </tbody>
       </table></div>
 
@@ -116,16 +143,17 @@ export default async function MethodeMixiParl() {
           <h2 id="table-annuelle">La table annuelle</h2>
           <div className="defile">
             <table className="stats">
-              <thead><tr><th>1er janvier</th><th>Chambre</th><th className="num">Femmes</th><th className="num">Hommes</th><th className="num">Indéterminés</th><th className="num">Part de femmes</th></tr></thead>
+              <thead><tr><th>1er janvier</th><th>Chambre</th><th className="num">Équipes éligibles</th><th className="num">Taux de mixité moyen</th><th className="num">Femmes</th><th className="num">Hommes</th><th className="num">Indéterminés</th><th className="num">Part de femmes</th></tr></thead>
               <tbody>{annees.map((a) => (
-                <tr key={`${a.chambre}-${a.an}`}><td>{a.an}</td><td>{CHAMBRE_LONG[a.chambre]}</td><td className="num">{n(a.femmes)}</td><td className="num">{n(a.hommes)}</td>
+                <tr key={`${a.chambre}-${a.an}`}><td>{a.an}</td><td>{CHAMBRE_LONG[a.chambre]}</td>
+                  <td className="num">{mixDe(a)?.equipes ?? "–"}</td><td className="num">{pct(mixDe(a)?.mixite_moyenne ?? null, 1)}</td><td className="num">{n(a.femmes)}</td><td className="num">{n(a.hommes)}</td>
                   <td className="num">{n(a.effectif - a.femmes - a.hommes)}</td><td className="num">{pct(partFemmes(a), 1)}</td></tr>
               ))}</tbody>
             </table>
           </div>
         </>
       )}
-      <PiedMethode historique={HISTORIQUE_METHODE.mixiparl} csv="/mixiparl/annuel.csv" />
+      <PiedMethode historique={HISTORIQUE_METHODE.mixiparl} extractions={extractions} />
     </div>
   );
 }

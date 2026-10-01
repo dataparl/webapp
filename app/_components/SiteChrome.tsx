@@ -1,4 +1,4 @@
-import Logo from "./Logo";
+import LogoSite from "./LogoSite";
 
 export const API_URL = "https://api.dataparl.fr";
 
@@ -6,7 +6,7 @@ export function EnTeteSite() {
   return (
     <header className="site">
       <div className="wrap">
-        <Logo />
+        <LogoSite />
         <nav aria-label="Navigation principale">
           <a href="/alertes">Alertes</a>
           <a href="/mon-compte">Mon compte</a>

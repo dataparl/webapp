@@ -3,7 +3,7 @@ import { PiedMethode, VersionMethode } from "@/app/_components/EnTeteMethode";
 import { derniersJours } from "@/lib/daily";
 import { CHAMBRE_LONG } from "@/lib/format";
 import {
-  agreger, HISTORIQUE_METHODE, mois, pct, statsAnnuelles, statsDurees, statsElus, statsFenetre, tauxTurnover, turnoverAnnuel,
+  agreger, dernieresExtractions, HISTORIQUE_METHODE, mois, pct, statsAnnuelles, statsDurees, statsElus, statsFenetre, tauxTurnover, turnoverAnnuel,
   type StatAnnuelle, type StatDuree, type StatElu, type StatFenetre,
 } from "@/lib/stats";
 
@@ -21,6 +21,7 @@ const dans = (c: string) => (c === "assemblee" ? "à l'Assemblée" : "au Sénat"
 export default async function MethodeVigiParl() {
   let rows: StatElu[] = [], annees: StatAnnuelle[] = [], durees: StatDuree[] = [], fenetre: StatFenetre[] = [];
   let donnees: string | null = null;
+  const extractions = await dernieresExtractions().catch(() => []);
   [rows, annees, durees, fenetre, donnees] = await Promise.all([
     statsElus().catch(() => []), statsAnnuelles().catch(() => []), statsDurees().catch(() => []), statsFenetre().catch(() => []),
     derniersJours(1).then((j) => j[0]?.date ?? null).catch(() => null),
@@ -163,7 +164,7 @@ export default async function MethodeVigiParl() {
           </div>
         </>
       )}
-      <PiedMethode historique={HISTORIQUE_METHODE.vigiparl} csv="/vigiparl/annuel.csv" />
+      <PiedMethode historique={HISTORIQUE_METHODE.vigiparl} extractions={extractions} />
     </div>
   );
 }

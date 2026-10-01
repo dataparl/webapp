@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import Autocompletion from "@/app/_components/Autocompletion";
-import { familleDe } from "@/lib/familles";
-import { CHAMBRE_LONG, prenomNom } from "@/lib/format";
 import { tousLesParlementaires, type EluCompact } from "@/lib/referentiel";
 
 export const metadata: Metadata = { title: "Parlementaires", alternates: { canonical: "/parlementaires" } };
@@ -12,7 +10,7 @@ export default async function Parlementaires() {
   try { elus = await tousLesParlementaires(); } catch {}
   const actifs = elus.filter((e) => e.a);
   const parChambre = (["assemblee", "senat", "europarl"] as const)
-    .map((c) => ({ c, liste: actifs.filter((e) => e.c === c).sort((a, b) => a.n.localeCompare(b.n, "fr")) }))
+    .map((c) => ({ c, liste: actifs.filter((e) => e.c === c) }))
     .filter((x) => x.liste.length);
   return (
     <>
@@ -24,22 +22,12 @@ export default async function Parlementaires() {
       <div className="recherche-globale">
         <Autocompletion id="recherche-elu" source="elus" navigation placeholder="Rechercher un parlementaire, en fonction ou non" ariaLabel="Rechercher un parlementaire" />
       </div>
-      {parChambre.map(({ c, liste }) => (
-        <section key={c}>
-          <h2>{CHAMBRE_LONG[c]} <span className="meta">({liste.length})</span></h2>
-          <p style={{ columns: "16rem", lineHeight: 1.9 }}>
-            {liste.map((e) => {
-              const fam = e.g ? familleDe(c, e.g) : null;
-              return (
-                <span key={e.s} style={{ display: "block" }}>
-                  <a href={`/parlementaires/${encodeURIComponent(e.s)}`}>{prenomNom(e.p, e.n)}</a>
-                  {e.g && <span className="meta" title={fam ? `Famille ${fam.code} · ${fam.libelle}` : undefined}> · {e.g}</span>}
-                </span>
-              );
-            })}
-          </p>
-        </section>
-      ))}
+      <div className="chiffres">
+        {parChambre.map(({ c, liste }) => (
+          <div key={c}><strong>{liste.length.toLocaleString("fr-FR")}</strong><span>{c === "assemblee" ? "députés" : c === "senat" ? "sénateurs" : "eurodéputés français"} en fonction</span></div>
+        ))}
+      </div>
+      <p className="meta">Tapez un nom pour ouvrir une fiche. Classements par élu : <a href="/vigiparl">VigiParl&apos;</a> (renouvellement) et <a href="/mixiparl">MixiParl&apos;</a> (mixité).</p>
     </>
   );
 }

@@ -16,6 +16,8 @@ const Corps = z.object({
   elus: z.array(Texte).max(100).default([]),
   partis: z.array(Texte).max(40).default([]),
   commissions: z.array(Texte).max(40).default([]),
+  prenom: z.string().trim().max(60).optional(),
+  nom: z.string().trim().max(60).optional(),
   // Obligatoires pour activer : CGU et consentement à recevoir les emails.
   cgu: z.boolean().optional(),
   consentement: z.boolean().optional(),
@@ -28,7 +30,7 @@ export async function PUT(req: Request) {
   if (!user) return NextResponse.json({ error: "connexion requise" }, { status: 401 });
   const parsed = Corps.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "choisis au moins une chambre et un type de mouvement" }, { status: 400 });
-  const { actives, frequence, chambres, types, groupes, elus, partis, commissions, cgu, consentement } = parsed.data;
+  const { actives, frequence, chambres, types, groupes, elus, partis, commissions, cgu, consentement, prenom, nom } = parsed.data;
   if (actives && !(cgu && consentement)) {
     return NextResponse.json({ error: "accepte les conditions d'utilisation et coche la case de consentement" }, { status: 400 });
   }
@@ -36,7 +38,7 @@ export async function PUT(req: Request) {
   const db = authAdmin();
   const now = new Date().toISOString();
 
-  const valeurs = { email, user_id: user.id, frequence, chambres, types, groupes, elus, partis, commissions, active: actives, updated_at: now };
+  const valeurs = { email, user_id: user.id, prenom: prenom ?? "", nom: nom ?? "", frequence, chambres, types, groupes, elus, partis, commissions, active: actives, updated_at: now };
   const { data: existant } = await db.from("alert_subscriptions").select("id").or(`user_id.eq.${user.id},email.eq.${email}`)
     .order("created_at", { ascending: false });
   if (existant?.length) {

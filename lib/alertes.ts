@@ -64,11 +64,11 @@ const pluriel = (n: number, s: string, p = `${s}s`) => `${n.toLocaleString("fr-F
 export const MAX_LIGNES = 60;
 
 // Corps du message. Quotidien : par chambre. Hebdomadaire : par groupe.
-export function messageAlerte(mvts: MvtAlerte[], frequence: Abonnement["frequence"], jour: string): { sujet: string; titre: string; html: string; texte: string } {
+export function messageAlerte(mvts: MvtAlerte[], frequence: Abonnement["frequence"], jour: string): { sujet: string; titre: string; html: string; texte: string; edition: "Daily" | "Weekly" } {
   const n = mvts.length;
   const hebdo = frequence === "hebdomadaire";
   const titre = hebdo ? `Ta semaine au Parlement : ${pluriel(n, "mouvement")}` : `${pluriel(n, "nouveau mouvement", "nouveaux mouvements")} pour tes alertes`;
-  const sujet = hebdo ? `Récap de la semaine : ${pluriel(n, "mouvement")} chez les collaborateurs` : `${pluriel(n, "mouvement")} chez les collaborateurs parlementaires`;
+  const sujet = hebdo ? `DataParl' Weekly : ${pluriel(n, "mouvement")} cette semaine` : `DataParl' Daily : ${pluriel(n, "mouvement")} chez les collaborateurs parlementaires`;
   const affiches = mvts.slice(0, MAX_LIGNES);
   const cle = (m: MvtAlerte) => hebdo ? `${m.elu_groupe || "Sans groupe"} · ${CHAMBRE[m.chambre]}` : CHAMBRE_LONG[m.chambre] ?? m.chambre;
   const sections = new Map<string, MvtAlerte[]>();
@@ -86,7 +86,7 @@ export function messageAlerte(mvts: MvtAlerte[], frequence: Abonnement["frequenc
     `<p style="margin:24px 0"><a href="${voir}" style="display:inline-block;background:#F0444F;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:6px;font-weight:bold">${hebdo ? "Voir tous les mouvements" : "Voir les mouvements du jour"}</a></p>`,
   ].join("\n");
   const texte = [titre, "", ...affiches.map(ligneTexte), reste > 0 ? `Et ${reste} autres.` : "", "", `Tout voir : ${voir}`].join("\n");
-  return { sujet, titre, html, texte };
+  return { sujet, titre, html, texte, edition: hebdo ? "Weekly" : "Daily" };
 }
 
 // Lundi de la semaine (AAAA-MM-JJ) d'une date AAAA-MM-JJ.

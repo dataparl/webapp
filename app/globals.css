@@ -352,3 +352,44 @@ h1.marque { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .rattrapage { list-style: none; padding: 0; margin: 18px 0 22px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .rattrapage a { display: inline-block; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--ink); text-decoration: none; font-weight: 600; }
 .rattrapage a:hover { border-color: var(--ink); }
+
+/* Logos de marque : bloc bleu nuit + couleur de la rubrique, bandeau « par DataParl' » */
+.logo-marque { display: inline-flex; flex-direction: column; align-items: stretch; margin: 8px 0; line-height: 1; }
+.logo-marque a { text-decoration: none; }
+.logo-marque .bloc { background: #14224E; color: #fff; font-family: "Spectral", serif; font-weight: 700; font-size: 1.3rem; padding: 6px 4px 6px 10px; border-radius: 6px 6px 0 0; white-space: nowrap; }
+.logo-marque .bloc span { padding: 6px 8px 6px 3px; margin-left: 2px; border-radius: 0 6px 0 0; }
+.logo-marque.vigi .bloc span { background: #C8102E; }
+.logo-marque.mixi .bloc span { background: #7B3FE4; }
+.logo-marque .bandeau { background: #FFD23F; color: #164DFF; font-size: .68rem; font-weight: 600; letter-spacing: .02em; padding: 3px 10px; border-radius: 0 0 6px 6px; text-align: right; }
+.logo-marque .bandeau b { color: #14224E; font-family: "Spectral", serif; font-size: .78rem; }
+
+/* Cases de statistiques sur deux colonnes (Assemblée, Sénat) */
+.chiffres.paires { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 720px; }
+.chiffres.paires div { min-width: 0; }
+.chiffres.mixi strong { color: var(--mixi); }
+
+/* Cartes à barre */
+.cartes-barres ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.bascule { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--card); margin: 4px 0 12px; }
+.bascule button { margin: 0; border: 0; background: transparent; color: var(--ink); padding: 6px 14px; border-radius: 999px; font: inherit; font-size: .9rem; cursor: pointer; }
+.bascule button[aria-pressed=true] { background: var(--ink); color: var(--bg); font-weight: 600; }
+.cb-entete, .carte-barre { display: grid; grid-template-columns: minmax(120px, 1.1fr) minmax(120px, 2fr) 76px 64px; gap: 12px; align-items: center; }
+.cb-entete { padding: 0 16px 4px; font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.cb-entete span:nth-child(2) { grid-column: 2 / 4; }
+.cb-entete span:last-child { text-align: right; }
+.carte-barre { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-card); padding: 12px 16px; box-shadow: 0 1px 3px rgba(7, 26, 65, .06); scroll-margin-top: 16px; }
+.carte-barre:target { border-color: var(--ink); }
+.carte-barre .cb-section { grid-column: 1 / -1; font-family: "Spectral", serif; font-weight: 700; margin: -2px 0 2px; }
+.carte-barre .barre { height: 12px; border-radius: 6px; }
+.cb-valeur { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cb-valeur .meta { display: block; font-weight: 400; font-size: .74rem; }
+.cb-elus { text-align: right; text-decoration: none; color: var(--bleu); font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 640px) {
+  .cb-entete { display: none; }
+  .carte-barre { grid-template-columns: 1fr auto auto; }
+  .carte-barre .barre { grid-column: 1 / -1; order: 5; }
+}
+.recherche-stat { max-width: 720px; margin: 8px 0 12px; }
+.recherche-stat input { padding: 12px 14px; border-radius: 12px; background: var(--card); }
+.pagination { display: flex; gap: 12px; justify-content: space-between; align-items: center; margin: 16px 0; flex-wrap: wrap; }
+.titre-lien { color: inherit; text-decoration: none; } .titre-lien:hover { color: var(--bleu); }

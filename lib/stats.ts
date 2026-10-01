@@ -1,5 +1,5 @@
 import "server-only";
-import { dataQueryTout } from "./data";
+import { dataQuery, dataQueryTout } from "./data";
 
 export type StatElu = {
   chambre: "assemblee" | "senat" | "europarl"; elu_cle: string; elu_id: string; elu_nom: string; elu_groupe: string;
@@ -74,14 +74,36 @@ export async function statsFenetre(): Promise<StatFenetre[]> {
   return dataQueryTout<StatFenetre>("stats_fenetre_12m", new URLSearchParams({ select: "*" }), 3600);
 }
 
-export { mixite } from "./mixite";
+export { equipeEligible, mixite, mixiteMoyenne, tauxMixite } from "./mixite";
 
 // Version de la méthode : toute évolution est datée et décrite ici.
 export const HISTORIQUE_METHODE: Record<"vigiparl" | "mixiparl", { date: string; texte: string }[]> = {
   vigiparl: [
     { date: "2026-10-01", texte: "Publication de la méthode détaillée ; départs exclus (fin de mandat de l'élu) et taux de couverture des durées affichés." },
+    { date: "2026-10-02", texte: "Les chiffres sont présentés avec leurs sources dans la page, sans fichier à télécharger." },
   ],
   mixiparl: [
     { date: "2026-10-01", texte: "Les équipes comptant un membre de genre indéterminé sont exclues des indicateurs de parité et de non-mixité (auparavant, seuls les membres de genre déterminé étaient comptés)." },
+    { date: "2026-10-02", texte: "L'indicateur principal devient le taux de mixité (100 % à 50/50, 0 % pour une équipe non mixte) ; la part de femmes reste affichée en complément. Les chiffres sont présentés avec leurs sources dans la page, sans fichier à télécharger." },
   ],
 };
+
+export type StatMixiteAnnuelle = { chambre: string; an: number; equipes: number; equipes_exclues: number; mixite_moyenne: number | null; non_mixtes: number };
+export async function statsMixiteAnnuelle(): Promise<StatMixiteAnnuelle[]> {
+  const rows = await dataQueryTout<StatMixiteAnnuelle>("stats_mixite_annuelle", new URLSearchParams({ select: "*", order: "chambre,an" }), 3600);
+  return rows.filter((r) => r.an >= (PREMIERE_ANNEE[r.chambre] ?? 0));
+}
+
+// Chambres des pages « par élu » : segment d'URL sans accent.
+export const SEGMENT_CHAMBRE: Record<string, "assemblee" | "senat"> = { an: "assemblee", senat: "senat" };
+export const segmentDe = (c: string) => (c === "assemblee" ? "an" : "senat");
+
+// Dernière extraction réussie par chambre (table runs du suivi quotidien).
+export type Extraction = { chambre: string; date: string; date_source: string | null; n_affectations: number | null };
+export async function dernieresExtractions(): Promise<Extraction[]> {
+  const { rows } = await dataQuery<Extraction & { statut: string }>("runs",
+    new URLSearchParams({ select: "chambre,date,date_source,n_affectations,statut", order: "date.desc", limit: "40" }), 3600);
+  const vus = new Map<string, Extraction>();
+  for (const r of rows) if (!vus.has(r.chambre) && ["ok", "initialisation"].includes(r.statut)) vus.set(r.chambre, r);
+  return [...vus.values()];
+}

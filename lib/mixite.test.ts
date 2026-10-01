@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mixite } from "./mixite.ts";
+import { mixite, mixiteMoyenne, tauxMixite } from "./mixite.ts";
 
 test("parité, non-mixité, exclusions", () => {
   const r = mixite([
@@ -12,4 +12,19 @@ test("parité, non-mixité, exclusions", () => {
     { femmes: 1, hommes: 3, indetermines: 0 }, // 25 % : ni l'un ni l'autre
   ]);
   assert.deepEqual(r, { eligibles: 4, exclues: 1, paritaires: 2, nonMixtes: 1 });
+});
+
+test("taux de mixité", () => {
+  const proche = (a: number | null, b: number) => assert.ok(a !== null && Math.abs(a - b) < 1e-9, `${a} ≠ ${b}`);
+  proche(tauxMixite({ femmes: 5, hommes: 5 }), 1);
+  proche(tauxMixite({ femmes: 7, hommes: 3 }), 0.6);
+  proche(tauxMixite({ femmes: 3, hommes: 7 }), 0.6);
+  proche(tauxMixite({ femmes: 4, hommes: 0 }), 0);
+  assert.equal(tauxMixite({ femmes: 0, hommes: 0 }), null);
+  const m = mixiteMoyenne([
+    { femmes: 1, hommes: 1, indetermines: 0 }, { femmes: 2, hommes: 0, indetermines: 0 },
+    { femmes: 1, hommes: 0, indetermines: 0 }, { femmes: 1, hommes: 1, indetermines: 1 },
+  ]);
+  assert.equal(m.equipes, 2);
+  proche(m.taux, 0.5);
 });
