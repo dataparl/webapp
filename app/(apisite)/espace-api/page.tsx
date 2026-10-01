@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: { absolute: "API DataParl' : le Parlement, en JSON" } };
+export const metadata: Metadata = { title: { absolute: "API DataParl' : le Parlement, en JSON" }, alternates: { canonical: "/" } };
 
 export default function AccueilApi() {
   return (

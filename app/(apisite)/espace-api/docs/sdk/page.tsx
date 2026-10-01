@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Exemples de code" };
+export const metadata: Metadata = { title: "Exemples de code", alternates: { canonical: "/docs/sdk" } };
 
 export default function Sdk() {
   return (

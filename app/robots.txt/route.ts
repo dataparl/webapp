@@ -16,9 +16,10 @@ export async function GET() {
         "Disallow: /desinscription",
         "Disallow: /connexion",
         "Disallow: /l/",
+        "Allow: /media/",
         "",
         `Sitemap: https://${host}/sitemap.xml`,
-        ...(host === "www.dataparl.fr" ? [`Sitemap: https://${host}/sitemap-daily.xml`] : []),
+
       ].join("\n")
     : "User-agent: *\nDisallow: /";
   return new Response(corps + "\n", { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=3600" } });

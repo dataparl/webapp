@@ -4,6 +4,8 @@ import { PiedDePage } from "@/app/_components/SiteChrome";
 export const metadata: Metadata = {
   title: { default: "API DataParl'", template: "%s | API DataParl'" },
   description: "L'API des mouvements de collaborateurs parlementaires : gratuite, avec une clé personnelle.",
+  metadataBase: new URL("https://api.dataparl.fr"),
+  openGraph: { siteName: "API DataParl'", locale: "fr_FR", type: "website" },
 };
 
 export default function ApiLayout({ children }: { children: React.ReactNode }) {

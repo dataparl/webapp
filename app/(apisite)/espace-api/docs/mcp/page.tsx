@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Assistants IA (MCP)" };
+export const metadata: Metadata = { title: "Assistants IA (MCP)", alternates: { canonical: "/docs/mcp" } };
 
 export default function Mcp() {
   return (

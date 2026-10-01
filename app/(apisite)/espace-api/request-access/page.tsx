@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import DemandeCle from "./DemandeCle";
 
-export const metadata: Metadata = { title: "Demander une clé" };
+export const metadata: Metadata = { title: "Demander une clé", alternates: { canonical: "/request-access" } };
 
 export default function RequestAccess() {
   return (

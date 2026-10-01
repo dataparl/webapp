@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Pour les machines" };
+export const metadata: Metadata = { title: "Pour les machines", alternates: { canonical: "/docs/machine" } };
 
 export default function Machine() {
   return (

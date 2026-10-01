@@ -5,6 +5,7 @@ import Partage from "@/app/_components/Partage";
 import Photo from "@/app/_components/Photo";
 import { eluDepuisFiche, eluDepuisId, equipe, lienOfficiel, mouvementsElu, statsElu } from "@/lib/elus";
 import { familleDe } from "@/lib/familles";
+import { CODE_CHAMBRE, CREDIT, photoAbsolue } from "@/lib/media";
 import { CHAMBRE_LONG, nomAffiche, prenomNom } from "@/lib/format";
 import { chevauche, fusionner, libellePeriode, moisAnnee } from "@/lib/periodes";
 import { collaborateurDeLaPersonne, parlementaireDepuisId, periodesElu, personne, type Appartenance, type Mandat, type Parlementaire } from "@/lib/referentiel";
@@ -22,10 +23,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const role = `${f.actif ? titre(f) : `${ancien(f)} ${titre(f).toLowerCase()}`}${f.circonscription && f.chambre !== "europarl" ? ` (${f.circonscription})` : ""}`;
     const description = `${nom}, ${role.charAt(0).toLowerCase()}${role.slice(1)}${f.groupe ? `, groupe ${f.groupe}` : ""} : collaborateurs parlementaires, mouvements de l'équipe, mandats et commissions.`;
     const url = `https://www.dataparl.fr/parlementaires/${encodeURIComponent(f.slug)}`;
+    const photo = f.photo_url ? photoAbsolue(f.chambre, f.slug, 400) : null;
     return {
       title: `${nom} : équipe et parcours`, description,
       alternates: { canonical: url },
-      openGraph: { title: `${nom} · DataParl'`, description, url, type: "profile", images: f.photo_url ? [{ url: f.photo_url }] : undefined },
+      openGraph: { title: `${nom} · DataParl'`, description, url, type: "profile", images: photo ? [{ url: photo, width: 400, height: 400, alt: `Photo officielle de ${nom}` }] : undefined },
+      twitter: { card: "summary", title: `${nom} · DataParl'`, description, images: photo ? [photo] : undefined },
     };
   }
   const e = await eluDepuisId(id).catch(() => null);
@@ -85,7 +88,7 @@ export default async function Parlementaire({ params }: Props) {
 
   const jsonLd = {
     "@context": "https://schema.org", "@type": "Person", name: nom, givenName: f.prenom, familyName: f.nom,
-    image: f.photo_url || undefined, url: `https://www.dataparl.fr/parlementaires/${f.slug}`,
+    image: (f.photo_url && photoAbsolue(f.chambre, f.slug, 400)) || undefined, url: `https://www.dataparl.fr/parlementaires/${f.slug}`,
     jobTitle: f.actif ? titre(f) : undefined, sameAs: f.url_officielle ? [f.url_officielle] : undefined,
     memberOf: f.actif ? { "@type": "GovernmentOrganization", name: CHAMBRE_LONG[f.chambre] } : undefined,
   };
@@ -94,7 +97,7 @@ export default async function Parlementaire({ params }: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <div className="entete-elu">
-        <Photo src={f.photo_url} nom={nom} />
+        <Photo chambre={f.chambre} slug={f.slug} src={f.photo_url} nom={nom} />
         <div>
           <p className="meta" style={{ margin: 0 }}>{CHAMBRE_LONG[f.chambre]}{f.actif ? "" : ` · ${ancien(f).toLowerCase()} mandat`}</p>
           <h1 style={{ margin: "2px 0 6px" }}>{nom}</h1>
@@ -106,6 +109,7 @@ export default async function Parlementaire({ params }: Props) {
           <p className="meta" style={{ marginTop: 6 }}>
             {f.actif ? `En fonction depuis ${moisAnnee(dernierDebut(mandats, f))}` : f.fin_mandat ? `Mandat terminé en ${moisAnnee(f.fin_mandat)}` : ""}
             {f.url_officielle && <> · <a href={f.url_officielle}>fiche officielle</a></>}
+            {f.photo_url && <> · photo : {CREDIT[CODE_CHAMBRE[f.chambre]]}</>}
             {autres.map((x) => <span key={x.chambre}> · <a href={`/parlementaires/${encodeURIComponent(x.slug)}`}>fiche {CHAMBRE_LONG[x.chambre]}</a></span>)}
           </p>
           <Partage compact url={`https://www.dataparl.fr/parlementaires/${encodeURIComponent(f.slug)}`} titre={nom}

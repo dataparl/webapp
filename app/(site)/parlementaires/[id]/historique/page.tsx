@@ -21,7 +21,7 @@ export default async function Historique({ params }: Props) {
   return (
     <>
       <div className="entete-elu petite">
-        <Photo src={f.photo_url} nom={nom} taille={64} />
+        <Photo chambre={f.chambre} slug={f.slug} src={f.photo_url} nom={nom} taille={64} />
         <div>
           <p className="meta" style={{ margin: 0 }}><a href={`/parlementaires/${encodeURIComponent(f.slug)}`}>← Fiche de {nom}</a></p>
           <h1 style={{ margin: "2px 0" }}>Historique des collaborateurs</h1>

@@ -50,7 +50,7 @@ export default function ParcoursCollab({ id, suite }: { id: string; suite: strin
     <ol className="parcours">
       {tries.map((p, i) => (
         <li key={i} className="parcours-collab">
-          <Photo src={p.elu.photo} nom={p.elu.nom} taille={48} />
+          <Photo chambre={p.chambre} slug={p.elu.slug} src={p.elu.photo} nom={p.elu.nom} taille={48} />
           <div>
             <p className="parcours-titre">
               <strong>{p.elu.slug ? <a href={`/parlementaires/${encodeURIComponent(p.elu.slug)}`}>{p.elu.nom}</a> : p.elu.nom}</strong>

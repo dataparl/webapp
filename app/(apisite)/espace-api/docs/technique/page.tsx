@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Référence technique" };
+export const metadata: Metadata = { title: "Référence technique", alternates: { canonical: "/docs/technique" } };
 
 export default function Technique() {
   return (

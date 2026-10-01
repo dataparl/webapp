@@ -13,6 +13,7 @@ import { estInactif } from "./lib/pagesRegistre";
 //   webmail.dataparl.fr     /x -> /webmail/x, sauf /connexion et /api/*
 //   mail.dataparl.fr        /lire/<jeton> (version en ligne des emails), le reste -> www
 //   link.dataparl.fr        /<code> -> /l/<code> (liens tracés), le reste -> www
+//   media.dataparl.fr       /<chambre>/<fichier>.png -> /media/… (photos des élus)
 // Sur www : une page désactivée dans l'admin (Plan du site) répond 404.
 // Anciens domaines (cavaparlement.eu, dataparl.com) : redirection 308 vers la
 // même adresse sur dataparl.fr. Exceptions, servies telles quelles pendant la
@@ -84,6 +85,16 @@ export async function proxy(req: NextRequest) {
     return vers(req, `www.${DOMAINE}`, "/", 307);
   }
 
+  // media.dataparl.fr/<chambre>/<fichier> : photos des élus.
+  if (host === `media.${DOMAINE}`) {
+    if (/^\/(an|senat|pe)\/[^/]+\.png$/.test(path)) {
+      const url = req.nextUrl.clone();
+      url.pathname = `/media${path}`;
+      return NextResponse.rewrite(url);
+    }
+    return vers(req, `www.${DOMAINE}`, "/", 307);
+  }
+
   if (host === `link.${DOMAINE}`) {
     if (/^\/[a-z0-9][a-z0-9-]{1,39}$/.test(path)) {
       const url = req.nextUrl.clone();
@@ -114,7 +125,7 @@ export async function proxy(req: NextRequest) {
   }
 
   // Pages désactivées ou en brouillon (site public et environnements de test).
-  if (!path.startsWith("/api/") && !path.startsWith("/admin") && !path.startsWith("/webmail") && path !== "/" && !/\.[a-z0-9]{2,5}$/i.test(path)) {
+  if (!path.startsWith("/api/") && !path.startsWith("/admin") && !path.startsWith("/webmail") && path !== "/" && !path.startsWith("/media/") && !/\.[a-z0-9]{2,5}$/i.test(path)) {
     if (estInactif(path, await cheminsInactifs())) {
       const url = req.nextUrl.clone();
       url.pathname = "/page-desactivee";

@@ -9,6 +9,10 @@ export const metadata: Metadata = {
     "Arrivées, départs et transferts des collaborateurs des députés, sénateurs et eurodéputés, d'après les publications officielles. Gratuit, sans pub, sans pistage.",
   applicationName: "DataParl'",
   openGraph: { siteName: "DataParl'", locale: "fr_FR", type: "website" },
+  // Cartes de partage (X, LinkedIn, Bluesky, Facebook, messageries) : grande image par défaut.
+  twitter: { card: "summary_large_image" },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
+  formatDetection: { telephone: false },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
