@@ -5,7 +5,7 @@ import type { Role } from "@/app/_components/admin/Porte";
 import { dateHeure, useRessource } from "@/app/_components/admin/utils";
 import Pagination from "@/app/_components/admin/Pagination";
 
-type Compte = { id: string; email: string; cree_le: string; derniere_connexion: string | null; fournisseurs: string[]; equipe: Role | null; alerte: { active: boolean; frequence: string } | null };
+type Compte = { id: string; email: string; nom: string; cree_le: string; derniere_connexion: string | null; fournisseurs: string[]; equipe: Role | null; alerte: { active: boolean; frequence: string } | null };
 
 export default function Comptes() {
   const [page, setPage] = useState(0);
@@ -18,9 +18,10 @@ export default function Comptes() {
       {data && <>
         <p className="meta">{data.total} compte(s)</p>
         <div className="defile"><table className="stats">
-          <thead><tr><th>Email</th><th>Connexion</th><th>Alertes</th><th>Créé</th><th>Dernière connexion</th></tr></thead>
+          <thead><tr><th>Nom</th><th>Email</th><th>Connexion</th><th>Alertes</th><th>Créé</th><th>Dernière connexion</th></tr></thead>
           <tbody>{data.comptes.map((c) => (
             <tr key={c.id}>
+              <td>{c.nom || <span className="meta">–</span>}</td>
               <td>{c.email}{c.equipe && <> <span className={`badge-role ${c.equipe}`}>{LIBELLE_ROLE[c.equipe]}</span></>}</td>
               <td className="meta">{c.fournisseurs.join(", ") || "email"}</td>
               <td className="meta">{c.alerte ? `${c.alerte.active ? "" : "(inactive) "}${c.alerte.frequence === "hebdomadaire" ? "Weekly" : "Daily"}` : "–"}</td>

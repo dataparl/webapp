@@ -40,6 +40,17 @@ if (photo) {
   const r = await fetch(photo);
   console.log(`${r.status} ${photo} (${r.headers.get("content-type")})`);
   if (r.status !== 200 || r.headers.get("content-type") !== "image/png") casses.push(`${r.status} ${photo}`);
+  if (!photo.startsWith("https://media.dataparl.fr/")) casses.push(`photo hors media.dataparl.fr : ${photo}`);
+  // Ouverture directe dans un navigateur : page de crédit, à la même adresse, jamais mise en cache.
+  const page = await fetch(photo, { headers: { Accept: "text/html,application/xhtml+xml" } });
+  const html = await page.text();
+  console.log(`${page.status} ${photo} (navigation : ${page.headers.get("content-type")})`);
+  if (page.status !== 200 || !html.includes("Crédit") || !/no-store/.test(page.headers.get("cache-control") ?? "")) casses.push(`page de crédit : ${page.status} ${photo}`);
+  // Depuis une page du site (Referer interne) ou un aperçu de lien (Accept */*) : l'image brute.
+  for (const h of [{ Accept: "text/html", Referer: "https://www.dataparl.fr/parlementaires" }, { Accept: "*/*" }]) {
+    const b = await fetch(photo, { headers: h });
+    if (b.headers.get("content-type") !== "image/png") casses.push(`image attendue (${JSON.stringify(h)}) : ${b.headers.get("content-type")}`);
+  }
 } else casses.push("aucune photo dans sitemap-parlementaires.xml");
 if (BASE === "https://www.dataparl.fr") {
   const api = await fetch("https://api.dataparl.fr/sitemap.xml");

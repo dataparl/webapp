@@ -26,8 +26,9 @@ export default async function Page({ params, searchParams }: Props) {
   const q = await searchParams;
   const croissant = q.ordre === "moins";
   const tous = (await statsElus().catch(() => [])).filter((r) => r.chambre === c && equipeEligible(r))
-    .sort((a, b) => (tauxMixite(b) ?? 0) - (tauxMixite(a) ?? 0) || (b.femmes + b.hommes) - (a.femmes + a.hommes)).map((r, i) => ({ r, rang: i + 1 }));
-  if (croissant) tous.reverse();
+    // À taux de mixité égal, l'élu qui a le plus de collaborateurs passe devant.
+    .sort((a, b) => (tauxMixite(b) ?? 0) - (tauxMixite(a) ?? 0) || (b.femmes + b.hommes) - (a.femmes + a.hommes) || a.elu_nom.localeCompare(b.elu_nom, "fr")).map((r, i) => ({ r, rang: i + 1 }));
+  if (croissant) tous.sort((a, b) => (tauxMixite(a.r) ?? 0) - (tauxMixite(b.r) ?? 0) || (b.r.femmes + b.r.hommes) - (a.r.femmes + a.r.hommes) || a.rang - b.rang);
   const filtre = q.groupe ? { cle: "groupe" as const, valeur: q.groupe.slice(0, 40) } : q.famille ? { cle: "famille" as const, valeur: q.famille.slice(0, 40) } : undefined;
   const retenus = tous.filter(({ r }) => !filtre || (filtre.cle === "groupe" ? r.elu_groupe === filtre.valeur : (familleDe(r.chambre, r.elu_groupe)?.code ?? "Autres") === filtre.valeur));
   const autre = seg === "an" ? "senat" : "an";
@@ -36,15 +37,15 @@ export default async function Page({ params, searchParams }: Props) {
     <>
       <p className="meta"><a href="/mixiparl">MixiParl&apos;</a></p>
       <h1>{CHAMBRE_LONG[c]} : la mixité <span className="surligne-mixi">élu par élu</span></h1>
-      <p className="lead">{croissant ? "De l'équipe la moins mixte à la plus mixte." : "De l'équipe la plus mixte à la moins mixte."} Équipes de 2 personnes ou plus, toutes de genre déterminé. <a href="/mixiparl/methode#taux-de-mixite">Définition</a></p>
+      <p className="lead">{croissant ? "De l'équipe la moins mixte à la plus mixte." : "De l'équipe la plus mixte à la moins mixte."} À taux égal, la plus grande équipe passe devant. Équipes de 2 personnes ou plus, toutes de genre déterminé. <a href="/mixiparl/methode#taux-de-mixite">Définition</a></p>
       <ClassementElus base={base} page={Number(q.page) || 1} filtre={filtre}
-        colonnes={["Femmes", "Hommes", "Part de femmes", "Taux de mixité"]}
+        colonnes={["Équipe", "Femmes", "Hommes", "Part de femmes", "Taux de mixité"]}
         ordre={croissant ? { libelle: "Les plus mixtes d'abord", href: base } : { libelle: "Les moins mixtes d'abord", href: `${base}?ordre=moins` }}
         autreChambre={{ libelle: `Voir ${autre === "an" ? "l'Assemblée nationale" : "le Sénat"}`, href: `/mixiparl/${autre}/parlementaires${filtre?.cle === "famille" ? `?famille=${encodeURIComponent(filtre.valeur)}` : ""}` }}
         lignes={retenus.map(({ r, rang }) => ({
           nom: nomAffiche(r.elu_nom), groupe: r.elu_groupe, rang,
           href: `/parlementaires/${encodeURIComponent(idParlementaire(r.chambre, r.elu_id, r.elu_cle, r.elu_nom))}`,
-          valeurs: [String(r.femmes), String(r.hommes), pct(r.femmes / (r.femmes + r.hommes)), pct(tauxMixite(r))],
+          valeurs: [String(r.femmes + r.hommes), String(r.femmes), String(r.hommes), pct(r.femmes / (r.femmes + r.hommes)), pct(tauxMixite(r))],
         }))} />
     </>
   );

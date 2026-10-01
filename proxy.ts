@@ -89,10 +89,24 @@ export async function proxy(req: NextRequest) {
   if (host === `media.${DOMAINE}`) {
     if (/^\/(an|senat|pe)\/[^/]+\.png$/.test(path)) {
       const url = req.nextUrl.clone();
+      // Ouverture directe dans un navigateur (pas une <img> du site, pas un aperçu
+      // de lien) : page de crédit, à la même adresse. Jamais pour une demande d'image.
+      const accept = req.headers.get("accept") ?? "";
+      let interne = false;
+      try { const r = new URL(req.headers.get("referer") ?? ""); interne = r.hostname === DOMAINE || r.hostname.endsWith(`.${DOMAINE}`); } catch { /* pas de Referer */ }
+      if (accept.includes("text/html") && !interne) {
+        url.pathname = "/photo-credit";
+        url.search = `?img=${encodeURIComponent(path.slice(1))}`;
+        const res = NextResponse.rewrite(url);
+        res.headers.set("Cache-Control", "no-store");
+        res.headers.set("X-Robots-Tag", "noindex");
+        return res;
+      }
       url.pathname = `/media${path}`;
       return NextResponse.rewrite(url);
     }
-    return vers(req, `www.${DOMAINE}`, "/", 307);
+    if (path.startsWith("/photo-credit")) return vers(req, `www.${DOMAINE}`, "/", 307);
+    return vers(req, `www.${DOMAINE}`, path, 307);
   }
 
   if (host === `link.${DOMAINE}`) {

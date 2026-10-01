@@ -5,7 +5,7 @@ import Partage from "@/app/_components/Partage";
 import Photo from "@/app/_components/Photo";
 import { eluDepuisFiche, eluDepuisId, equipe, lienOfficiel, mouvementsElu, statsElu } from "@/lib/elus";
 import { familleDe } from "@/lib/familles";
-import { CODE_CHAMBRE, CREDIT, photoAbsolue } from "@/lib/media";
+import { photoAbsolue } from "@/lib/media";
 import { CHAMBRE_LONG, nomAffiche, prenomNom } from "@/lib/format";
 import { chevauche, fusionner, libellePeriode, moisAnnee } from "@/lib/periodes";
 import { collaborateurDeLaPersonne, parlementaireDepuisId, periodesElu, personne, type Appartenance, type Mandat, type Parlementaire } from "@/lib/referentiel";
@@ -109,7 +109,6 @@ export default async function Parlementaire({ params }: Props) {
           <p className="meta" style={{ marginTop: 6 }}>
             {f.actif ? `En fonction depuis ${moisAnnee(dernierDebut(mandats, f))}` : f.fin_mandat ? `Mandat terminé en ${moisAnnee(f.fin_mandat)}` : ""}
             {f.url_officielle && <> · <a href={f.url_officielle}>fiche officielle</a></>}
-            {f.photo_url && <> · photo : {CREDIT[CODE_CHAMBRE[f.chambre]]}</>}
             {autres.map((x) => <span key={x.chambre}> · <a href={`/parlementaires/${encodeURIComponent(x.slug)}`}>fiche {CHAMBRE_LONG[x.chambre]}</a></span>)}
           </p>
           <Partage compact url={`https://www.dataparl.fr/parlementaires/${encodeURIComponent(f.slug)}`} titre={nom}

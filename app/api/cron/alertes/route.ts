@@ -31,6 +31,8 @@ async function destinataire(s: Sub): Promise<string | undefined> {
   if (s.prenom || s.nom) return prenomNomAdresse(s.prenom ?? "", s.nom ?? "");
   if (!s.user_id) return undefined;
   const { data } = await authAdmin().auth.admin.getUserById(s.user_id);
+  const meta = data.user?.user_metadata ?? {};
+  if (meta.prenom || meta.nom) return prenomNomAdresse(String(meta.prenom ?? ""), String(meta.nom ?? ""));
   const complet = String(data.user?.user_metadata?.full_name ?? data.user?.user_metadata?.name ?? "").trim();
   if (!complet.includes(" ")) return undefined;
   const mots = complet.split(/\s+/);

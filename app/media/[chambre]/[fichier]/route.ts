@@ -5,8 +5,8 @@ import { parlementaireDepuisId } from "@/lib/referentiel";
 // Photo officielle d'un élu, redimensionnée et servie par DataParl' :
 // /media/<chambre>/<id>_<credit>_<taille>.png (media.dataparl.fr/<chambre>/…).
 // L'image vient du site de l'assemblée (crédit dans le nom et en en-tête) ;
-// elle est gardée 30 jours par le réseau de diffusion.
-export const revalidate = 2592000;
+// le crédit est dans le nom du fichier, qui se garde donc un an en cache.
+export const dynamic = "force-dynamic";
 
 const absente = () => new Response("Photo introuvable", { status: 404, headers: { "Cache-Control": "public, s-maxage=3600" } });
 
@@ -25,7 +25,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ chambre
     const png = await sharp(brut).resize(f.taille, f.taille, { fit: "cover", position: "top" }).png({ compressionLevel: 9, palette: true }).toBuffer();
     return new Response(new Uint8Array(png), {
       headers: {
-        "Content-Type": "image/png", "Cache-Control": "public, max-age=86400, s-maxage=2592000, stale-while-revalidate=604800",
+        "Content-Disposition": `inline; filename="${f.id}_${f.credit}_${f.taille}.png"`,
+        "Content-Type": "image/png", "Cache-Control": "public, max-age=31536000, immutable", "Vary": "Accept",
         "X-Credit": encodeURIComponent(`Photo : ${CREDIT[code]}`), "Access-Control-Allow-Origin": "*", "X-Robots-Tag": "noarchive",
       },
     });

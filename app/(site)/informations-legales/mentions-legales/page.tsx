@@ -46,6 +46,20 @@ export default function MentionsLegales() {
         <a href="/informations-legales/licences">Licences et réutilisation</a>.
       </p>
 
+      <h2 id="photos">Photos des élus</h2>
+      <p>
+        Les portraits des parlementaires sont les photos officielles publiées par les assemblées : © Assemblée nationale pour les
+        députés, © Sénat pour les sénateurs, © Union européenne (source : Parlement européen) pour les députés européens. Ils
+        illustrent les fiches à titre d&apos;information et ne sont ni modifiés (hors redimensionnement) ni utilisés à des fins publicitaires.
+      </p>
+      <p>
+        Ces photos sont servies depuis <span className="mono">media.dataparl.fr</span>, sous un nom de la forme{" "}
+        <span className="mono">chambre/identifiant_crédit_taille.png</span>. Le segment <span className="mono">_crédit_</span> du nom de
+        fichier indique l&apos;institution détentrice de chaque photo : <span className="mono">an</span> (Assemblée nationale),{" "}
+        <span className="mono">senat</span> (Sénat), <span className="mono">pe</span> (Parlement européen). Toute demande de modification ou
+        de recadrage est à adresser à l&apos;institution concernée.
+      </p>
+
       <h2>Sources et indépendance</h2>
       <p>
         Les informations publiées proviennent des publications officielles de l&apos;Assemblée nationale, du Sénat et

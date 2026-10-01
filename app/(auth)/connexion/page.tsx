@@ -7,6 +7,7 @@ import { authBrowser } from "@/lib/supabaseBrowser";
 // l'origine qui l'a lancé.
 
 const CGU_OK = "dp_cgu_acceptees";
+const IDENTITE = "dp_identite"; // prénom et nom saisis à la création, enregistrés une fois connecté
 let redirige = false;
 
 function IconeGitHub() {
@@ -31,6 +32,8 @@ function IconeGoogle() {
 export default function Connexion() {
   const [onglet, setOnglet] = useState<"connexion" | "creation">("connexion");
   const [cgu, setCgu] = useState(false);
+  const [prenom, setPrenom] = useState("");
+  const [nom, setNom] = useState("");
   const [etape, setEtape] = useState<"choix" | "email" | "code">("choix");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -38,7 +41,9 @@ export default function Connexion() {
   const [enCours, setEnCours] = useState(false);
 
   const creation = onglet === "creation";
-  const bloque = creation && !cgu;
+  const identite = prenom.trim().length > 0 && nom.trim().length > 0;
+  const bloque = creation && (!cgu || !identite);
+  const motif = !identite ? "Indique d'abord ton prénom et ton nom." : "Coche d'abord la case d'acceptation.";
 
   function destination(): string {
     const suite = new URLSearchParams(window.location.search).get("suite");
@@ -50,6 +55,12 @@ export default function Connexion() {
     if (redirige) return;
     redirige = true;
     try {
+      const id = sessionStorage.getItem(IDENTITE);
+      if (id) {
+        const { prenom: p, nom: n } = JSON.parse(id) as { prenom: string; nom: string };
+        await authBrowser().auth.updateUser({ data: { prenom: p, nom: n } });
+        sessionStorage.removeItem(IDENTITE);
+      }
       if (sessionStorage.getItem(CGU_OK)) {
         await fetch("/api/compte/consentement", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
         sessionStorage.removeItem(CGU_OK);
@@ -71,11 +82,16 @@ export default function Connexion() {
   }, []);
 
   function memoriserCgu() {
-    try { if (creation && cgu) sessionStorage.setItem(CGU_OK, "1"); } catch {}
+    try {
+      if (creation && cgu) {
+        sessionStorage.setItem(CGU_OK, "1");
+        sessionStorage.setItem(IDENTITE, JSON.stringify({ prenom: prenom.trim().slice(0, 60), nom: nom.trim().toUpperCase().slice(0, 60) }));
+      }
+    } catch {}
   }
 
   async function oauth(provider: "github" | "google") {
-    if (bloque) return setMessage("Coche d'abord la case d'acceptation.");
+    if (bloque) return setMessage(motif);
     memoriserCgu();
     const suite = encodeURIComponent(destination());
     await authBrowser().auth.signInWithOAuth({
@@ -86,7 +102,7 @@ export default function Connexion() {
 
   async function envoyerCode(e: React.FormEvent) {
     e.preventDefault();
-    if (bloque) return setMessage("Coche d'abord la case d'acceptation.");
+    if (bloque) return setMessage(motif);
     setEnCours(true);
     setMessage("");
     const { error } = await authBrowser().auth.signInWithOtp({ email, options: { shouldCreateUser: creation } });
@@ -121,8 +137,16 @@ export default function Connexion() {
           <button role="tab" aria-selected={creation} onClick={() => { setOnglet("creation"); setMessage(""); }}>Créer un compte</button>
         </div>
 
+        {creation && etape !== "code" && (
+          <div className="grille-2" style={{ textAlign: "left" }}>
+            <div><label htmlFor="c-prenom">Prénom</label>
+              <input id="c-prenom" type="text" required maxLength={60} value={prenom} onChange={(e) => setPrenom(e.target.value)} autoComplete="given-name" /></div>
+            <div><label htmlFor="c-nom">NOM</label>
+              <input id="c-nom" type="text" required maxLength={60} value={nom} onChange={(e) => setNom(e.target.value)} autoComplete="family-name" style={{ textTransform: "uppercase" }} /></div>
+          </div>
+        )}
         {creation && (
-          <label className="check" style={{ marginTop: 0 }}>
+          <label className="check" style={{ marginTop: 12 }}>
             <input type="checkbox" checked={cgu} onChange={(e) => setCgu(e.target.checked)} />
             <span>
               J&apos;accepte les <a href="/informations-legales/cgu" target="_blank">conditions d&apos;utilisation</a> et la{" "}

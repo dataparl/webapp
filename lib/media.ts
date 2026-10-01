@@ -6,8 +6,14 @@ export const CHAMBRE_DE_CODE: Record<string, "assemblee" | "senat" | "europarl">
 export const CREDIT: Record<string, string> = { an: "Assemblée nationale", senat: "Sénat", pe: "Parlement européen" };
 export const TAILLES = [96, 200, 400] as const;
 
-// Base des adresses : vide (chemin relatif /media) par défaut ; https://media.dataparl.fr une fois le sous-domaine en place.
-export const MEDIA_BASE = (process.env.NEXT_PUBLIC_MEDIA_BASE ?? "/media").replace(/\/$/, "");
+export const MEDIA_BASE = (process.env.NEXT_PUBLIC_MEDIA_BASE ?? "https://media.dataparl.fr").replace(/\/$/, "");
+
+// Institution détentrice et adresse où demander un accord (modification, recadrage).
+export const INSTITUTION: Record<string, { libelle: string; contact: string; courriel?: string }> = {
+  an: { libelle: "Assemblée nationale (direction de l'information multimédia)", contact: "dim@assemblee-nationale.fr", courriel: "dim@assemblee-nationale.fr" },
+  senat: { libelle: "Sénat", contact: "l'adresse officielle fournie par le Sénat" },
+  pe: { libelle: "Parlement européen", contact: "l'adresse officielle fournie par le Parlement européen" },
+};
 
 export function cheminPhoto(chambre: string, slug: string, taille: (typeof TAILLES)[number] = 200): string | null {
   const c = CODE_CHAMBRE[chambre];

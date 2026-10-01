@@ -1,0 +1,42 @@
+import type { Metadata } from "next";
+import { prenomNom } from "@/lib/format";
+import { analyserFichier, CHAMBRE_DE_CODE, INSTITUTION, MEDIA_BASE } from "@/lib/media";
+import { parlementaireDepuisId } from "@/lib/referentiel";
+
+export const metadata: Metadata = { title: "Crédit photo", robots: { index: false, follow: false } };
+export const dynamic = "force-dynamic";
+
+const SITE = "https://www.dataparl.fr";
+
+// Page de crédit d'une photo, affichée quand son adresse media.dataparl.fr est
+// ouverte directement dans un navigateur (réécriture par proxy.ts).
+export default async function CreditPhoto({ searchParams }: { searchParams: Promise<{ img?: string }> }) {
+  const img = (await searchParams).img ?? "";
+  const m = /^(an|senat|pe)\/([^/]+\.png)$/.exec(img);
+  const f = m ? analyserFichier(m[2]) : null;
+  const valide = !!m && !!f && f.credit === m[1];
+  const inst = valide ? INSTITUTION[f!.credit] : null;
+  const elu = valide ? await parlementaireDepuisId(f!.id).catch(() => null) : null;
+  const fiche = elu && elu.chambre === CHAMBRE_DE_CODE[m![1]] ? elu : null;
+  return (
+    <div className="etroit">
+      <h1>Crédit <span className="surligne">photo</span></h1>
+      {valide && (
+        <p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="photo" src={`${MEDIA_BASE}/${img}`} alt={fiche ? `Photo officielle de ${prenomNom(fiche.prenom, fiche.nom)}` : "Photo officielle"} width={f!.taille} height={f!.taille} style={{ maxWidth: "100%", height: "auto" }} />
+        </p>
+      )}
+      <p className="lead">
+        Source : {inst ? inst.libelle : "l'institution d'origine"}.
+        {inst && <> Pour toute demande spécifique de modification ou de recadrage, vous devez envoyer un mail de demande d&apos;accord à
+          l&apos;adresse officielle fournie par l&apos;institution : {inst.courriel ? <a href={`mailto:${inst.courriel}`}>{inst.courriel}</a> : inst.contact}.</>}
+      </p>
+      {valide && <p className="meta">Fichier : <span className="mono">{m![2]}</span>. Le segment <span className="mono">_{f!.credit}_</span> du nom indique l&apos;institution détentrice de la photo.</p>}
+      <p>
+        {fiche && <><a href={`${SITE}/parlementaires/${encodeURIComponent(fiche.slug)}`}>Voir la fiche de {prenomNom(fiche.prenom, fiche.nom)}</a> · </>}
+        <a href={`${SITE}/`}>Accueil de DataParl&apos;</a> · <a href={`${SITE}/informations-legales/mentions-legales`}>Mentions légales</a>
+      </p>
+    </div>
+  );
+}

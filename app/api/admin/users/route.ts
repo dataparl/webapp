@@ -22,7 +22,7 @@ export async function GET(req: Request) {
     return {
       total: (data as { total?: number }).total ?? data.users.length, page, par_page: PAGE,
       comptes: data.users.map((x) => ({
-        id: x.id, email: x.email ?? "", cree_le: x.created_at, derniere_connexion: x.last_sign_in_at ?? null,
+        id: x.id, email: x.email ?? "", nom: [x.user_metadata?.prenom, x.user_metadata?.nom].filter(Boolean).join(" ") || String(x.user_metadata?.full_name ?? x.user_metadata?.name ?? ""), cree_le: x.created_at, derniere_connexion: x.last_sign_in_at ?? null,
         fournisseurs: (x.app_metadata?.providers as string[] | undefined) ?? [], equipe: st.get(x.id) ?? null,
         alerte: al.get((x.email ?? "").toLowerCase()) ?? null,
       })),
