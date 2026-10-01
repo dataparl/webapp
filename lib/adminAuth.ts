@@ -70,6 +70,9 @@ function lireCookie(req: Request, nom: string): string | null {
 export async function checkAdmin(req: Request): Promise<AdminCheck> {
   const a = await identifierAdmin(req);
   if (!a.ok) return a;
+  // Double authentification exigée des administrateurs seulement (éditeurs et
+  // utilisateurs : adresse + mot de passe).
+  if (a.role !== "admin") return a;
   if (!verifierJeton(lireCookie(req, COOKIE_OTP), a.userId, secret("ADMIN_OTP_SECRET"))) {
     const { data } = await authAdmin().from("admin_totp_secrets").select("active").eq("user_id", a.userId).maybeSingle();
     return { ok: false, status: 401, otp: data?.active ? "requis" : "a_enroler" };

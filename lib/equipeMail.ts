@@ -24,7 +24,7 @@ export async function envoyerConfiguration(p: {
     `<ol style="margin:0 0 16px;padding-left:20px">`,
     `<li style="margin-bottom:6px">Connecte-toi sur <a href="${admin}" style="color:#164DFF">admin.dataparl.fr</a> avec ton adresse et ce mot de passe.</li>`,
     `<li style="margin-bottom:6px">Choisis ton propre mot de passe (8 caractères minimum) : le provisoire ne sert qu'une fois.</li>`,
-    `<li style="margin-bottom:6px">Active la double authentification avec une application (Google Authenticator, 1Password, Authy…).</li>`,
+    ...(p.role === "admin" ? [`<li style="margin-bottom:6px">Active la double authentification avec une application (Google Authenticator, 1Password, Authy…).</li>`] : []),
     `<li>Ta boîte se lit sur <a href="${webmail}" style="color:#164DFF">webmail.dataparl.fr</a>. Dans « Mon espace », tu trouveras ta signature et le raccourci pour ton téléphone.</li>`,
     `</ol>`,
     `<p style="margin:0;color:#4A5670;font-size:14px">Pour ta sécurité, supprime ce message une fois connecté(e). Une question : réponds simplement à cet email.</p>`,
@@ -35,7 +35,7 @@ export async function envoyerConfiguration(p: {
     `Rôle : ${ROLE[p.role] ?? p.role}`, "",
     `Adresse : ${p.email}`, `Mot de passe provisoire : ${p.motDePasse}`, "",
     `1. Connecte-toi sur ${admin}`, "2. Choisis ton propre mot de passe (8 caractères minimum).",
-    "3. Active la double authentification.", `4. Ta boîte : ${webmail}`, "",
+    ...(p.role === "admin" ? ["3. Active la double authentification."] : []), `Ta boîte : ${webmail}`, "",
     "Pour ta sécurité, supprime ce message une fois connecté(e).",
   ].join("\n");
   return expedier({

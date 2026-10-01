@@ -63,7 +63,7 @@ function Liste() {
       <div className="card" style={{ maxWidth: 720 }}>
         <p><button className="lien" onClick={() => setGere(null)}>← Retour</button></p>
         <h2 style={{ marginTop: 0 }}>{gere.nom}</h2>
-        <p className="meta">{gere.email} · créé le {dateHeure(gere.cree_le)} · {gere.actif ? "actif" : "suspendu"} · second facteur {gere.totp_actif ? "activé" : "à activer"}</p>
+        <p className="meta">{gere.email} · créé le {dateHeure(gere.cree_le)} · {gere.actif ? "actif" : "suspendu"} · second facteur {gere.role !== "admin" ? "non requis" : gere.totp_actif ? "activé" : "à activer"}</p>
         <label>Rôle</label>
         <div className="cartes-roles">
           {ROLES.map((r) => (
@@ -163,7 +163,7 @@ function Creer() {
 
   function copier() {
     if (!cree) return;
-    const txt = `DataParl' : tes identifiants\nAdresse : ${cree.email}\nMot de passe provisoire : ${cree.mot_de_passe}\nRôle : ${LIBELLE_ROLE[cree.role]}\nConnexion : https://admin.dataparl.fr\n\nTu choisiras ton propre mot de passe à la première connexion, puis tu activeras le second facteur (application d'authentification).`;
+    const txt = `DataParl' : tes identifiants\nAdresse : ${cree.email}\nMot de passe provisoire : ${cree.mot_de_passe}\nRôle : ${LIBELLE_ROLE[cree.role]}\nConnexion : https://admin.dataparl.fr\n\nTu choisiras ton propre mot de passe à la première connexion${cree.role === "admin" ? ", puis tu activeras le second facteur (application d'authentification)" : ""}.`;
     navigator.clipboard?.writeText(txt).then(() => setCopie(true));
   }
 
@@ -222,7 +222,7 @@ function Creer() {
             <p>Mot de passe provisoire : <code className="mono">{cree.mot_de_passe}</code></p>
             {cree.envoi && <p className={cree.envoi.ok ? "ok" : "erreur"}>{cree.envoi.ok ? `Email de configuration envoyé à ${cree.envoi.a}.` : `L'email n'est pas parti : ${cree.envoi.erreur}. Copie les identifiants à la place.`}</p>}
             <button onClick={copier}>{copie ? "Copié" : "Copier les identifiants"}</button>
-            <p className="meta">Ce mot de passe ne sera plus affiché. La personne le remplacera à sa première connexion, puis activera son second facteur.</p>
+            <p className="meta">Ce mot de passe ne sera plus affiché. La personne le remplacera à sa première connexion{cree.role === "admin" ? ", puis activera son second facteur" : ""}.</p>
           </> : <p className="meta">Le récapitulatif apparaît ici après la création.</p>}
         </div>
         <div className="card">
