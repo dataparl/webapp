@@ -276,3 +276,43 @@ h1.marque { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .lockup .par { font-size: .85rem; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
 .lockup .par b { font-family: "Spectral", serif; color: var(--ink); font-size: 1rem; }
 @media (max-width: 700px) { header.site.admin .qui { width: 100%; justify-content: space-between; } .qui-nom { text-align: left; } }
+
+/* Alertes : atouts et aperçus d'emails */
+.atouts { list-style: none; padding: 0; margin: 20px 0 28px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.atouts li { border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--card); padding: 14px 16px; }
+.atouts strong { display: block; font-family: "Spectral", serif; font-size: 1.1rem; margin-bottom: 2px; }
+.atouts span { color: var(--muted); font-size: .9rem; }
+.apercus-mail { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 12px 0 8px; }
+.apercus-mail figure { margin: 0; }
+.apercus-mail figcaption { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
+.apercus-mail figcaption span { color: var(--muted); font-size: .88rem; }
+.apercus-mail iframe { width: 100%; height: 620px; border: 1px solid var(--line); border-radius: var(--radius-card); background: #F6F4EC; }
+
+/* Partage (liens directs, sans script tiers) */
+.partage { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+.partage .meta { margin-right: 4px; }
+.partage-btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; min-width: 34px; justify-content: center; padding: 0 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--ink); cursor: pointer; text-decoration: none; font: inherit; font-size: .85rem; }
+.partage-btn:hover { border-color: var(--ink); }
+.partage .partage-btn { margin: 0; }
+.partage.compact { margin: 6px 0 0; gap: 4px; }
+.partage.compact .partage-btn { height: 28px; min-width: 28px; padding: 0 6px; }
+.partage-ok { font-size: .8rem; }
+
+/* Pages daily */
+.bandeau-suite { margin: 24px 0; padding: 18px 20px; border: 1px solid var(--line); border-left: 4px solid var(--jaune); border-radius: var(--radius-card); background: var(--card); }
+.bandeau-suite p { margin-top: 0; }
+.nav-jours { display: flex; justify-content: space-between; gap: 12px; margin: 32px 0 8px; padding-top: 16px; border-top: 1px solid var(--line); }
+.jours { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+.jours li a { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 4px; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+.jours li a span { color: var(--muted); font-size: .9rem; }
+.jours li a:hover strong { color: var(--bleu); }
+.calendrier { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin: 12px 0; }
+.mois h3 { margin: 0 0 6px; font-size: 1rem; text-transform: capitalize; }
+.mois table { border-collapse: collapse; width: 100%; font-size: .85rem; }
+.mois th { color: var(--muted); font-weight: 600; padding: 2px; }
+.mois td { text-align: center; padding: 2px; }
+.mois td a { display: block; border-radius: 6px; background: var(--jaune); color: #071A41; text-decoration: none; font-weight: 600; padding: 3px 0; }
+.mois td span { display: block; color: var(--muted); padding: 3px 0; opacity: .6; }
+.selecteur-mois { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+.grille-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+@media (max-width: 520px) { .grille-2 { grid-template-columns: 1fr; } }

@@ -16,6 +16,7 @@ export type TypeEnvoi = "transactionnel" | "webmail" | "auto" | "alerte";
 
 export type Message = {
   from?: string; // adresse nue ; défaut : MAIL_FROM
+  nomExpediteur?: string; // nom affiché ; défaut : DataParl'
   to: string[];
   cc?: string[];
   subject: string;
@@ -40,7 +41,8 @@ export async function expedier(m: Message): Promise<Resultat> {
   const lireUrl = `${MAIL_WEB_URL}/lire/${jeton}`;
   const html = gabarit({ titre: m.titre ?? m.subject, corpsHtml: m.corpsHtml, lireUrl, pied: m.pied });
   const text = `${m.text}\n\n--\nDataParl' · version en ligne : ${lireUrl}`;
-  const from = m.from ? `DataParl' <${m.from}>` : MAIL_FROM;
+  const nom = (m.nomExpediteur ?? "DataParl'").replace(/["<>\r\n]/g, "").trim() || "DataParl'";
+  const from = m.from ? `"${nom}" <${m.from}>` : MAIL_FROM;
 
   const headers: Record<string, string> = { ...(m.headers ?? {}) };
   if (m.unsubscribeUrl) {

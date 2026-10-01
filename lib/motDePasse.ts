@@ -24,3 +24,9 @@ export function adresseEquipe(identifiant: string, sousDomaine?: string): string
   if (sd && !/^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/.test(sd)) return null;
   return `${id}@${sd ? `${sd}.` : ""}dataparl.fr`;
 }
+
+// Adresse complète saisie (x@dataparl.fr ou x@sous-domaine.dataparl.fr), normalisée.
+export function adresseValide(email: string): string | null {
+  const m = /^([^@\s]+)@(?:([^@.\s]+)\.)?dataparl\.fr$/i.exec(email.trim());
+  return m ? adresseEquipe(m[1], m[2]) : null;
+}

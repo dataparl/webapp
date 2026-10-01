@@ -49,7 +49,8 @@ export default async function Accueil() {
           <strong>Tout l&apos;historique depuis 2015</strong>, la recherche par collaborateur, élu, groupe ou date, et les
           alertes personnalisées : c&apos;est gratuit, il suffit d&apos;un compte.
         </p>
-        <a className="btn" href="/mouvements">Voir plus</a>
+        <a className="btn" href="/mouvements">Voir plus</a>{" "}
+        <a className="btn secondaire" href="/daily">Les mouvements du jour en une page →</a>
       </div>
 
       <h2>Explorer</h2>

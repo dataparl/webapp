@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+
+const EXPEDITEURS_CONFIG = ["support@dataparl.fr", "it@dataparl.fr"] as const;
 import { LIBELLE_ROLE } from "@/app/_components/admin/EnTete";
 import { useAdmin, type Role } from "@/app/_components/admin/Porte";
 import { dateHeure, useRessource } from "@/app/_components/admin/utils";
@@ -34,12 +36,17 @@ function Liste() {
   const [filtre, setFiltre] = useState<Role | "">("");
   const [gere, setGere] = useState<Compte | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [adresse, setAdresse] = useState("");
+  const [envoiA, setEnvoiA] = useState("");
+  const [expediteur, setExpediteur] = useState<(typeof EXPEDITEURS_CONFIG)[number]>("support@dataparl.fr");
 
   async function action(c: Compte, body: Record<string, unknown>, confirmation?: string) {
     if (confirmation && !confirm(confirmation)) return;
     try {
-      const r = await api<{ mot_de_passe?: string }>("/api/admin/equipe", { method: "PATCH", body: { user_id: c.user_id, ...body } });
-      setMessage(r.mot_de_passe ? `Nouveau mot de passe provisoire pour ${c.email} : ${r.mot_de_passe} (à transmettre, il ne sera plus affiché)` : "C'est fait.");
+      const r = await api<{ mot_de_passe?: string; email?: string; envoi?: { ok: boolean; a?: string; erreur?: string } }>("/api/admin/equipe", { method: "PATCH", body: { user_id: c.user_id, ...body } });
+      const envoye = r.envoi ? (r.envoi.ok ? ` Email de configuration envoyé à ${r.envoi.a}.` : ` L'email n'est pas parti : ${r.envoi.erreur}.`) : "";
+      setMessage(r.mot_de_passe ? `Nouveau mot de passe provisoire pour ${c.email} : ${r.mot_de_passe} (il ne sera plus affiché).${envoye}`
+        : r.email ? `Nouvelle adresse : ${r.email}.` : "C'est fait.");
       await recharger();
       if (gere) setGere(null);
     } catch (e) { setMessage((e as Error).message); }
@@ -51,6 +58,7 @@ function Liste() {
 
   if (gere) {
     const moi = gere.user_id === data.moi;
+    const envoi = envoiA.trim() ? { envoyer_a: envoiA.trim(), expediteur } : undefined;
     return (
       <div className="card" style={{ maxWidth: 720 }}>
         <p><button className="lien" onClick={() => setGere(null)}>← Retour</button></p>
@@ -65,13 +73,28 @@ function Liste() {
             </button>
           ))}
         </div>
-        {moi ? <p className="meta">Ton propre rôle ne peut être changé que par un autre administrateur.</p> : (
+        <form onSubmit={(e) => { e.preventDefault(); if (adresse.trim()) action(gere, { action: "adresse", email: adresse.trim() }, `Remplacer ${gere.email} par ${adresse.trim()} ? C'est aussi l'identifiant de connexion.`); }}>
+          <label htmlFor="g-adresse">Adresse email</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input id="g-adresse" type="email" value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder={gere.email} />
+            <button className="secondaire" style={{ marginTop: 0, whiteSpace: "nowrap" }} disabled={!adresse.trim()}>Changer</button>
+          </div>
+          <p className="meta" style={{ marginTop: 4 }}>x@dataparl.fr ou x@sous-domaine.dataparl.fr. C&apos;est aussi l&apos;identifiant de connexion.</p>
+        </form>
+        {moi ? <p className="meta">Ton propre rôle ne peut être changé que par un autre administrateur.</p> : (<>
+          <label htmlFor="g-envoi">Envoyer le nouveau mot de passe par email à <span className="meta">(facultatif)</span></label>
+          <div className="grille-2">
+            <input id="g-envoi" type="email" value={envoiA} onChange={(e) => setEnvoiA(e.target.value)} placeholder="adresse personnelle" />
+            <select aria-label="Expéditeur" value={expediteur} onChange={(e) => setExpediteur(e.target.value as typeof expediteur)}>
+              {EXPEDITEURS_CONFIG.map((x) => <option key={x} value={x}>depuis {x}</option>)}
+            </select>
+          </div>
           <div className="actions" style={{ marginTop: 16 }}>
-            <button className="secondaire" onClick={() => action(gere, { action: "nouveau_mdp" }, `Générer un nouveau mot de passe provisoire pour ${gere.email} ?`)}>Nouveau mot de passe</button>
+            <button className="secondaire" onClick={() => action(gere, { action: "nouveau_mdp", envoi }, `Générer un nouveau mot de passe provisoire pour ${gere.email}${envoi ? ` et l'envoyer à ${envoi.envoyer_a}` : ""} ?`)}>Nouveau mot de passe</button>
             <button className="secondaire" onClick={() => action(gere, { action: "reinit_totp" }, `Réinitialiser le second facteur de ${gere.email} ?`)}>Réinitialiser le second facteur</button>
             <button className="danger" onClick={() => action(gere, { action: gere.actif ? "suspendre" : "reactiver" })}>{gere.actif ? "Suspendre" : "Réactiver"}</button>
           </div>
-        )}
+        </>)}
         {message && <p className="meta">{message}</p>}
       </div>
     );
@@ -96,7 +119,7 @@ function Liste() {
                 <td><span className={`badge-role ${c.role}`}>{LIBELLE_ROLE[c.role]}</span></td>
                 <td>{c.actif ? <span className="ok">Actif</span> : <span className="meta">Suspendu</span>}{c.actif && c.doit_changer_mdp && <span className="meta"> · 1re connexion à faire</span>}</td>
                 <td className="actions" style={{ flexWrap: "nowrap" }}>
-                  <button className="lien" onClick={() => { setMessage(null); setGere(c); }}>Gérer</button>
+                  <button className="lien" onClick={() => { setMessage(null); setAdresse(""); setEnvoiA(""); setGere(c); }}>Gérer</button>
                   {c.user_id !== data.moi && <> · <button className="lien" onClick={() => action(c, { action: c.actif ? "suspendre" : "reactiver" })}>{c.actif ? "Suspendre" : "Réactiver"}</button></>}
                 </td>
               </tr>
@@ -111,8 +134,9 @@ function Liste() {
 
 function Creer() {
   const { api } = useAdmin();
-  const [f, setF] = useState({ nom: "", identifiant: "", sousDomaine: false, sous_domaine: "", role: "editeur" as Role, mot_de_passe: "" });
-  const [cree, setCree] = useState<{ nom: string; email: string; role: Role; mot_de_passe: string } | null>(null);
+  const [f, setF] = useState({ prenom: "", nom_famille: "", nom: "", poste: "", identifiant: "", sousDomaine: false, sous_domaine: "", role: "editeur" as Role, mot_de_passe: "",
+    envoyer: false, envoyer_a: "", expediteur: "support@dataparl.fr" as (typeof EXPEDITEURS_CONFIG)[number] });
+  const [cree, setCree] = useState<{ nom: string; email: string; role: Role; mot_de_passe: string; envoi?: { ok: boolean; a?: string; erreur?: string } | null } | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [copie, setCopie] = useState(false);
   const [envoi, setEnvoi] = useState(false);
@@ -122,13 +146,17 @@ function Creer() {
     e.preventDefault();
     setErr(null); setEnvoi(true);
     try {
-      const r = await api<{ compte: { nom: string; email: string; role: Role }; mot_de_passe: string }>("/api/admin/equipe", {
+      const r = await api<{ compte: { nom: string; email: string; role: Role }; mot_de_passe: string; envoi: { ok: boolean; a?: string; erreur?: string } | null }>("/api/admin/equipe", {
         method: "POST",
-        body: { nom: f.nom, identifiant: f.identifiant, sous_domaine: f.sousDomaine ? f.sous_domaine : undefined, role: f.role, mot_de_passe: f.mot_de_passe || undefined },
+        body: {
+          nom: f.nom, prenom: f.prenom, nom_famille: f.nom_famille, poste: f.poste, identifiant: f.identifiant,
+          sous_domaine: f.sousDomaine ? f.sous_domaine : undefined, role: f.role, mot_de_passe: f.mot_de_passe || undefined,
+          envoyer_a: f.envoyer ? f.envoyer_a : undefined, expediteur: f.envoyer ? f.expediteur : undefined,
+        },
       });
-      setCree({ ...r.compte, mot_de_passe: r.mot_de_passe });
+      setCree({ ...r.compte, mot_de_passe: r.mot_de_passe, envoi: r.envoi });
       setCopie(false);
-      setF({ ...f, nom: "", identifiant: "", mot_de_passe: "" });
+      setF({ ...f, prenom: "", nom_famille: "", nom: "", poste: "", identifiant: "", mot_de_passe: "", envoyer_a: "" });
     } catch (e) { setErr((e as Error).message); }
     setEnvoi(false);
   }
@@ -144,8 +172,16 @@ function Creer() {
       <form className="card" onSubmit={creer}>
         <h2 style={{ marginTop: 0 }}>Créer un compte</h2>
         <p className="meta">Crée une adresse @dataparl.fr pour un membre de l&apos;équipe : elle sert à la fois d&apos;identifiant et de boîte mail dans la messagerie.</p>
+        <div className="grille-2">
+          <div><label htmlFor="c-prenom">Prénom</label>
+            <input id="c-prenom" type="text" value={f.prenom} onChange={(e) => setF({ ...f, prenom: e.target.value })} placeholder="Marie" /></div>
+          <div><label htmlFor="c-nomf">Nom</label>
+            <input id="c-nomf" type="text" value={f.nom_famille} onChange={(e) => setF({ ...f, nom_famille: e.target.value })} placeholder="Dupont" /></div>
+        </div>
         <label htmlFor="c-nom">Nom affiché</label>
         <input id="c-nom" type="text" required value={f.nom} onChange={(e) => setF({ ...f, nom: e.target.value })} placeholder="Marie de DataParl'" />
+        <label htmlFor="c-poste">Poste <span className="meta">(signature email)</span></label>
+        <input id="c-poste" type="text" value={f.poste} onChange={(e) => setF({ ...f, poste: e.target.value })} placeholder={LIBELLE_ROLE[f.role]} />
         <label htmlFor="c-id">Identifiant (avant le @)</label>
         <input id="c-id" type="text" required value={f.identifiant} onChange={(e) => setF({ ...f, identifiant: e.target.value.replace(/[^a-z0-9.-]/gi, "").toLowerCase() })} placeholder="marie" />
         <label className="check"><input type="checkbox" checked={f.sousDomaine} onChange={(e) => setF({ ...f, sousDomaine: e.target.checked })} /> Adresse sur un sous-domaine (prenom@sous-domaine.dataparl.fr)</label>
@@ -167,6 +203,13 @@ function Creer() {
           <button type="button" className="secondaire" style={{ marginTop: 0, whiteSpace: "nowrap" }} onClick={() => setF({ ...f, mot_de_passe: genererMotDePasse() })}>Générer</button>
         </div>
         <p className="apercu-adresse">Adresse : <strong>{(f.identifiant || "…")}@{domaine}</strong></p>
+        <label className="check"><input type="checkbox" checked={f.envoyer} onChange={(e) => setF({ ...f, envoyer: e.target.checked })} /> Envoyer les identifiants par email à une autre adresse</label>
+        {f.envoyer && <div className="grille-2">
+          <input type="email" aria-label="Adresse de réception" required value={f.envoyer_a} onChange={(e) => setF({ ...f, envoyer_a: e.target.value })} placeholder="adresse personnelle" />
+          <select aria-label="Expéditeur" value={f.expediteur} onChange={(e) => setF({ ...f, expediteur: e.target.value as typeof f.expediteur })}>
+            {EXPEDITEURS_CONFIG.map((x) => <option key={x} value={x}>depuis {x}</option>)}
+          </select>
+        </div>}
         {err && <p className="erreur">{err}</p>}
         <button disabled={envoi}>{envoi ? "Création…" : "Créer le compte"}</button>
       </form>
@@ -177,6 +220,7 @@ function Creer() {
           {cree ? <>
             <p><strong>{cree.nom}</strong><br />{cree.email}<br /><span className={`badge-role ${cree.role}`}>{LIBELLE_ROLE[cree.role]}</span></p>
             <p>Mot de passe provisoire : <code className="mono">{cree.mot_de_passe}</code></p>
+            {cree.envoi && <p className={cree.envoi.ok ? "ok" : "erreur"}>{cree.envoi.ok ? `Email de configuration envoyé à ${cree.envoi.a}.` : `L'email n'est pas parti : ${cree.envoi.erreur}. Copie les identifiants à la place.`}</p>}
             <button onClick={copier}>{copie ? "Copié" : "Copier les identifiants"}</button>
             <p className="meta">Ce mot de passe ne sera plus affiché. La personne le remplacera à sa première connexion, puis activera son second facteur.</p>
           </> : <p className="meta">Le récapitulatif apparaît ici après la création.</p>}
