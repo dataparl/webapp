@@ -86,6 +86,8 @@ export async function importerRecu(emailId: string, apercu: ApercuRecu = {}): Pr
   if (error) throw error;
   if (!data?.length) return { corps: !!complet, erreur }; // déjà importé : pas de second accusé
   if (!doitRepondre({ from: m.from, subject: m.subject ?? "", headers: h })) return { corps: !!complet, erreur };
+  // Livraison tardive (nouvel essai du webhook) : pas d'accusé pour un vieux message.
+  if (Date.now() - new Date(m.created_at).getTime() > 6 * 3600_000) return { corps: !!complet, erreur };
 
   const expediteur = adresseNue(m.reply_to?.[0] ?? m.from);
   const recuSur = [...(m.to ?? []), h["to"] ?? "", h["delivered-to"] ?? ""]
