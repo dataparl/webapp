@@ -40,16 +40,38 @@ type Recu = {
   attachments?: { id: string; filename: string; content_type: string; size?: number }[];
 };
 
-// Récupère un email reçu complet (corps compris), le range dans « Reçus » et
-// envoie l'accusé de réception s'il y a lieu. Idempotent (resend_id unique).
-// Nécessite une clé Resend « Full access » (la lecture des emails reçus est
-// refusée aux clés « Sending access »).
-export async function importerRecu(emailId: string): Promise<void> {
-  const r = await fetch(`${RESEND}/emails/receiving/${encodeURIComponent(emailId)}`, {
-    headers: { Authorization: `Bearer ${secret("RESEND_API_KEY")}` },
-  });
-  if (!r.ok) throw new Error(`Resend receiving ${r.status} ${await r.text()}`);
-  const m = (await r.json()) as Recu;
+export type ApercuRecu = {
+  from?: string; to?: string[]; cc?: string[]; subject?: string; message_id?: string; created_at?: string;
+  attachments?: { id: string; filename: string; content_type: string; size?: number }[];
+};
+
+// Lit un email reçu complet chez Resend. Nécessite une clé « Full access » :
+// les clés « Sending access » sont refusées (401/403). Renvoie null si
+// impossible, sans lever : le message n'est jamais perdu pour autant.
+async function lireRecu(emailId: string): Promise<{ m: Recu | null; erreur?: string }> {
+  try {
+    const r = await fetch(`${RESEND}/emails/receiving/${encodeURIComponent(emailId)}`, {
+      headers: { Authorization: `Bearer ${secret("RESEND_API_KEY")}` },
+    });
+    if (!r.ok) return { m: null, erreur: `Resend ${r.status} ${(await r.text()).slice(0, 200)}` };
+    return { m: (await r.json()) as Recu };
+  } catch (e) {
+    return { m: null, erreur: String(e).slice(0, 200) };
+  }
+}
+
+// Range un email reçu dans « Reçus » et envoie l'accusé de réception s'il y
+// a lieu. Idempotent (resend_id unique). Si le corps ne peut pas être lu, le
+// message est quand même enregistré à partir du webhook (expéditeur, objet,
+// destinataires) et le corps sera récupéré à l'ouverture (completerCorps).
+export async function importerRecu(emailId: string, apercu: ApercuRecu = {}): Promise<{ corps: boolean; erreur?: string }> {
+  const { m: complet, erreur } = await lireRecu(emailId);
+  if (!complet && !apercu.from) throw new Error(erreur ?? "email illisible");
+  if (erreur) console.warn("webmail: corps non récupéré", emailId, erreur);
+  const m: Recu = complet ?? {
+    id: emailId, from: apercu.from ?? "", to: apercu.to ?? [], cc: apercu.cc ?? null, subject: apercu.subject ?? "",
+    message_id: apercu.message_id ?? null, created_at: apercu.created_at ?? new Date().toISOString(), attachments: apercu.attachments ?? [],
+  };
   const h = entetes(m.headers);
   const { data, error } = await authAdmin().from("emails").upsert({
     direction: "in", communication_type: "webmail", from_addr: m.from, to_addr: (m.to ?? []).join(", "),
@@ -59,9 +81,11 @@ export async function importerRecu(emailId: string): Promise<void> {
     resend_id: m.id, attachments: (m.attachments ?? []).map((p) => ({ id: p.id, filename: p.filename, content_type: p.content_type, size: p.size ?? null })),
     folder: "inbox", read: false, date: m.created_at, source: "resend",
   }, { onConflict: "resend_id", ignoreDuplicates: true }).select("id");
+  // Même Message-ID déjà rangé (un email adressé à deux de nos adresses) : déjà là.
+  if (error && (error as { code?: string }).code === "23505") return { corps: !!complet, erreur };
   if (error) throw error;
-  if (!data?.length) return; // déjà importé : pas de second accusé
-  if (!doitRepondre({ from: m.from, subject: m.subject ?? "", headers: h })) return;
+  if (!data?.length) return { corps: !!complet, erreur }; // déjà importé : pas de second accusé
+  if (!doitRepondre({ from: m.from, subject: m.subject ?? "", headers: h })) return { corps: !!complet, erreur };
 
   const expediteur = adresseNue(m.reply_to?.[0] ?? m.from);
   const recuSur = [...(m.to ?? []), h["to"] ?? "", h["delivered-to"] ?? ""]
@@ -73,6 +97,17 @@ export async function importerRecu(emailId: string): Promise<void> {
     messageId: m.message_id ?? h["message-id"] ?? null,
     extrait: (m.text ?? "").trim(),
   });
+  return { corps: !!complet, erreur };
+}
+
+// À l'ouverture d'un message reçu sans corps : nouvel essai de lecture.
+export async function completerCorps<T extends { id: string; direction: string; resend_id: string | null; body_html: string | null; body_text: string | null }>(row: T): Promise<T & { corps_indisponible?: string }> {
+  if (row.direction !== "in" || !row.resend_id || row.body_html || row.body_text) return row;
+  const { m, erreur } = await lireRecu(row.resend_id);
+  if (!m) return { ...row, corps_indisponible: erreur ?? "illisible" };
+  const maj = { body_html: m.html ?? null, body_text: m.text ?? null, reply_to: m.reply_to?.length ? m.reply_to.join(", ") : null };
+  await authAdmin().from("emails").update(maj).eq("id", row.id);
+  return { ...row, ...maj };
 }
 
 // Une seule réponse automatique par expéditeur et par 24 h.

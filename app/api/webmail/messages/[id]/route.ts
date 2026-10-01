@@ -3,6 +3,7 @@ import { audit, type Admin } from "@/lib/adminAuth";
 import { avecAdmin, EQUIPE, corps, erreur } from "@/lib/adminRoute";
 import { boitesDe, peutVoir } from "@/lib/boites";
 import { authAdmin } from "@/lib/supabaseAdmin";
+import { completerCorps } from "@/lib/webmail";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,8 @@ export async function GET(req: Request, { params }: Ctx) {
     const { data: evts } = data.resend_id
       ? await db.from("email_events").select("type, created_at").eq("message_id", data.resend_id).order("created_at")
       : { data: [] };
-    return { message: { ...data, read: true }, evenements: evts ?? [] };
+    const complet = await completerCorps(data);
+    return { message: { ...complet, read: true }, evenements: evts ?? [] };
   }, EQUIPE);
 }
 

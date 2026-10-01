@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifierSvix } from "@/lib/crypto";
 import { secret } from "@/lib/env";
-import { enregistrerEvenement, importerRecu } from "@/lib/webmail";
+import { enregistrerEvenement, importerRecu, type ApercuRecu } from "@/lib/webmail";
 
 export const dynamic = "force-dynamic";
 
@@ -12,17 +12,21 @@ export async function POST(req: Request) {
   if (!verifierSvix(brut, req.headers, secret("RESEND_WEBHOOK_SECRET"))) {
     return NextResponse.json({ error: "signature invalide" }, { status: 401 });
   }
-  let evt: { type?: string; data?: { email_id?: string } };
+  let evt: { type?: string; data?: { email_id?: string } & ApercuRecu };
   try { evt = JSON.parse(brut); } catch { return NextResponse.json({ error: "JSON invalide" }, { status: 400 }); }
   const type = evt.type ?? "";
   const id = evt.data?.email_id;
   if (!id) return NextResponse.json({ ok: true, ignore: true });
   try {
-    if (type === "email.received") await importerRecu(id);
-    else if (type.startsWith("email.")) await enregistrerEvenement(type, id, evt.data);
+    if (type === "email.received") {
+      const r = await importerRecu(id, evt.data);
+      return NextResponse.json({ ok: true, corps: r.corps, ...(r.erreur ? { detail: r.erreur } : {}) });
+    } else if (type.startsWith("email.")) await enregistrerEvenement(type, id, evt.data);
   } catch (e) {
     console.error("webhook resend", type, e);
-    return NextResponse.json({ error: "traitement impossible" }, { status: 500 }); // Resend réessaiera
+    // Le détail (code Resend ou Supabase) s'affiche dans les tentatives du webhook chez Resend.
+    const detail = e instanceof Error ? e.message : typeof e === "object" && e && "message" in e ? String((e as { message: unknown }).message) : String(e);
+    return NextResponse.json({ error: "traitement impossible", detail: detail.slice(0, 300) }, { status: 500 }); // Resend réessaiera
   }
   return NextResponse.json({ ok: true });
 }

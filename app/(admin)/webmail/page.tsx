@@ -9,7 +9,7 @@ const DOSSIERS: [Dossier, string][] = [["inbox", "Reçus"], ["sent", "Envoyés"]
 
 type Resume = { id: string; direction: "in" | "out"; from_addr: string; to_addr: string; subject: string; date: string; read: boolean; flagged: boolean; pieces: number; bounced_at: string | null };
 type Complet = Resume & {
-  cc_addr: string | null; reply_to: string | null; body_html: string | null; body_text: string | null; folder: Dossier;
+  cc_addr: string | null; reply_to: string | null; body_html: string | null; body_text: string | null; corps_indisponible?: string; folder: Dossier;
   message_id: string | null; attachments: { id: string; filename: string; content_type: string; size: number | null }[];
 };
 type Liste = { total: number; page: number; par_page: number; non_lus: Record<Dossier, number>; messages: Resume[]; boites: string[] | null; expediteurs: string[] };
@@ -171,7 +171,9 @@ export default function Webmail() {
                 {!images && <p className="meta">Images distantes bloquées. <button className="lien" onClick={() => setImages(true)}>Les afficher</button></p>}
                 <iframe className="wm-corps" title="Contenu de l'email" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerPolicy="no-referrer"
                   srcDoc={documentLecture(m.body_html, images)} />
-              </> : <pre className="wm-texte">{m.body_text ?? ""}</pre>}
+              </> : m.body_text ? <pre className="wm-texte">{m.body_text}</pre>
+                : m.corps_indisponible ? <p className="erreur">Contenu pas encore récupéré : la clé Resend du site n&apos;a pas le droit de lire les emails reçus (il faut une clé « Full access »).</p>
+                : <pre className="wm-texte" />}
             </article>
           );
         })()}
