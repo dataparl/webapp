@@ -1,4 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { cheminsInactifs } from "./lib/pagesEtat";
+import { estInactif } from "./lib/pagesRegistre";
 
 // Routage par sous-domaine (un seul déploiement pour tous les hôtes) :
 //   www.dataparl.fr         site public ; /api -> api.dataparl.fr
@@ -10,6 +12,8 @@ import { NextResponse, type NextRequest } from "next/server";
 //   admin.dataparl.fr       /x -> /admin/x, sauf /connexion et /api/*
 //   webmail.dataparl.fr     /x -> /webmail/x, sauf /connexion et /api/*
 //   mail.dataparl.fr        /lire/<jeton> (version en ligne des emails), le reste -> www
+//   link.dataparl.fr        /<code> -> /l/<code> (liens tracés), le reste -> www
+// Sur www : une page désactivée dans l'admin (Plan du site) répond 404.
 // Anciens domaines (cavaparlement.eu, dataparl.com) : redirection 308 vers la
 // même adresse sur dataparl.fr. Exceptions, servies telles quelles pendant la
 // transition : /api/* (webhooks, formulaires déjà ouverts) et l'API /v1 sur
@@ -47,7 +51,7 @@ function protege(res: NextResponse): NextResponse {
   return res;
 }
 
-export function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const host = (req.headers.get("host") ?? "").split(":")[0].toLowerCase();
   const path = req.nextUrl.pathname;
 
@@ -80,6 +84,16 @@ export function proxy(req: NextRequest) {
     return vers(req, `www.${DOMAINE}`, "/", 307);
   }
 
+  if (host === `link.${DOMAINE}`) {
+    if (/^\/[a-z0-9][a-z0-9-]{1,39}$/.test(path)) {
+      const url = req.nextUrl.clone();
+      url.pathname = `/l${path}`;
+      return protege(NextResponse.rewrite(url));
+    }
+    if (path.startsWith("/l/")) return protege(NextResponse.next());
+    return vers(req, `www.${DOMAINE}`, "/", 307);
+  }
+
   for (const espace of ["admin", "webmail"] as const) {
     if (host !== `${espace}.${DOMAINE}`) continue;
     let res: NextResponse;
@@ -97,6 +111,15 @@ export function proxy(req: NextRequest) {
     if (path.startsWith("/admin")) return vers(req, `admin.${DOMAINE}`, path.replace(/^\/admin/, "") || "/", 307);
     if (path.startsWith("/webmail")) return vers(req, `webmail.${DOMAINE}`, path.replace(/^\/webmail/, "") || "/", 307);
     if (path.startsWith("/espace-api")) return vers(req, `api.${DOMAINE}`, path.replace(/^\/espace-api/, "") || "/", 308);
+  }
+
+  // Pages désactivées ou en brouillon (site public et environnements de test).
+  if (!path.startsWith("/api/") && !path.startsWith("/admin") && !path.startsWith("/webmail") && path !== "/" && !/\.[a-z0-9]{2,5}$/i.test(path)) {
+    if (estInactif(path, await cheminsInactifs())) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/page-desactivee";
+      return NextResponse.rewrite(url, { status: 404 });
+    }
   }
 
   return NextResponse.next();

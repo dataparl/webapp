@@ -12,7 +12,7 @@ const AUTOMATIQUES = "(transactionnel,auto,alerte)";
 interface Filtrable { eq(c: string, v: string): Filtrable; in(c: string, v: string[]): Filtrable; not(c: string, o: string, v: string): Filtrable }
 function filtrer<Q>(requete: Q, dossier: string): Q {
   const q = requete as unknown as Filtrable;
-  const r = dossier === "auto" ? q.eq("folder", "sent").in("communication_type", ["transactionnel", "auto", "alerte"])
+  const r = dossier === "auto" ? q.eq("folder", "sent").in("communication_type", ["transactionnel", "auto", "alerte", "communique", "mailing"])
     : dossier === "sent" ? q.eq("folder", "sent").not("communication_type", "in", AUTOMATIQUES)
     : q.eq("folder", dossier);
   return r as unknown as Q;

@@ -50,7 +50,10 @@ export async function GET(req: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   const exclus = new Set((refus ?? []).map((r) => r.email as string));
   const abonnes = ((subs ?? []) as Sub[]).filter((s) => !exclus.has(s.email));
-  if (!abonnes.length) return NextResponse.json({ ok: true, jour, envoyes: 0, abonnes: 0 });
+  if (!abonnes.length) {
+    await db.from("liens_clics").delete().lt("le", new Date(Date.now() - 395 * 86400_000).toISOString());
+    return NextResponse.json({ ok: true, jour, envoyes: 0, abonnes: 0 });
+  }
 
   const mvts = await dataQueryTout<MvtAlerte>("mouvements", new URLSearchParams({
     select: `${COLONNES_PUBLIQUES},elu_origine_cle,elu_origine_id`, date_event: `gte.${decaler(jour, -7)}`, order: "date_event.desc,chambre.asc,id.asc",
@@ -104,5 +107,7 @@ export async function GET(req: Request) {
       erreurs.push(e instanceof Error ? e.message : String(e));
     }
   }
+  // Ménage quotidien : les ouvertures de liens tracés sont gardées 13 mois.
+  await db.from("liens_clics").delete().lt("le", new Date(Date.now() - 395 * 86400_000).toISOString());
   return NextResponse.json({ ok: erreurs.length === 0, jour, abonnes: abonnes.length, envoyes, erreurs: erreurs.slice(0, 5) });
 }

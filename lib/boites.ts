@@ -11,7 +11,7 @@ export const COMMUNES = EXPEDITEURS.filter((e) => e.endsWith("@dataparl.fr") && 
 
 export function boitesDe(a: Admin): string[] | null {
   if (a.role === "admin") return null;
-  return [...new Set([a.email, ...(a.role === "editeur" ? COMMUNES : [])].filter(Boolean).map((x) => x.toLowerCase()))];
+  return [...new Set([a.email, ...(a.modules.includes("boites_communes") ? COMMUNES : [])].filter(Boolean).map((x) => x.toLowerCase()))];
 }
 
 const nettoyer = (e: string) => e.replace(/[%,()*"\\]/g, "");

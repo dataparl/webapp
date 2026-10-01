@@ -2,14 +2,14 @@
 import { usePathname } from "next/navigation";
 import Logo from "./Logo";
 
-// Logo d'en-tête : la marque de la rubrique sur VigiParl' et MixiParl'
-// (« VigiParl' par DataParl' »), le logo DataParl' ailleurs.
+// Logo d'en-tête : sur VigiParl' et MixiParl', la marque de la rubrique avec
+// « par DataParl' » en dessous ; le logo DataParl' ailleurs.
 export function LogoMarque({ marque }: { marque: "vigi" | "mixi" }) {
   const prefixe = marque === "vigi" ? "Vigi" : "Mixi";
   return (
     <span className={`logo-marque ${marque}`}>
-      <a className="bloc" href={`/${marque}parl`} aria-label={`${prefixe}Parl', accueil de la rubrique`}>{prefixe}<span>Parl&apos;</span></a>
-      <a className="bandeau" href="/" aria-label="par DataParl', accueil">par <b>DataParl&apos;</b></a>
+      <a className="haut" href={`/${marque}parl`} aria-label={`${prefixe}Parl', accueil de la rubrique`}>{prefixe}<span>Parl&apos;</span></a>
+      <a className="par" href="/" aria-label="par DataParl', accueil">par <b>Data<span>Parl&apos;</span></b></a>
     </span>
   );
 }

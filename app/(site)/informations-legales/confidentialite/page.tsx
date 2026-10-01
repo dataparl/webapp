@@ -81,6 +81,16 @@ export default function Confidentialite() {
         bien délivrés. Chaque email dispose aussi d&apos;une version en ligne, accessible uniquement par le lien
         unique qu&apos;il contient.
       </p>
+      <p>
+        <strong>Liens courts.</strong> Certains liens que nous diffusons (réseaux sociaux, communiqués) passent par une adresse courte
+        DataParl&apos;. À l&apos;ouverture, nous enregistrons la date, le site de provenance, le pays, le type d&apos;appareil et
+        l&apos;adresse IP tronquée (elle ne permet pas de t&apos;identifier), pour compter les ouvertures. Conservation : 13 mois.
+      </p>
+      <p>
+        <strong>Journalistes.</strong> Le carnet presse (nom, média, adresse professionnelle) sert à envoyer nos communiqués, sur la base de
+        notre intérêt légitime à informer la presse. Chaque communiqué contient un lien de désinscription ; tu peux aussi écrire à
+        presse@dataparl.fr.
+      </p>
 
       <h2>3. Personnes citées dans les données</h2>
       <p>

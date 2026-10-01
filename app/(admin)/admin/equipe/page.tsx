@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Permissions from "./Permissions";
 
 const EXPEDITEURS_CONFIG = ["support@dataparl.fr", "it@dataparl.fr"] as const;
 import { LIBELLE_ROLE } from "@/app/_components/admin/EnTete";
@@ -17,15 +18,16 @@ const DESCRIPTION: Record<Role, string> = {
 };
 
 export default function Equipe() {
-  const [onglet, setOnglet] = useState<"liste" | "creer">("liste");
+  const [onglet, setOnglet] = useState<"liste" | "creer" | "permissions">("liste");
   return (
     <>
       <h1>Équipe</h1>
       <div className="onglets-pages">
         <a href="#" aria-current={onglet === "liste" ? "page" : undefined} onClick={(e) => { e.preventDefault(); setOnglet("liste"); }}>Utilisateurs</a>
         <a href="#" aria-current={onglet === "creer" ? "page" : undefined} onClick={(e) => { e.preventDefault(); setOnglet("creer"); }}>Créer un compte</a>
+        <a href="#" aria-current={onglet === "permissions" ? "page" : undefined} onClick={(e) => { e.preventDefault(); setOnglet("permissions"); }}>Permissions</a>
       </div>
-      {onglet === "liste" ? <Liste /> : <Creer />}
+      {onglet === "liste" ? <Liste /> : onglet === "creer" ? <Creer /> : <Permissions />}
     </>
   );
 }

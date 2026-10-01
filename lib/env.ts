@@ -44,3 +44,7 @@ export function secret(name: Secret): string {
   if (!v) throw new Error(`Variable d'environnement manquante : ${name}`);
   return v;
 }
+
+// Base des liens tracés. www.dataparl.fr/l fonctionne d'emblée ; passer à
+// https://link.dataparl.fr une fois ce sous-domaine ajouté au projet Vercel.
+export const LIENS_BASE = (process.env.NEXT_PUBLIC_LIENS_BASE ?? "https://www.dataparl.fr/l").replace(/\/$/, "");

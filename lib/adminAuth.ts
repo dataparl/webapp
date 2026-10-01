@@ -5,6 +5,7 @@ import { domaineCookie as domaineDeHote } from "./domaine";
 import { chiffrer, dechiffrer, signerJeton, verifierJeton } from "./crypto";
 import { ADMIN_GITHUB_LOGINS, secret } from "./env";
 import { authAdmin } from "./supabaseAdmin";
+import { CLES_MODULES, modulesDe, type Module } from "./permissions";
 import { fournisseurs, utilisateur } from "./userAuth";
 
 // Accès à l'administration et à la webmail : trois verrous.
@@ -25,8 +26,8 @@ const MAX_ECHECS = 5;
 export type Role = "admin" | "editeur" | "utilisateur";
 export const ROLES: Role[] = ["admin", "editeur", "utilisateur"];
 // `github` : nom affiché dans le journal (historiquement le login GitHub).
-export type Admin = { userId: string; github: string; role: Role; email: string; doitChangerMdp: boolean };
-export type Refus = { ok: false; status: 401 | 403; otp?: "a_enroler" | "requis" };
+export type Admin = { userId: string; github: string; role: Role; email: string; doitChangerMdp: boolean; modules: Module[] };
+export type Refus = { ok: false; status: 401 | 403; otp?: "a_enroler" | "requis"; passkey?: boolean; totp?: boolean };
 export type AdminCheck = ({ ok: true } & Admin) | Refus;
 
 function loginGithub(user: { identities?: { provider: string; identity_data?: Record<string, unknown> }[] }): string | null {
@@ -43,14 +44,19 @@ export async function identifierAdmin(req: Request): Promise<({ ok: true } & Adm
   const { data: s } = await db.from("staff").select("nom, email, role, actif, doit_changer_mdp").eq("user_id", user.id).maybeSingle();
   if (s) {
     if (!s.actif) return { ok: false, status: 403 };
-    return { ok: true, userId: user.id, github: s.nom as string, role: s.role as Role, email: s.email as string, doitChangerMdp: !!s.doit_changer_mdp };
+    const { data: reglages, error: ePerm } = s.role === "admin" ? { data: [], error: null } : await db.from("staff_permissions").select("module, autorise").eq("user_id", user.id);
+    if (ePerm) return { ok: false, status: 403 }; // sans les réglages, un refus explicite pourrait être ignoré
+    return {
+      ok: true, userId: user.id, github: s.nom as string, role: s.role as Role, email: s.email as string, doitChangerMdp: !!s.doit_changer_mdp,
+      modules: modulesDe(s.role as Role, (reglages ?? []) as { module: string; autorise: boolean }[]),
+    };
   }
   // Administrateurs GitHub historiques : rattachés à l'équipe comme admins.
   if (!fournisseurs(user).includes("github")) return { ok: false, status: 403 };
   const { data: row } = await db.from("admin_users").select("github_login").eq("user_id", user.id).maybeSingle();
   const login = (row?.github_login as string | undefined) ?? loginGithub(user);
   if (!row && !(login && ADMIN_GITHUB_LOGINS.includes(login.toLowerCase()))) return { ok: false, status: 403 };
-  const a: Admin = { userId: user.id, github: login ?? user.email ?? "admin", role: "admin", email: user.email ?? "", doitChangerMdp: false };
+  const a: Admin = { userId: user.id, github: login ?? user.email ?? "admin", role: "admin", email: user.email ?? "", doitChangerMdp: false, modules: [...CLES_MODULES] };
   await db.from("admin_users").upsert({ user_id: user.id, github_login: a.github });
   await db.from("staff").upsert({ user_id: user.id, nom: a.github, email: a.email, role: "admin" });
   await audit(a, "staff.ajout_auto", a.github);
@@ -74,8 +80,13 @@ export async function checkAdmin(req: Request): Promise<AdminCheck> {
   // utilisateurs : adresse + mot de passe).
   if (a.role !== "admin") return a;
   if (!verifierJeton(lireCookie(req, COOKIE_OTP), a.userId, secret("ADMIN_OTP_SECRET"))) {
-    const { data } = await authAdmin().from("admin_totp_secrets").select("active").eq("user_id", a.userId).maybeSingle();
-    return { ok: false, status: 401, otp: data?.active ? "requis" : "a_enroler" };
+    const db = authAdmin();
+    const [{ data }, { count }] = await Promise.all([
+      db.from("admin_totp_secrets").select("active").eq("user_id", a.userId).maybeSingle(),
+      db.from("passkeys").select("id", { count: "exact", head: true }).eq("user_id", a.userId),
+    ]);
+    // Une clé d'accès (Touch ID, Face ID) ou un code TOTP : l'un des deux suffit.
+    return { ok: false, status: 401, otp: data?.active || (count ?? 0) > 0 ? "requis" : "a_enroler", passkey: (count ?? 0) > 0, totp: !!data?.active };
   }
   return a;
 }

@@ -15,6 +15,7 @@ export async function GET() {
         "Disallow: /preferences",
         "Disallow: /desinscription",
         "Disallow: /connexion",
+        "Disallow: /l/",
         "",
         `Sitemap: https://${host}/sitemap.xml`,
         ...(host === "www.dataparl.fr" ? [`Sitemap: https://${host}/sitemap-daily.xml`] : []),

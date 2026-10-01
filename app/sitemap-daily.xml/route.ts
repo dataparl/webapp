@@ -1,6 +1,8 @@
 import { headers } from "next/headers";
 import { aujourdhuiParis, decaler } from "@/lib/alertes";
 import { joursPublies } from "@/lib/daily";
+import { cheminsInactifs } from "@/lib/pagesEtat";
+import { estInactif } from "@/lib/pagesRegistre";
 
 export const revalidate = 3600;
 
@@ -11,7 +13,7 @@ export async function GET() {
   if (host !== "www.dataparl.fr") return new Response("Not found", { status: 404 });
   const base = "https://www.dataparl.fr";
   let jours: { date: string }[] = [];
-  try { jours = await joursPublies(decaler(aujourdhuiParis(), -90)); } catch { /* plan vide plutôt qu'une erreur */ }
+  if (!estInactif("/daily", await cheminsInactifs())) try { jours = await joursPublies(decaler(aujourdhuiParis(), -90)); } catch { /* plan vide plutôt qu'une erreur */ }
   const xml = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',

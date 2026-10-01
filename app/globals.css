@@ -353,15 +353,16 @@ h1.marque { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .rattrapage a { display: inline-block; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--ink); text-decoration: none; font-weight: 600; }
 .rattrapage a:hover { border-color: var(--ink); }
 
-/* Logos de marque : bloc bleu nuit + couleur de la rubrique, bandeau « par DataParl' » */
-.logo-marque { display: inline-flex; flex-direction: column; align-items: stretch; margin: 8px 0; line-height: 1; }
-.logo-marque a { text-decoration: none; }
-.logo-marque .bloc { background: #14224E; color: #fff; font-family: "Spectral", serif; font-weight: 700; font-size: 1.3rem; padding: 6px 4px 6px 10px; border-radius: 6px 6px 0 0; white-space: nowrap; }
-.logo-marque .bloc span { padding: 6px 8px 6px 3px; margin-left: 2px; border-radius: 0 6px 0 0; }
-.logo-marque.vigi .bloc span { background: #C8102E; }
-.logo-marque.mixi .bloc span { background: #7B3FE4; }
-.logo-marque .bandeau { background: #FFD23F; color: #164DFF; font-size: .68rem; font-weight: 600; letter-spacing: .02em; padding: 3px 10px; border-radius: 0 0 6px 6px; text-align: right; }
-.logo-marque .bandeau b { color: #14224E; font-family: "Spectral", serif; font-size: .78rem; }
+/* Logos de marque : « Vigi » + bloc rouge (ou violet) « Parl' », et « par DataParl' » en dessous, à droite */
+.logo-marque { display: inline-block; margin: 6px 0 8px; line-height: 1; text-align: right; }
+.logo-marque a { display: block; text-decoration: none; color: var(--ink); white-space: nowrap; }
+.logo-marque .haut { font-family: "Spectral", serif; font-weight: 700; font-size: 1.7rem; display: flex; align-items: center; justify-content: flex-end; }
+.logo-marque .haut span { display: block; color: #fff; padding: .36em .08em .36em .1em; margin-left: .03em; }
+.logo-marque.vigi .haut span { background: #B42B34; }
+.logo-marque.mixi .haut span { background: #7341DC; }
+.logo-marque .par { font-size: .7rem; color: var(--muted); margin-top: -.55em; position: relative; display: flex; align-items: center; justify-content: flex-end; }
+.logo-marque .par b { font-family: "Spectral", serif; font-size: .95rem; color: #0D1B3E; margin-left: .45em; display: flex; align-items: center; }
+.logo-marque .par b span { display: block; background: #F8D45C; color: #0D1B3E; padding: .5em .12em .5em .1em; margin-left: .04em; }
 
 /* Cases de statistiques sur deux colonnes (Assemblée, Sénat) */
 .chiffres.paires { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 720px; }
@@ -393,3 +394,4 @@ h1.marque { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .recherche-stat input { padding: 12px 14px; border-radius: 12px; background: var(--card); }
 .pagination { display: flex; gap: 12px; justify-content: space-between; align-items: center; margin: 16px 0; flex-wrap: wrap; }
 .titre-lien { color: inherit; text-decoration: none; } .titre-lien:hover { color: var(--bleu); }
+.matrice th[scope=row] { text-align: left; font-weight: 400; min-width: 220px; } .matrice select { min-width: 190px; } .matrice select.autorise { border-color: #1F8A4C; } .matrice select.refuse { color: var(--muted); }

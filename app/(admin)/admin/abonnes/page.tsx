@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useAdmin } from "@/app/_components/admin/Porte";
+import Pagination from "@/app/_components/admin/Pagination";
 import { dateHeure, useRessource } from "@/app/_components/admin/utils";
 
 type Abonne = {
@@ -46,17 +47,5 @@ export default function Abonnes() {
         <Pagination page={page} total={data.total} parPage={data.par_page} onPage={setPage} />
       </>}
     </>
-  );
-}
-
-export function Pagination({ page, total, parPage, onPage }: { page: number; total: number; parPage: number; onPage: (p: number) => void }) {
-  const pages = Math.ceil(total / parPage);
-  if (pages <= 1) return null;
-  return (
-    <p className="pagination">
-      <button className="lien" disabled={page === 0} onClick={() => onPage(page - 1)}>Précédent</button>
-      <span className="meta">page {page + 1} / {pages}</span>
-      <button className="lien" disabled={page + 1 >= pages} onClick={() => onPage(page + 1)}>Suivant</button>
-    </p>
   );
 }

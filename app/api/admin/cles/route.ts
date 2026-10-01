@@ -32,7 +32,7 @@ export async function GET(req: Request) {
         };
       }),
     };
-  });
+  }, "cles_api");
 }
 
 const Maj = z.object({
@@ -52,5 +52,5 @@ export async function PATCH(req: Request) {
     await authAdmin().from("api_keys").update(champs).eq("id", p.data.id);
     await audit(a, p.data.revoquer ? "cle.revocation" : "cle.quota", p.data.id, champs);
     return { ok: true };
-  });
+  }, "cles_api");
 }

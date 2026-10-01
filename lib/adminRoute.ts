@@ -1,16 +1,18 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import { checkAdmin, refus, type Admin, type Role } from "./adminAuth";
+import type { Module } from "./permissions";
 
 // Enveloppe commune des routes d'admin et de webmail : les trois verrous,
 // le rôle requis (admin par défaut), puis réponse JSON jamais mise en cache.
 export const EQUIPE: Role[] = ["admin", "editeur", "utilisateur"];
 export const EDITION: Role[] = ["admin", "editeur"];
 
-export async function avecAdmin(req: Request, fn: (a: Admin) => Promise<unknown>, roles: Role[] = ["admin"]): Promise<NextResponse> {
+// `acces` : liste de rôles, ou module de la matrice de permissions.
+export async function avecAdmin(req: Request, fn: (a: Admin) => Promise<unknown>, acces: Role[] | Module = ["admin"]): Promise<NextResponse> {
   const a = await checkAdmin(req);
   if (!a.ok) return refus(a);
-  if (!roles.includes(a.role)) return NextResponse.json({ error: "réservé à un autre rôle" }, { status: 403, headers: { "Cache-Control": "no-store" } });
+  if (typeof acces === "string" ? !a.modules.includes(acces) : !acces.includes(a.role)) return NextResponse.json({ error: "réservé à un autre rôle" }, { status: 403, headers: { "Cache-Control": "no-store" } });
   if (a.doitChangerMdp) return NextResponse.json({ error: "mot de passe à changer", mdp: true }, { status: 403, headers: { "Cache-Control": "no-store" } });
   try {
     const out = await fn(a);

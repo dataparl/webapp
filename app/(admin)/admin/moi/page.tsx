@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { startRegistration } from "@simplewebauthn/browser";
+import { dateHeure, useRessource } from "@/app/_components/admin/utils";
 import { LIBELLE_ROLE } from "@/app/_components/admin/EnTete";
 import { lien } from "@/app/_components/admin/liens";
 import { useAdmin } from "@/app/_components/admin/Porte";
@@ -18,6 +20,48 @@ function iconeBase64(): string {
   g.fillStyle = "#071A41"; g.font = "bold 120px Georgia, 'Times New Roman', serif";
   g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("D", 90, 98);
   return c.toDataURL("image/png").split(",")[1] ?? "";
+}
+
+type Cle = { id: string; nom: string; cree_le: string; utilisee_le: string | null };
+
+// Clés d'accès : Touch ID (Mac), Face ID (iPhone, iPad), empreinte ou code de l'appareil.
+function ClesDAcces() {
+  const { api } = useAdmin();
+  const { data, recharger } = useRessource<{ cles: Cle[]; disponible: boolean }>("/api/admin/passkeys");
+  const [nom, setNom] = useState("");
+  const [etat, setEtat] = useState<{ ok: boolean; t: string } | null>(null);
+  async function ajouter() {
+    setEtat(null);
+    try {
+      const { options } = await api<{ options: Parameters<typeof startRegistration>[0]["optionsJSON"] }>("/api/admin/passkeys", { method: "POST", body: { action: "options" } });
+      const reponse = await startRegistration({ optionsJSON: options });
+      await api("/api/admin/passkeys", { method: "POST", body: { action: "enregistrer", reponse, nom: nom || "Clé d'accès" } });
+      setNom(""); setEtat({ ok: true, t: "Clé d'accès ajoutée : tu peux te connecter et déverrouiller avec elle." });
+      await recharger();
+    } catch (e) { setEtat({ ok: false, t: (e as Error).name === "NotAllowedError" ? "Demande annulée." : (e as Error).message || "Cet appareil ne propose pas de clé d'accès." }); }
+  }
+  async function retirer(c: Cle) {
+    if (!confirm(`Retirer « ${c.nom} » ?`)) return;
+    await api(`/api/admin/passkeys?id=${c.id}`, { method: "DELETE" }); recharger();
+  }
+  return (
+    <div className="card">
+      <h2 style={{ marginTop: 0 }}>Touch ID, Face ID</h2>
+      <p>Une clé d&apos;accès permet de te connecter et de déverrouiller l&apos;admin et la messagerie avec l&apos;empreinte ou le visage, sans mot de passe ni code. Le mot de passe reste valable.</p>
+      {data?.cles.length ? (
+        <table className="stats"><tbody>{data.cles.map((c) => (
+          <tr key={c.id}><td><strong>{c.nom}</strong><br /><span className="meta">ajoutée le {dateHeure(c.cree_le)}{c.utilisee_le ? ` · utilisée le ${dateHeure(c.utilisee_le)}` : ""}</span></td>
+            <td><button className="lien" onClick={() => retirer(c)}>Retirer</button></td></tr>
+        ))}</tbody></table>
+      ) : <p className="meta">Aucune clé d&apos;accès pour l&apos;instant.</p>}
+      {data && !data.disponible ? <p className="meta">À enregistrer depuis admin.dataparl.fr ou webmail.dataparl.fr.</p> : <>
+        <label htmlFor="cle-nom">Nom de l&apos;appareil</label>
+        <input id="cle-nom" type="text" value={nom} onChange={(e) => setNom(e.target.value)} placeholder="MacBook de Théo" maxLength={60} />
+        {etat && <p className={etat.ok ? "ok" : "erreur"}>{etat.t}</p>}
+        <button className="secondaire" onClick={ajouter}>Ajouter cet appareil</button>
+      </>}
+    </div>
+  );
 }
 
 export default function MonEspace() {
@@ -130,6 +174,8 @@ export default function MonEspace() {
             {etat && <p className={etat.ok ? "ok" : "erreur"}>{etat.t}</p>}
             <button disabled={!mdp}>Changer</button>
           </form>
+
+          <ClesDAcces />
 
           <div className="card">
             <h2 style={{ marginTop: 0 }}>Sur mon téléphone</h2>

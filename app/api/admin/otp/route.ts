@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   if (!id.ok) return refus(id);
   const c = await checkAdmin(req);
   const otp = c.ok ? "ok" : c.otp ?? "requis";
-  return NextResponse.json({ github: id.github, nom: id.github, email: id.email, role: id.role, mdp: id.doitChangerMdp, otp }, { headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json({ github: id.github, nom: id.github, email: id.email, role: id.role, modules: id.modules, mdp: id.doitChangerMdp, otp, passkey: !c.ok && !!c.passkey, totp: c.ok || !!c.totp }, { headers: { "Cache-Control": "no-store" } });
 }
 
 // Fin de l'accès renforcé (bouton « Verrouiller »).

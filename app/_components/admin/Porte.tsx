@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { startAuthentication } from "@simplewebauthn/browser";
 import { authBrowser } from "@/lib/supabaseBrowser";
 
 // Porte d'entrée de l'admin et de la webmail. Connexion (compte d'équipe par
@@ -10,7 +11,7 @@ import { authBrowser } from "@/lib/supabaseBrowser";
 
 type Api = <T = unknown>(chemin: string, init?: { method?: string; body?: unknown; query?: Record<string, string | number | undefined> }) => Promise<T>;
 export type Role = "admin" | "editeur" | "utilisateur";
-export type Moi = { nom: string; email: string; role: Role };
+export type Moi = { nom: string; email: string; role: Role; modules: string[] };
 type Ctx = Moi & { github: string; api: Api; verrouiller: () => void };
 
 const AdminCtx = createContext<Ctx | null>(null);
@@ -22,7 +23,7 @@ export class ErreurApi extends Error {
 
 type Etat =
   | { e: "chargement" } | { e: "anonyme" } | { e: "refuse" } | { e: "erreur" }
-  | ({ e: "mdp" } & Moi) | ({ e: "enrolement" } & Moi) | ({ e: "code" } & Moi) | ({ e: "ok" } & Moi);
+  | ({ e: "mdp" } & Moi) | ({ e: "enrolement" } & Moi) | ({ e: "code"; passkey: boolean; totp: boolean } & Moi) | ({ e: "ok" } & Moi);
 
 async function jeton(): Promise<string | null> {
   const { data } = await authBrowser().auth.getSession();
@@ -39,9 +40,9 @@ export default function Porte({ titre, children }: { titre: string; children: Re
     if (r.status === 401) return setEtat({ e: "anonyme" });
     if (r.status === 403) return setEtat({ e: "refuse" });
     if (!r.ok) return setEtat({ e: "erreur" });
-    const j = (await r.json()) as { nom: string; email: string; role: Role; mdp: boolean; otp: "ok" | "requis" | "a_enroler" };
-    const moi: Moi = { nom: j.nom, email: j.email, role: j.role };
-    setEtat(j.mdp ? { e: "mdp", ...moi } : j.otp === "ok" ? { e: "ok", ...moi } : j.otp === "a_enroler" ? { e: "enrolement", ...moi } : { e: "code", ...moi });
+    const j = (await r.json()) as { nom: string; email: string; role: Role; modules?: string[]; mdp: boolean; otp: "ok" | "requis" | "a_enroler"; passkey?: boolean; totp?: boolean };
+    const moi: Moi = { nom: j.nom, email: j.email, role: j.role, modules: j.modules ?? [] };
+    setEtat(j.mdp ? { e: "mdp", ...moi } : j.otp === "ok" ? { e: "ok", ...moi } : j.otp === "a_enroler" ? { e: "enrolement", ...moi } : { e: "code", passkey: !!j.passkey, totp: j.totp !== false, ...moi });
   }, []);
 
   useEffect(() => { verifier(); }, [verifier]);
@@ -69,7 +70,7 @@ export default function Porte({ titre, children }: { titre: string; children: Re
   }, [verifier]);
 
   if (etat.e === "ok") {
-    const moi = { nom: etat.nom, email: etat.email, role: etat.role };
+    const moi = { nom: etat.nom, email: etat.email, role: etat.role, modules: etat.modules };
     return <AdminCtx.Provider value={{ ...moi, github: etat.nom, api, verrouiller }}>{children}</AdminCtx.Provider>;
   }
 
@@ -87,7 +88,7 @@ export default function Porte({ titre, children }: { titre: string; children: Re
         </>}
         {etat.e === "erreur" && <p className="erreur">Service indisponible. Réessaie dans un instant.</p>}
         {etat.e === "enrolement" && <Enrolement github={etat.nom} onOk={verifier} />}
-        {etat.e === "code" && <SaisieCode github={etat.nom} onOk={verifier} />}
+        {etat.e === "code" && <SaisieCode github={etat.nom} passkey={etat.passkey} totp={etat.totp} onOk={verifier} />}
       </div>
     </div>
   );
@@ -116,15 +117,45 @@ function useEnvoiCode(onOk: () => void) {
   return { champ, valider, err, envoi, code };
 }
 
-function SaisieCode({ github, onOk }: { github: string; onOk: () => void }) {
+// Clé d'accès (Touch ID, Face ID, empreinte) : demande les options au serveur,
+// laisse le navigateur afficher la demande biométrique, renvoie la réponse.
+async function parCleDAcces(chemin: string, avecSession: boolean): Promise<{ ok: true; jeton?: string } | { ok: false; error: string }> {
+  try {
+    const t = avecSession ? await jeton() : null;
+    const entetes = { "Content-Type": "application/json", ...(t ? { Authorization: `Bearer ${t}` } : {}) };
+    const o = await fetch(chemin, { method: "POST", headers: entetes, body: JSON.stringify({ action: "options" }) });
+    if (!o.ok) return { ok: false, error: ((await o.json().catch(() => ({}))) as { error?: string }).error ?? "indisponible" };
+    const reponse = await startAuthentication({ optionsJSON: (await o.json()).options });
+    const r = await fetch(chemin, { method: "POST", headers: entetes, body: JSON.stringify({ action: "verifier", reponse }) });
+    const j = (await r.json().catch(() => ({}))) as { error?: string; jeton?: string };
+    return r.ok ? { ok: true, jeton: j.jeton } : { ok: false, error: j.error ?? "clé d'accès refusée" };
+  } catch {
+    return { ok: false, error: "Demande annulée ou clé d'accès indisponible sur cet appareil." };
+  }
+}
+
+function SaisieCode({ github, passkey, totp, onOk }: { github: string; passkey: boolean; totp: boolean; onOk: () => void }) {
   const f = useEnvoiCode(onOk);
+  const [errCle, setErrCle] = useState<string | null>(null);
+  async function cle() {
+    setErrCle(null);
+    const r = await parCleDAcces("/api/admin/passkeys/verification", true);
+    if (r.ok) onOk(); else setErrCle(r.error);
+  }
   return (
     <form onSubmit={f.valider}>
       <h1>Second facteur</h1>
-      <p>Connecté(e) en tant que <strong>{github}</strong>. Saisis le code à 6 chiffres de ton application d&apos;authentification. L&apos;accès reste ouvert 15 minutes.</p>
-      {f.champ}
-      {f.err && <p className="erreur">{f.err}</p>}
-      <button disabled={f.envoi || f.code.length !== 6}>Valider</button>
+      <p>Connecté(e) en tant que <strong>{github}</strong>. L&apos;accès reste ouvert 15 minutes.</p>
+      {passkey && <>
+        <button type="button" onClick={cle}>Déverrouiller avec Touch ID / Face ID</button>
+        {errCle && <p className="erreur">{errCle}</p>}
+      </>}
+      {totp && <>
+        <p>{passkey ? "Ou saisis" : "Saisis"} le code à 6 chiffres de ton application d&apos;authentification.</p>
+        {f.champ}
+        {f.err && <p className="erreur">{f.err}</p>}
+        <button className={passkey ? "secondaire" : undefined} disabled={f.envoi || f.code.length !== 6}>Valider</button>
+      </>}
     </form>
   );
 }
@@ -170,6 +201,16 @@ function ConnexionEquipe({ onOk }: { onOk: () => void }) {
     if (error) return setErr("Adresse ou mot de passe incorrect.");
     onOk();
   }
+  // Sans mot de passe : la clé d'accès désigne le compte, le serveur renvoie un jeton à usage unique.
+  async function cle() {
+    setEnvoi(true); setErr(null);
+    const r = await parCleDAcces("/api/admin/passkeys/connexion", false);
+    if (!r.ok || !r.jeton) { setEnvoi(false); return setErr(r.ok ? "Connexion impossible." : r.error); }
+    const { error } = await authBrowser().auth.verifyOtp({ token_hash: r.jeton, type: "magiclink" });
+    setEnvoi(false);
+    if (error) return setErr("Connexion impossible, utilise ton mot de passe.");
+    onOk();
+  }
   return (
     <form onSubmit={valider}>
       <h1>Espace équipe</h1>
@@ -179,7 +220,8 @@ function ConnexionEquipe({ onOk }: { onOk: () => void }) {
       <label htmlFor="eq-mdp">Mot de passe</label>
       <input id="eq-mdp" type="password" autoComplete="current-password" required value={mdp} onChange={(e) => setMdp(e.target.value)} />
       {err && <p className="erreur">{err}</p>}
-      <button disabled={envoi}>{envoi ? "Connexion…" : "Se connecter"}</button>
+      <button disabled={envoi}>{envoi ? "Connexion…" : "Se connecter"}</button>{" "}
+      <button type="button" className="secondaire" disabled={envoi} onClick={cle}>Touch ID / Face ID</button>
       <p className="meta" style={{ marginTop: 18 }}>
         Administrateur avec GitHub ? <a href={`/connexion?suite=${encodeURIComponent(window.location.pathname)}`}>Se connecter avec GitHub</a>
       </p>

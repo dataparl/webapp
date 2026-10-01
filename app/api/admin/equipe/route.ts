@@ -4,6 +4,7 @@ import { avecAdmin, corps, erreur } from "@/lib/adminRoute";
 import { EXPEDITEURS_CONFIG, envoyerConfiguration } from "@/lib/equipeMail";
 import { changerAdresse } from "@/lib/equipe";
 import { adresseEquipe, genererMotDePasse, motDePasseValide } from "@/lib/motDePasse";
+import { CLES_MODULES, modulesDe, reserve, type Role as RoleP } from "@/lib/permissions";
 import { authAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
@@ -14,14 +15,21 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   return avecAdmin(req, async (a) => {
     const db = authAdmin();
-    const [{ data: staff }, { data: totp }] = await Promise.all([
+    const [{ data: staff }, { data: totp }, { data: perms }, { data: cles }] = await Promise.all([
       db.from("staff").select("user_id, nom, prenom, nom_famille, poste, email, role, actif, doit_changer_mdp, cree_le").order("cree_le"),
       db.from("admin_totp_secrets").select("user_id, active, last_used_at"),
+      db.from("staff_permissions").select("user_id, module, autorise"),
+      db.from("passkeys").select("user_id"),
     ]);
+    const reglagesDe = (id: string) => (perms ?? []).filter((x) => x.user_id === id).map((x) => ({ module: x.module as string, autorise: !!x.autorise }));
     const t = new Map((totp ?? []).map((x) => [x.user_id, x]));
     return {
       moi: a.userId,
-      comptes: (staff ?? []).map((s) => ({ ...s, totp_actif: !!t.get(s.user_id)?.active, derniere_connexion: t.get(s.user_id)?.last_used_at ?? null })),
+      comptes: (staff ?? []).map((s) => ({
+        ...s, totp_actif: !!t.get(s.user_id)?.active, derniere_connexion: t.get(s.user_id)?.last_used_at ?? null,
+        passkeys: (cles ?? []).filter((x) => x.user_id === s.user_id).length,
+        reglages: reglagesDe(s.user_id as string), modules: modulesDe(s.role as RoleP, reglagesDe(s.user_id as string)),
+      })),
     };
   });
 }
@@ -80,6 +88,8 @@ const Action = z.discriminatedUnion("action", [
   z.object({ action: z.literal("nouveau_mdp"), user_id: z.string().uuid(), envoi: ExpedConfig.optional() }),
   z.object({ action: z.literal("adresse"), user_id: z.string().uuid(), email: z.string().trim().max(120) }),
   z.object({ action: z.literal("reinit_totp"), user_id: z.string().uuid() }),
+  // autorise : true / false, ou null pour revenir au réglage du rôle.
+  z.object({ action: z.literal("permission"), user_id: z.string().uuid(), module: z.enum(CLES_MODULES as [string, ...string[]]), autorise: z.boolean().nullable() }),
 ]);
 
 export async function PATCH(req: Request) {
@@ -108,14 +118,19 @@ export async function PATCH(req: Request) {
         const r = await envoyerConfiguration({ to: d.envoi.envoyer_a, from: d.envoi.expediteur, nom: (cible.prenom as string) || (cible.nom as string), email: cible.email as string, motDePasse, role: cible.role as string, nouveau: true });
         retour.envoi = r.ok ? { ok: true, a: d.envoi.envoyer_a } : { ok: false, erreur: r.error };
       }
+    } else if (d.action === "permission") {
+      if (reserve(d.module)) return erreur(400, "ce module est réservé aux administrateurs");
+      if (d.autorise === null) await db.from("staff_permissions").delete().eq("user_id", d.user_id).eq("module", d.module);
+      else await db.from("staff_permissions").upsert({ user_id: d.user_id, module: d.module, autorise: d.autorise });
     } else if (d.action === "adresse") {
       const r = await changerAdresse(d.user_id, d.email);
       if (!r.ok) return erreur(r.statut, r.erreur);
       retour = { ok: true, email: r.email };
     } else {
       await db.from("admin_totp_secrets").delete().eq("user_id", d.user_id);
+      await db.from("passkeys").delete().eq("user_id", d.user_id);
     }
-    await audit(a, `equipe.${d.action}`, cible.email as string, d.action === "role" ? { role: d.role } : {});
+    await audit(a, `equipe.${d.action}`, cible.email as string, d.action === "role" ? { role: d.role } : d.action === "permission" ? { module: d.module, autorise: d.autorise } : {});
     return retour;
   });
 }

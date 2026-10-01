@@ -12,7 +12,7 @@ export { esc, texteVersHtml } from "./gabarit";
 //     hash du jeton est stocké) ;
 //   - est rangé dans la table emails (visible dans la webmail).
 
-export type TypeEnvoi = "transactionnel" | "webmail" | "auto" | "alerte";
+export type TypeEnvoi = "transactionnel" | "webmail" | "auto" | "alerte" | "communique" | "mailing";
 
 export type Message = {
   from?: string; // adresse nue ; défaut : MAIL_FROM
