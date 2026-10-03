@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const url = `https://www.dataparl.fr/parlementaires/${encodeURIComponent(f.slug)}`;
     const photo = f.photo_url ? photoAbsolue(f.chambre, f.slug, 400) : null;
     return {
-      title: `${nom} : équipe et parcours`, description,
+      title: `${nom}${f.groupe ? ` (${f.groupe})` : ""} : équipe, bio et mandats`, description,
       alternates: { canonical: url },
       openGraph: { title: `${nom} · DataParl'`, description, url, type: "profile", images: photo ? [{ url: photo, width: 400, height: 400, alt: `Photo officielle de ${nom}` }] : undefined },
       twitter: { card: "summary", title: `${nom} · DataParl'`, description, images: photo ? [photo] : undefined },
@@ -92,10 +92,18 @@ export default async function Parlementaire({ params }: Props) {
     jobTitle: f.actif ? titre(f) : undefined, sameAs: f.url_officielle ? [f.url_officielle] : undefined,
     memberOf: f.actif ? { "@type": "GovernmentOrganization", name: CHAMBRE_LONG[f.chambre] } : undefined,
   };
+  const filAriane = {
+    "@context": "https://schema.org", "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Parlementaires", item: "https://www.dataparl.fr/parlementaires" },
+      { "@type": "ListItem", position: 2, name: nom },
+    ],
+  };
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(filAriane).replace(/</g, "\\u003c") }} />
       <div className="entete-elu">
         <Photo chambre={f.chambre} slug={f.slug} src={f.photo_url} nom={nom} />
         <div>
@@ -115,6 +123,14 @@ export default async function Parlementaire({ params }: Props) {
             texte={`${nom} : son équipe de collaborateurs, ses arrivées et ses départs, sur DataParl'`} />
         </div>
       </div>
+
+      <p className="lead" style={{ marginBottom: 0 }}>
+        {nom}, {f.actif ? titre(f).toLowerCase() : `${ancien(f).toLowerCase()} ${titre(f).toLowerCase()}`}
+        {f.circonscription && f.chambre !== "europarl" ? ` pour ${f.circonscription}` : ""}
+        {f.actif && f.groupe ? ` (groupe ${f.groupe})` : ""} : ici se trouvent son équipe de collaborateurs
+        parlementaires, ses mandats et commissions, les mouvements de son cabinet et{" "}
+        <a href={`/parlementaires/${encodeURIComponent(f.slug)}/bio`}>sa biographie</a>.
+      </p>
 
       <div className="chiffres">
         {stats && <>
@@ -168,7 +184,8 @@ export default async function Parlementaire({ params }: Props) {
           )}
           <p>
             <a className="btn secondaire" href={`/collab?elu=${encodeURIComponent(f.slug)}`}>Contacts et export de l&apos;équipe</a>{" "}
-            <a className="btn secondaire" href={`/parlementaires/${encodeURIComponent(f.slug)}/historique`}>Historique des collaborateurs</a>
+            <a className="btn secondaire" href={`/parlementaires/${encodeURIComponent(f.slug)}/historique`}>Historique des collaborateurs</a>{" "}
+            <a className="btn secondaire" href={`/parlementaires/${encodeURIComponent(f.slug)}/bio`}>Biographie</a>
           </p>
         </>
       )}

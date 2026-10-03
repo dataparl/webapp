@@ -60,6 +60,7 @@ export default async function Accueil() {
         <li><a href="/mouvements/parlement"><strong>Mouvements</strong><span>Rechercher dans les trois chambres →</span></a></li>
         <li><a href="/collab"><strong>Collaborateurs</strong><span>Qui travaille pour quel élu, et comment le joindre →</span></a></li>
         <li><a href="/parlementaires"><strong>Parlementaires</strong><span>Chaque élu, son équipe, ses mandats et ses commissions →</span></a></li>
+        <li><a href="/senatoriales2026"><strong>Sénatoriales 2026</strong><span>Les nouveaux sénateurs, département par département →</span></a></li>
         <li><a href="/vigiparl"><strong>Vigi<span className="surligne-vigi">Parl&apos;</span></strong><span>Le renouvellement des équipes, élu par élu →</span></a></li>
         <li><a href="/mixiparl"><strong>Mixi<span className="surligne-mixi">Parl&apos;</span></strong><span>La mixité femmes-hommes des équipes →</span></a></li>
         <li><a href="/alertes"><strong>Alertes</strong><span>Être prévenu(e) des mouvements qui t&apos;intéressent →</span></a></li>
