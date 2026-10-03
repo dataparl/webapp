@@ -46,7 +46,8 @@ const ancien = (f: Pick<Parlementaire, "civilite">) => (f.civilite === "Mme" ? "
 function Groupe({ chambre, sigle, libelle }: { chambre: string; sigle: string; libelle?: string }) {
   if (!sigle) return null;
   const fam = familleDe(chambre, sigle);
-  const href = hrefGroupe(chambre, sigle);
+  // « Aucun » n'est pas un groupe : pas de lien vers une fiche inexistante.
+  const href = sansGroupe(sigle) ? null : hrefGroupe(chambre, sigle);
   const contenu = (
     <>
       Groupe {sigle}{fam && fam.code !== sigle ? <span className="meta"> (famille {fam.code})</span> : null}
