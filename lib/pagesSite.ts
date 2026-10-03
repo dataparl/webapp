@@ -13,6 +13,8 @@ export const PAGES_SITE: PageSite[] = [
   { libelle: "Partis politiques", detail: "Tous les élus d'un parti, toutes chambres confondues", href: "/parti", mots: "partis politiques rn lr ps lfi modem elus toutes chambres" },
   { libelle: "Collaborateurs", detail: "Qui travaille pour quel élu", href: "/collab", mots: "collaborateurs assistants equipes collabs" },
   { libelle: "Alertes par email", detail: "Être prévenu(e) des mouvements", href: "/alertes", mots: "alertes email notification suivre abonnement" },
+  { libelle: "Méthode", detail: "Comment DataParl' collecte et vérifie", href: "/methode", mots: "methode methodologie collecte verification pipeline officiel donnees" },
+  { libelle: "Sources", detail: "Les publications officielles derrière chaque chiffre", href: "/methode/sources", mots: "sources publications officielles assemblee nationale senat agas licences citer" },
   { libelle: "Méthode VigiParl'", detail: "Comment le taux de renouvellement est calculé", href: "/vigiparl/methode", mots: "methode methodologie vigiparl calcul taux renouvellement" },
   { libelle: "Méthode MixiParl'", detail: "Comment la mixité est mesurée", href: "/mixiparl/methode", mots: "methode methodologie mixiparl genre parite calcul" },
   { libelle: "Presse & médias", detail: "Données et accès pour les rédactions", href: "/presse", mots: "presse medias journalistes redaction citer" },

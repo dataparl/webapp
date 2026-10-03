@@ -14,6 +14,8 @@ export const PAGES: PageSite[] = [
   { chemin: "/groupe", titre: "Groupes parlementaires", dynamique: "une fiche par groupe et par chambre", sitemap: true },
   { chemin: "/departement", titre: "Départements", dynamique: "une fiche par département", sitemap: true },
   { chemin: "/parti", titre: "Partis politiques", dynamique: "une fiche par parti", sitemap: true },
+  { chemin: "/methode", titre: "Méthode", dynamique: "les pages méthode (VigiParl', MixiParl', sources)", sitemap: true },
+  { chemin: "/methode/sources", titre: "Méthode · sources", sitemap: true },
   { chemin: "/vigiparl", titre: "VigiParl'", sitemap: true },
   { chemin: "/vigiparl/methode", titre: "VigiParl' · méthode", sitemap: true },
   { chemin: "/vigiparl/timeline", titre: "VigiParl' · année par année", sitemap: true },

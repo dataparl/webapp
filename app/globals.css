@@ -428,3 +428,6 @@ h1.marque { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 a.pastille-groupe { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); font-size: .88rem; font-weight: 600; text-decoration: none; color: var(--ink); }
 a.pastille-groupe:hover, a.pastille-groupe:focus-visible { border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, var(--card)); }
 .pastille-groupe .point { width: 9px; height: 9px; border-radius: 3px; background: var(--c); flex: none; }
+.etapes-methode { list-style: none; padding: 0; counter-reset: etape; }
+.etapes-methode > li { counter-increment: etape; margin: 0 0 14px; padding-left: 34px; position: relative; }
+.etapes-methode > li::before { content: counter(etape); position: absolute; left: 0; top: 1px; width: 22px; height: 22px; border-radius: 6px; background: color-mix(in srgb, var(--jaune) 45%, transparent); font-weight: 700; font-size: .8rem; display: inline-flex; align-items: center; justify-content: center; }
