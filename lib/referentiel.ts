@@ -28,12 +28,21 @@ const COLS_PARL = "chambre,elu_id,personne_id,cle,civilite,prenom,nom,date_naiss
 const ID_OK = /^[\p{L}\p{N}_ -]{1,80}$/u;
 
 // Retrouve un parlementaire à partir de l'identifiant d'URL : PA… (AN), slug
-// senat.fr ou matricule (Sénat), identifiant européen (PE).
+// senat.fr ou matricule (Sénat), identifiant européen (PE). Un même personne_id
+// peut avoir plusieurs fiches (une par chambre) : si l'identifiant d'URL
+// correspond à l'ancienne fiche d'une personne qui siège aujourd'hui ailleurs
+// (ex. un député devenu sénateur), la fiche active est préférée — les deux URL
+// montrent alors la même personne, avec l'historique complet des mandats.
 export async function parlementaireDepuisId(id: string): Promise<Parlementaire | null> {
   if (!ID_OK.test(id)) return null;
   const p = new URLSearchParams({ select: COLS_PARL, or: `(slug.ilike.${id},elu_id.ilike.${id})`, limit: "3" });
   const { rows } = await dataQuery<Parlementaire>("parlementaires", p, 3600);
-  return rows.find((r) => r.slug.toLowerCase() === id.toLowerCase()) ?? rows[0] ?? null;
+  const f = rows.find((r) => r.slug.toLowerCase() === id.toLowerCase()) ?? rows[0] ?? null;
+  if (!f || f.actif) return f;
+  const actives = await dataQuery<Parlementaire>("parlementaires",
+    new URLSearchParams({ select: COLS_PARL, personne_id: `eq.${f.personne_id}`, actif: "eq.true", limit: "2" }), 3600);
+  // Une seule fiche active : c'est elle qui représente la personne aujourd'hui.
+  return actives.rows.length === 1 ? actives.rows[0] : f;
 }
 
 // Fiche du référentiel correspondant à un élu des données de collaborateurs
