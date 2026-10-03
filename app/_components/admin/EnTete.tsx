@@ -9,6 +9,7 @@ export const LIBELLE_ROLE: Record<Role, string> = { admin: "Administrateur", edi
 const SECTIONS: [string, string, Role[] | string][] = [
   ["/", "Tableau de bord", ["admin", "editeur"]],
   ["/contact", "Contact", "formulaires"],
+  ["/elus", "Élus", "elus"],
   ["/abonnes", "Abonnés", "comptes"],
   ["/users", "Comptes", "comptes"],
   ["/oppositions", "Oppositions", "formulaires"],

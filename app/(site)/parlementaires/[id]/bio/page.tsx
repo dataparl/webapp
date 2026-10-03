@@ -7,6 +7,7 @@ import { CHAMBRE_LONG, nomAffiche, prenomNom } from "@/lib/format";
 import { chevauche, libellePeriode, moisAnnee } from "@/lib/periodes";
 import { collaborateurDeLaPersonne, parlementaireDepuisId, personne, type Appartenance, type Mandat, type Parlementaire } from "@/lib/referentiel";
 import { resumeWikipedia } from "@/lib/wikipedia";
+import { editionsManuelles } from "@/lib/editionsManuelles";
 
 export const revalidate = 3600;
 type Props = { params: Promise<{ id: string }> };
@@ -56,6 +57,14 @@ export default async function Bio({ params }: Props) {
   const dernier = ici[ici.length - 1];
   const commissions = appartenances.filter((a) => a.chambre === f.chambre && a.type !== "groupe" && (!a.fin || f.actif));
   const wiki = await resumeWikipedia(f.prenom, f.nom).catch(() => null);
+  // Éditions manuelles (admin.dataparl.fr/elus) : bio, mandats et fonctions.
+  const manuel = await editionsManuelles(f.personne_id).catch(() => ({ bio: null, mandats: [], fonctions: [] }));
+  const mandatsManuels = manuel.mandats.map((m) => ({
+    chambre: m.chambre, elu_id: m.elu_id, personne_id: m.personne_id,
+    libelle: m.libelle, circonscription: m.circonscription, legislature: "",
+    debut: m.debut, fin: m.fin, cause_fin: m.cause_fin,
+  }) as Mandat);
+  const parcours = [...mandats, ...mandatsManuels].sort((a, b) => (b.debut || "").localeCompare(a.debut || ""));
 
   const phrases: string[] = [];
   const elu = f.civilite === "Mme" ? "élue" : "élu";
@@ -111,6 +120,16 @@ export default async function Bio({ params }: Props) {
         </div>
       </div>
 
+      {manuel.bio && (
+        <>
+          <h2>Biographie</h2>
+          {manuel.bio.texte.split(/\n\s*\n/).map((p, i) => <p key={i}>{p}</p>)}
+          {manuel.bio.source && (
+            <p className="meta">Source : {manuel.bio.source} · biographie éditée par l&apos;équipe DataParl&apos;.</p>
+          )}
+        </>
+      )}
+
       <h2>Qui est {nom} ?</h2>
       {phrases.map((p, i) => <p key={i}>{p}</p>)}
       {f.date_naissance && (
@@ -133,23 +152,25 @@ export default async function Bio({ params }: Props) {
 
       <h2>Mandats et parcours</h2>
       <ol className="parcours">
-        {mandats.map((m, i) => {
-          const g = groupes(m).map((a) => a.sigle || a.libelle).filter(Boolean);
+        {parcours.map((m, i) => {
+          const g = m.chambre === f.chambre ? groupes(m).map((a) => a.sigle || a.libelle).filter(Boolean) : [];
+          const manuelItem = mandatsManuels.includes(m);
           return (
             <li key={`${m.chambre}-${m.debut}-${i}`}>
               <p className="parcours-titre">
                 <strong>{m.libelle}</strong>
                 {m.circonscription && m.chambre !== "europarl" ? ` · ${m.circonscription}` : ""}
-                <span className="meta"> · {libellePeriode({ debut: m.debut, debut_connu: true, fin: m.fin, fin_connue: !!m.fin, en_cours: !m.fin })}</span>
+                <span className="meta"> · {libellePeriode({ debut: m.debut, debut_connu: !!m.debut, fin: m.fin, fin_connue: !!m.fin, en_cours: !m.fin })}</span>
+                {manuelItem && <span className="puce">précisé par DataParl&apos;</span>}
               </p>
               {g.length > 0 && <p className="meta" style={{ margin: "2px 0" }}>Groupe : {g.join(", ")}</p>}
             </li>
           );
         })}
       </ol>
-      {mandats.length === 0 && <p className="meta">Mandats non disponibles.</p>}
+      {parcours.length === 0 && <p className="meta">Mandats non disponibles.</p>}
 
-      {commissions.length > 0 && (
+      {(commissions.length > 0 || manuel.fonctions.length > 0) && (
         <>
           <h2>Commissions et fonctions{f.actif ? " actuelles" : ""}</h2>
           <ul className="organes">
@@ -158,6 +179,13 @@ export default async function Bio({ params }: Props) {
                 {a.libelle}
                 {a.fonction && a.fonction.toLowerCase() !== "membre" && <span className="puce">{a.fonction}</span>}
                 <span className="meta"> · {a.fin ? `${moisAnnee(a.debut)} à ${moisAnnee(a.fin)}` : `depuis ${moisAnnee(a.debut)}`}</span>
+              </li>
+            ))}
+            {manuel.fonctions.map((a) => (
+              <li key={a.id}>
+                {a.libelle}
+                {a.fonction && a.fonction.toLowerCase() !== "membre" && <span className="puce">{a.fonction}</span>}
+                <span className="meta"> · {a.fin ? `${a.debut ? `${moisAnnee(a.debut)} à ${moisAnnee(a.fin)}` : `jusqu'en ${moisAnnee(a.fin)}`}` : a.debut ? `depuis ${moisAnnee(a.debut)}` : ""}</span>
               </li>
             ))}
           </ul>
