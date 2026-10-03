@@ -3,9 +3,42 @@ import Link from "next/link";
 import ListeElus, { CHAMBRE_LONG } from "@/app/_components/ListeElus";
 import { elusDuGroupe, groupesExistants } from "@/lib/collectifsData";
 import { CHAMBRE_COURTE, hrefParti, groupeDepuisSlug, slugCollectif } from "@/lib/collectifs";
+import { couleurParti } from "@/lib/couleurs";
 
 export const revalidate = 3600;
 type Props = { params: Promise<{ groupe: string }> };
+
+// Page « groupe introuvable » : les groupes existants, chambre par chambre,
+// en pastilles colorées (Assemblée nationale, Sénat, Parlement européen).
+function GroupesExistants({ groupes }: { groupes: { chambre: string; groupe: string; groupe_libelle: string }[] }) {
+  const CHAMBRES_ORDRE = ["assemblee", "senat", "europarl"];
+  const parChambre: Record<string, typeof groupes> = {};
+  for (const g of groupes) (parChambre[g.chambre] ??= []).push(g);
+  return (
+    <>
+      {CHAMBRES_ORDRE.map((chambre) =>
+        parChambre[chambre]?.length ? (
+          <section key={chambre}>
+            <h2>{CHAMBRE_LONG[chambre]}</h2>
+            <div className="pastilles-groupes">
+              {parChambre[chambre].map((g) => (
+                <Link
+                  key={g.groupe}
+                  className="pastille-groupe"
+                  href={`/groupe/${CHAMBRE_COURTE[chambre]}-${slugCollectif(g.groupe)}/`}
+                  style={{ ["--c" as string]: couleurParti(g.groupe) }}
+                >
+                  <span className="point" />
+                  {g.groupe_libelle || g.groupe}
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null,
+      )}
+    </>
+  );
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const slug = (await params).groupe;
@@ -24,12 +57,15 @@ export default async function FicheGroupe({ params }: Props) {
   const groupes = await groupesExistants().catch(() => []);
   const g = groupeDepuisSlug(slug, groupes);
   if (!g) {
-    const existants = groupes.map((x) => `/groupe/${CHAMBRE_COURTE[x.chambre]}-${slugCollectif(x.groupe)}/`);
     return (
       <>
         <h1>Groupe introuvable</h1>
-        <p className="meta">Ce groupe n&apos;existe pas (ou plus). <Link href="/groupe">Voir tous les groupes</Link>.</p>
-        {existants.length > 0 && <p className="meta">Groupes existants : {existants.slice(0, 40).join(", ")}…</p>}
+        <p className="lead">
+          Ce groupe n&apos;existe pas (ou plus) : le sigle ou la chambre de l&apos;adresse ne correspond
+          à aucun groupe actif. Voici les groupes parlementaires existants, chambre par chambre :
+        </p>
+        <p><Link className="btn secondaire" href="/groupe">Voir tous les groupes</Link></p>
+        <GroupesExistants groupes={groupes} />
       </>
     );
   }

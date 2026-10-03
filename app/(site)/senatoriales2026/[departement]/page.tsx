@@ -6,6 +6,7 @@ import { moisAnnee } from "@/lib/periodes";
 import { SCRUTIN_2026, senatoriales2026, slugDepartement, type Senateur } from "@/lib/senatoriales";
 import { libelleElection } from "@/lib/senatorialesClassement";
 import { hrefGroupe, hrefDepartement, hrefParti, sansGroupe } from "@/lib/collectifs";
+import { BadgeChambre, BadgeParti } from "@/app/_components/Badges";
 
 export const revalidate = 3600;
 type Props = { params: Promise<{ departement: string }> };
@@ -34,9 +35,13 @@ function CarteSenateur({ s, reelu }: { s: Senateur; reelu?: boolean }) {
           {s.slug ? <a href={`/parlementaires/${encodeURIComponent(s.slug)}`}>{nom}</a> : nom}
           {reelu && <span className="puce">réélu{s.civilite === "Mme" ? "e" : ""}</span>}
         </p>
+        <div className="badges-elu">
+          <BadgeChambre chambre="senat" />
+          {!sansGroupe(s.groupe) && <BadgeParti sigle={s.groupe} />}
+        </div>
         <p className="meta" style={{ margin: "2px 0" }}>
           {s.election ? `Élu${s.civilite === "Mme" ? "e" : ""} le ${libelleElection()}` : ""}
-          {s.groupe ? ` · groupe ${s.groupe}` : s.liste ? ` · liste « ${s.liste} »` : ""}
+          {s.groupe && !sansGroupe(s.groupe) ? ` · groupe ${s.groupe}` : s.liste ? ` · liste « ${s.liste} »` : ""}
         </p>
         {s.slug && (
           <p className="meta" style={{ margin: 0 }}>

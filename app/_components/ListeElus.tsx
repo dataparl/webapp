@@ -1,6 +1,7 @@
 import Photo from "./Photo";
+import { BadgeChambre, BadgeParti } from "./Badges";
 import { prenomNom } from "@/lib/format";
-import { hrefDepartement, hrefGroupe } from "@/lib/collectifs";
+import { hrefDepartement, hrefGroupe, sansGroupe } from "@/lib/collectifs";
 import { slugDepartement } from "@/lib/senatorialesClassement";
 import type { EluCollectif } from "@/lib/collectifsData";
 
@@ -26,7 +27,11 @@ export default function ListeElus({ elus, afficher }: { elus: EluCollectif[]; af
               <p style={{ margin: 0, fontWeight: 700 }}>
                 <a href={`/parlementaires/${encodeURIComponent(e.slug)}`}>{nom}</a>
               </p>
-              <p className="meta" style={{ margin: "2px 0" }}>{CHAMBRE_LONG[e.chambre] ?? e.chambre}{dep && e.chambre !== "europarl" ? ` · ${dep}` : ""}</p>
+              <div className="badges-elu">
+                <BadgeChambre chambre={e.chambre} />
+                {!sansGroupe(e.groupe) && <BadgeParti sigle={e.groupe} />}
+              </div>
+              {dep && e.chambre !== "europarl" && <p className="meta" style={{ margin: "2px 0" }}>{dep}</p>}
               {afficher !== "groupe" && e.groupe && !["", "Aucun"].includes(e.groupe) && (
                 <p className="meta" style={{ margin: 0 }}>
                   <a href={hrefGroupe(e.chambre, e.groupe) ?? "#"}>Fiche groupe {e.groupe}</a>

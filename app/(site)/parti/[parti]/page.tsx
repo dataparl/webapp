@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ListeElus, { CHAMBRE_LONG } from "@/app/_components/ListeElus";
 import { elusDuParti, partisExistants } from "@/lib/collectifsData";
-import { partiDepuisSlug } from "@/lib/collectifs";
+import { partiDepuisSlug, slugCollectif } from "@/lib/collectifs";
+import { couleurParti } from "@/lib/couleurs";
 
 export const revalidate = 3600;
 type Props = { params: Promise<{ parti: string }> };
@@ -22,10 +23,23 @@ export default async function FicheParti({ params }: Props) {
   const slug = (await params).parti;
   const sigle = partiDepuisSlug(slug, await partisExistants().catch(() => []));
   if (!sigle) {
+    const partis = await partisExistants().catch(() => []);
     return (
       <>
         <h1>Parti introuvable</h1>
-        <p className="meta">Ce parti n&apos;a pas (ou plus) d&apos;élu actif enregistré. <Link href="/parti">Voir tous les partis</Link>.</p>
+        <p className="lead">
+          Ce parti n&apos;a pas (ou plus) d&apos;élu actif enregistré : le sigle de l&apos;adresse ne
+          correspond à aucun parti du référentiel. Voici les partis et groupes existants :
+        </p>
+        <p><Link className="btn secondaire" href="/parti">Voir tous les partis</Link></p>
+        <div className="pastilles-groupes">
+          {partis.map((p) => (
+            <Link key={p} className="pastille-groupe" href={`/parti/${slugCollectif(p)}/`} style={{ ["--c" as string]: couleurParti(p) }}>
+              <span className="point" />
+              {p}
+            </Link>
+          ))}
+        </div>
       </>
     );
   }

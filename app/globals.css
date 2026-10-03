@@ -414,3 +414,17 @@ h1.marque { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .grille-senateurs { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin: 12px 0 20px; }
 .carte-elu { display: flex; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: var(--radius-card); padding: 12px 14px; background: var(--card); }
 .carte-elu .photo { flex: none; }
+
+
+/* ── Pastilles chambre / parti et groupes existants ────────────────────── */
+.badges-elu { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0 2px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 999px; font-size: .74rem; font-weight: 700; line-height: 1.5; color: var(--c); background: color-mix(in srgb, var(--c) 12%, transparent); border: 1px solid color-mix(in srgb, var(--c) 40%, transparent); }
+.badge .point { width: 7px; height: 7px; border-radius: 50%; background: var(--c); flex: none; }
+@media (prefers-color-scheme: dark) {
+  /* les teintes sombres (RN, UDR…) restent lisibles sur fond nuit */
+  .badge { color: color-mix(in srgb, var(--c) 55%, #FFFDF5); background: color-mix(in srgb, var(--c) 26%, transparent); }
+}
+.pastilles-groupes { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 20px; }
+a.pastille-groupe { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); font-size: .88rem; font-weight: 600; text-decoration: none; color: var(--ink); }
+a.pastille-groupe:hover, a.pastille-groupe:focus-visible { border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, var(--card)); }
+.pastille-groupe .point { width: 9px; height: 9px; border-radius: 3px; background: var(--c); flex: none; }
