@@ -5,7 +5,7 @@ import { prenomNom } from "@/lib/format";
 import { moisAnnee } from "@/lib/periodes";
 import { SCRUTIN_2026, senatoriales2026, slugDepartement, type Senateur } from "@/lib/senatoriales";
 import { libelleElection } from "@/lib/senatorialesClassement";
-import { hrefGroupe, hrefDepartement, hrefParti } from "@/lib/collectifs";
+import { hrefGroupe, hrefDepartement, hrefParti, sansGroupe } from "@/lib/collectifs";
 
 export const revalidate = 3600;
 type Props = { params: Promise<{ departement: string }> };
@@ -41,8 +41,8 @@ function CarteSenateur({ s, reelu }: { s: Senateur; reelu?: boolean }) {
         {s.slug && (
           <p className="meta" style={{ margin: 0 }}>
             <a href={`/parlementaires/${encodeURIComponent(s.slug)}/bio`}>Biographie</a>
-            {hrefGroupe("senat", s.groupe) && <a href={hrefGroupe("senat", s.groupe)!}> · Fiche groupe {s.groupe} au Sénat</a>}
-            {hrefParti(s.groupe) && <a href={hrefParti(s.groupe)!}> · Fiche parti {s.groupe}</a>}
+            {!sansGroupe(s.groupe) && hrefGroupe("senat", s.groupe) && <a href={hrefGroupe("senat", s.groupe)!}> · Fiche groupe {s.groupe} au Sénat</a>}
+            {!sansGroupe(s.groupe) && hrefParti(s.groupe) && <a href={hrefParti(s.groupe)!}> · Fiche parti {s.groupe}</a>}
           </p>
         )}
         {hrefDepartement(s.departement, slugDepartement) && (

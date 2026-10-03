@@ -10,7 +10,7 @@ import { CHAMBRE_LONG, nomAffiche, prenomNom } from "@/lib/format";
 import { chevauche, fusionner, libellePeriode, moisAnnee } from "@/lib/periodes";
 import { collaborateurDeLaPersonne, parlementaireDepuisId, periodesElu, personne, type Appartenance, type Mandat, type Parlementaire } from "@/lib/referentiel";
 import { partFemmes, pct, tauxTurnover } from "@/lib/stats";
-import { hrefGroupe, hrefDepartement, hrefParti } from "@/lib/collectifs";
+import { hrefGroupe, hrefDepartement, hrefParti, sansGroupe } from "@/lib/collectifs";
 import { slugDepartement } from "@/lib/senatoriales";
 
 export const revalidate = 3600;
@@ -125,7 +125,8 @@ export default async function Parlementaire({ params }: Props) {
             {f.actif ? `En fonction depuis ${moisAnnee(dernierDebut(mandats, f))}` : f.fin_mandat ? `Mandat terminé en ${moisAnnee(f.fin_mandat)}` : ""}
             {f.url_officielle && <> · <a href={f.url_officielle}>fiche officielle</a></>}
             {hrefDepartement(f.departement || f.circonscription, slugDepartement) && <> · <a href={hrefDepartement(f.departement || f.circonscription, slugDepartement)!}>fiche élus de {f.departement || f.circonscription}</a></>}
-            {hrefParti(f.groupe) && f.groupe && <> · <a href={hrefParti(f.groupe)!}>fiche parti {f.groupe}</a></>}
+            {hrefGroupe(f.chambre, f.groupe) && <> · <a href={hrefGroupe(f.chambre, f.groupe)!}>fiche groupe {f.groupe}</a></>}
+            {!sansGroupe(f.groupe) && hrefParti(f.groupe) && <> · <a href={hrefParti(f.groupe)!}>fiche parti {f.groupe}</a></>}
             {autres.map((x) => <span key={x.chambre}> · <a href={`/parlementaires/${encodeURIComponent(x.slug)}`}>fiche {CHAMBRE_LONG[x.chambre]}</a></span>)}
           </p>
           <Partage compact url={`https://www.dataparl.fr/parlementaires/${encodeURIComponent(f.slug)}`} titre={nom}
