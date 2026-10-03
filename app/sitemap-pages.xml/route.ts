@@ -33,6 +33,39 @@ export async function GET() {
       for (const d of departements) urls.push({ loc: `${base}/senatoriales2026/${d.slug}`, changefreq: "weekly", priority: "0.7" });
     } catch { /* sans les sénatoriales */ }
   }
+  // Une page par groupe parlementaire (données du référentiel).
+  if (!estInactif("/groupe", inactifs)) {
+    try {
+      const { hrefGroupe } = await import("@/lib/collectifs");
+      const { groupesExistants } = await import("@/lib/collectifsData");
+      for (const g of await groupesExistants()) {
+        const href = hrefGroupe(g.chambre, g.groupe);
+        if (href) urls.push({ loc: `${base}${href}`, changefreq: "weekly", priority: "0.6" });
+      }
+    } catch { /* sans les groupes */ }
+  }
+  // Une page par département représenté.
+  if (!estInactif("/departement", inactifs)) {
+    try {
+      const { slugDepartement } = await import("@/lib/senatoriales");
+      const { departementsExistants } = await import("@/lib/collectifsData");
+      for (const d of await departementsExistants()) {
+        const slug = slugDepartement(d);
+        if (slug) urls.push({ loc: `${base}/departement/${slug}/`, changefreq: "weekly", priority: "0.6" });
+      }
+    } catch { /* sans les départements */ }
+  }
+  // Une page par parti politique.
+  if (!estInactif("/parti", inactifs)) {
+    try {
+      const { hrefParti } = await import("@/lib/collectifs");
+      const { partisExistants } = await import("@/lib/collectifsData");
+      for (const p of await partisExistants()) {
+        const href = hrefParti(p);
+        if (href) urls.push({ loc: `${base}${href}`, changefreq: "weekly", priority: "0.6" });
+      }
+    } catch { /* sans les partis */ }
+  }
   if (!estInactif("/presse/communiques", inactifs)) {
     try {
       const { data } = await authAdmin().from("communiques").select("slug, publie_le").eq("statut", "publie").order("publie_le", { ascending: false }).limit(500);
