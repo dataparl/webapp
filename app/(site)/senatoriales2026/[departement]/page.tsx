@@ -4,6 +4,7 @@ import Photo from "@/app/_components/Photo";
 import { prenomNom } from "@/lib/format";
 import { moisAnnee } from "@/lib/periodes";
 import { SCRUTIN_2026, senatoriales2026, type Senateur } from "@/lib/senatoriales";
+import { libelleElection } from "@/lib/senatorialesClassement";
 
 export const revalidate = 3600;
 type Props = { params: Promise<{ departement: string }> };
@@ -29,16 +30,18 @@ function CarteSenateur({ s, reelu }: { s: Senateur; reelu?: boolean }) {
       <Photo chambre="senat" slug={s.slug} src={s.photo_url} nom={nom} taille={64} />
       <div>
         <p style={{ margin: 0, fontWeight: 700 }}>
-          <a href={`/parlementaires/${encodeURIComponent(s.slug)}`}>{nom}</a>
+          {s.slug ? <a href={`/parlementaires/${encodeURIComponent(s.slug)}`}>{nom}</a> : nom}
           {reelu && <span className="puce">réélu{s.civilite === "Mme" ? "e" : ""}</span>}
         </p>
         <p className="meta" style={{ margin: "2px 0" }}>
-          {s.groupe ? `Groupe ${s.groupe}` : "Sans groupe renseigné"}
-          {s.debut ? ` · élu${s.civilite === "Mme" ? "e" : ""} en ${moisAnnee(s.debut)}` : ""}
+          {s.election ? `Élu${s.civilite === "Mme" ? "e" : ""} le ${libelleElection()}` : ""}
+          {s.groupe ? ` · groupe ${s.groupe}` : s.liste ? ` · liste « ${s.liste} »` : ""}
         </p>
-        <p className="meta" style={{ margin: 0 }}>
-          <a href={`/parlementaires/${encodeURIComponent(s.slug)}/bio`}>Biographie</a>
-        </p>
+        {s.slug && (
+          <p className="meta" style={{ margin: 0 }}>
+            <a href={`/parlementaires/${encodeURIComponent(s.slug)}/bio`}>Biographie</a>
+          </p>
+        )}
       </div>
     </div>
   );
@@ -68,7 +71,7 @@ export default async function DepartementSenatoriales({ params }: Props) {
       <p className="meta" style={{ marginTop: 0 }}><a href="/senatoriales2026">← Sénatoriales 2026 : tous les départements</a></p>
       <h1>Sénatoriales 2026 : <span className="surligne">{d.nom}</span></h1>
       <p className="lead">
-        À l&apos;automne {SCRUTIN_2026.annee}, les grands électeurs du département ont élu
+        Le {libelleElection()}, les grands électeurs du département ont élu
         {" "}{elus} sénateur{elus > 1 ? "s" : ""} pour six ans. Retrouvez ci-dessous les élus qui entrent
         au Sénat, ceux qui y sont réélus, les sénateurs qui le quittent, leurs groupes politiques —
         et pour chacun, son équipe de collaborateurs suivie par DataParl&apos;.
@@ -125,7 +128,8 @@ export default async function DepartementSenatoriales({ params }: Props) {
       </p>
       <p className="meta">
         <a href="/mouvements/senat">Les mouvements au Sénat</a> · <a href="/collab">Rechercher un collaborateur</a> ·{" "}
-        <a href="/senatoriales2026">Tous les départements</a>
+        <a href="/senatoriales2026">Tous les départements</a> ·{" "}
+        <a href="https://www.resultats-elections.interieur.gouv.fr/Senatoriales2026/nouvelle_assemblee/index.html" target="_blank" rel="noopener noreferrer">Résultats officiels (ministère de l&apos;Intérieur)</a>
       </p>
     </>
   );

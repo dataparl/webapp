@@ -4,6 +4,7 @@ import {
   SCRUTIN_2026, classerScrutin, nomDepartement, senateurDepuis, slugDepartement,
   type FicheScrutin, type MandatScrutin, type Senateur,
 } from "./senatorialesClassement";
+import { ELUS_OFFICIELS_2026 } from "./scrutin2026Officiel";
 
 // Sénatoriales 2026 : renouvellement partiel du Sénat (septembre 2026).
 // Le classement (nouveaux / réélus / sortants) est une fonction pure testée
@@ -28,7 +29,7 @@ export async function senatoriales2026(): Promise<Senatoriales2026> {
     dataQueryTout<FicheScrutin>("parlementaires", new URLSearchParams({ select: COLS_FICHE, chambre: "eq.senat" }), 3600),
     dataQueryTout<MandatScrutin>("mandats", new URLSearchParams({ select: COLS_MANDAT, chambre: "eq.senat", order: "debut.desc" }), 3600),
   ]);
-  const { nouveaux, reelus, sortants } = classerScrutin(fiches, mandats);
+  const { nouveaux, reelus, sortants } = classerScrutin(fiches, mandats, ELUS_OFFICIELS_2026);
 
   const parNom = new Map<string, DepartementScrutin>();
   const groupe = (s: Senateur): DepartementScrutin => {

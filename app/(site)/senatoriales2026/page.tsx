@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Carte, { type DonneesDep } from "./Carte";
 import { OUTRE_MER, SCRUTIN_2026, slugDepartement, senatoriales2026, type Senatoriales2026 as Donnees } from "@/lib/senatoriales";
+import { libelleElection } from "@/lib/senatorialesClassement";
 
 export const revalidate = 3600;
 
@@ -45,10 +46,10 @@ export default async function Senatoriales2026() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <h1>Sénatoriales 2026 : <span className="surligne">les nouveaux sénateurs</span></h1>
       <p className="lead">
-        En septembre {SCRUTIN_2026.annee}, une partie du Sénat a été renouvelée : dans chaque département concerné,
-        les grands électeurs ont désigné de nouveaux sénateurs pour six ans. Voici, département par département,
-        les élus qui entrent au Palais du Luxembourg, ceux qui le quittent, leur groupe politique — et leur équipe
-        de collaborateurs, suivie chaque jour par DataParl&apos;.
+        Le {libelleElection()}, une partie du Sénat a été renouvelée : dans chaque département concerné,
+        les grands électeurs ont désigné 178 sénateurs pour six ans. Voici, département par département,
+        les élus qui entrent au Palais du Luxembourg, ceux qui y sont réélus, ceux qui le quittent, leur groupe
+        politique — et leur équipe de collaborateurs, suivie chaque jour par DataParl&apos;.
       </p>
 
       <div className="chiffres">
@@ -94,7 +95,7 @@ export default async function Senatoriales2026() {
         changent de chambre — un député devenu sénateur, un collaborateur devenu parlementaire.
       </p>
       <p className="meta">
-        Voir aussi : <a href="/parlementaires">tous les parlementaires</a> · <a href="/mouvements/senat">les mouvements
+        Voir aussi : <a href="https://www.resultats-elections.interieur.gouv.fr/Senatoriales2026/nouvelle_assemblee/index.html" target="_blank" rel="noopener noreferrer">les résultats officiels du ministère de l&apos;Intérieur</a> · <a href="/parlementaires">tous les parlementaires</a> · <a href="/mouvements/senat">les mouvements
         au Sénat</a> · <a href="/vigiparl/senat/parlementaires">VigiParl&apos; au Sénat</a>
       </p>
     </>

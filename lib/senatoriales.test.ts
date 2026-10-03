@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { SCRUTIN_2026, classerScrutin, debutEffectif, nomDepartement, slugDepartement, type FicheScrutin, type MandatScrutin } from "./senatorialesClassement.ts";
+import { SCRUTIN_2026, classerScrutin, debutEffectif, libelleElection, nomDepartement, nomNormalise, slugDepartement, type EluOfficiel, type FicheScrutin, type MandatScrutin } from "./senatorialesClassement.ts";
 
 const fiche = (x: Partial<FicheScrutin>): FicheScrutin => ({
   personne_id: "", elu_id: "", slug: "", civilite: "M.", prenom: "", nom: "",
@@ -83,4 +83,69 @@ test("doublons : une personne n'apparaît qu'une fois par liste", () => {
 test("fenêtre du scrutin", () => {
   assert.equal(SCRUTIN_2026.debut, "2026-09-01");
   assert.equal(SCRUTIN_2026.fin, "2026-12-31");
+});
+
+// ---- Liste officielle (ministère de l'Intérieur, scrutin du 27/09/2026) ----
+
+const officiel = (x: Partial<EluOfficiel>): EluOfficiel => ({
+  civilite: "M.", prenom: "", nom: "", departement: "33 - Gironde", ...x,
+});
+
+test("élection : libellé et date du scrutin", () => {
+  assert.equal(libelleElection(), "27 septembre 2026");
+  assert.equal(SCRUTIN_2026.election, "2026-09-27");
+});
+
+test("rapprochement des noms : accents, majuscules, tirets", () => {
+  assert.equal(nomNormalise("Jean-Pierre", "Vogel"), nomNormalise("Jean Pierre", "VOGEL"));
+  assert.equal(nomNormalise("Albéric", "de Montgolfier"), nomNormalise("ALBERIC", "DE MONTGOLFIER"));
+  assert.equal(nomNormalise("Sonia", "de La Provôté"), nomNormalise("SONIA", "DE LA PROVOTE"));
+});
+
+test("officiel réélu sans mandat 2026 en base : apparaît comme réélu", () => {
+  // Bruno Retailleau : en base avec un mandat ancien se terminant au scrutin,
+  // mais la ligne « mandat 2026 » n'est pas encore synchronisée.
+  const fiches2 = [
+    ...fiches,
+    fiche({ personne_id: "S04033B", elu_id: "04033B", slug: "retailleau_bruno04033b", civilite: "M.", prenom: "Bruno", nom: "Retailleau", premier_mandat: "2004-10-01", actif: true }),
+  ];
+  const mandats2 = [
+    ...mandats,
+    mandat({ personne_id: "S04033B", elu_id: "04033B", debut: "2020-10-01", fin: "2026-09-30", cause_fin: "Fin de mandat" }),
+  ];
+  const officiels = [officiel({ prenom: "Bruno", nom: "RETAILLEAU", departement: "Vendée" })];
+  const { nouveaux, reelus, sortants } = classerScrutin(fiches2, mandats2, officiels);
+  assert.deepEqual(reelus.map((s) => s.personne_id), ["S19820Y", "S04033B"]);
+  assert.ok(!nouveaux.some((s) => s.personne_id === "S04033B"));
+  assert.ok(!sortants.some((s) => s.personne_id === "S04033B"), "un réélu officiel n'est pas sortant");
+  assert.equal(reelus.find((s) => s.personne_id === "S04033B")!.election, "2026-09-27");
+});
+
+test("officiel absent de la base : listé quand même, sans lien", () => {
+  const officiels = [officiel({ civilite: "Mme", prenom: "Mélanie", nom: "VOGEL", departement: "Français établis hors de France" })];
+  const { nouveaux, reelus } = classerScrutin(fiches, mandats, officiels);
+  const v = nouveaux.find((s) => s.personne_id.startsWith("OFF-"));
+  assert.ok(v, "l'officielle absente apparaît parmi les nouveaux");
+  assert.equal(v!.slug, "");
+  assert.equal(v!.prenom, "Mélanie");
+  assert.equal(v!.election, "2026-09-27");
+  assert.equal(reelus.filter((s) => s.personne_id.startsWith("OFF-")).length, 0);
+});
+
+test("officiel enrichi de sa liste électorale", () => {
+  const officiels = [officiel({ civilite: "Mme", prenom: "Géraldine", nom: "AMOUROUX", liste: "Unis pour la Gironde" })];
+  const { nouveaux } = classerScrutin(fiches, mandats, officiels);
+  const a = nouveaux.find((s) => s.personne_id === "S21714T");
+  assert.equal(a!.liste, "Unis pour la Gironde");
+});
+
+test("coquille dans la liste officielle : rapprochement sur le nom de famille", () => {
+  // Le site du ministère écrit « Chistine BOST » ; la fiche dit « Christine Bost ».
+  const officiels = [officiel({ civilite: "Mme", prenom: "Chistine", nom: "BOST", liste: "ENGAGÉS POUR TOUTE LA GIRONDE" })];
+  const { nouveaux, sortants } = classerScrutin(fiches, mandats, officiels);
+  const b = nouveaux.find((s) => s.personne_id === "S21710P");
+  assert.ok(b, "la fiche correspondante est reconnue malgré la coquille");
+  assert.equal(b!.liste, "ENGAGÉS POUR TOUTE LA GIRONDE");
+  assert.equal(b!.election, "2026-09-27");
+  assert.ok(!nouveaux.some((s) => s.personne_id.startsWith("OFF-")), "pas de doublon créé");
 });
