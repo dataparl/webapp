@@ -126,7 +126,7 @@ export default async function Parlementaire({ params }: Props) {
             {f.actif ? `En fonction depuis ${moisAnnee(dernierDebut(mandats, f))}` : f.fin_mandat ? `Mandat terminé en ${moisAnnee(f.fin_mandat)}` : ""}
             {f.url_officielle && <> · <a href={f.url_officielle}>fiche officielle</a></>}
             {hrefDepartement(f.departement || f.circonscription, slugDepartement) && <> · <a href={hrefDepartement(f.departement || f.circonscription, slugDepartement)!}>fiche élus de {f.departement || f.circonscription}</a></>}
-            {hrefGroupe(f.chambre, f.groupe) && <> · <a href={hrefGroupe(f.chambre, f.groupe)!}>fiche groupe {f.groupe}</a></>}
+            {!sansGroupe(f.groupe) && hrefGroupe(f.chambre, f.groupe) && <> · <a href={hrefGroupe(f.chambre, f.groupe)!}>fiche groupe {f.groupe}</a></>}
             {!sansGroupe(f.groupe) && hrefParti(f.groupe) && <> · <a href={hrefParti(f.groupe)!}>fiche parti {f.groupe}</a></>}
             {autres.map((x) => <span key={x.chambre}> · <a href={`/parlementaires/${encodeURIComponent(x.slug)}`}>fiche {CHAMBRE_LONG[x.chambre]}</a></span>)}
           </p>
