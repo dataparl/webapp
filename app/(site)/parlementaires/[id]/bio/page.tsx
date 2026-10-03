@@ -32,6 +32,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+// Rendu léger des biographies manuelles : sections « I. … » en intertitre,
+// **gras** et sauts de ligne simples à l'intérieur d'un paragraphe.
+const TITRE_SECTION = /^(I|II|III|IV|V|VI|VII|VIII|IX|X|XI|XII)\.\s+\S/;
+function gras(bloc: string, cle: string) {
+  return bloc.split(/(\*\*[^*]+\*\*)/g).map((m, i) =>
+    m.startsWith("**") && m.endsWith("**") ? <strong key={`${cle}-${i}`}>{m.slice(2, -2)}</strong> : m);
+}
+
+function ParagrapheBio({ texte, i }: { texte: string; i: number }) {
+  const lignes = texte.split("\n").filter((l) => l.trim());
+  if (TITRE_SECTION.test(texte)) return <h3 style={{ marginTop: 24 }}>{texte}</h3>;
+  return (
+    <p key={i}>
+      {lignes.map((l, j) => (
+        <span key={j}>{j > 0 && <br />}{gras(l, `${i}-${j}`)}</span>
+      ))}
+    </p>
+  );
+}
+
 export default async function Bio({ params }: Props) {
   const id = decodeURIComponent((await params).id);
   const f = await parlementaireDepuisId(id).catch(() => null);
@@ -123,7 +143,7 @@ export default async function Bio({ params }: Props) {
       {manuel.bio && (
         <>
           <h2>Biographie</h2>
-          {manuel.bio.texte.split(/\n\s*\n/).map((p, i) => <p key={i}>{p}</p>)}
+          {manuel.bio.texte.split(/\n\s*\n/).map((p, i) => <ParagrapheBio key={i} texte={p.trim()} i={i} />)}
           {manuel.bio.source && (
             <p className="meta">Source : {manuel.bio.source} · biographie éditée par l&apos;équipe DataParl&apos;.</p>
           )}

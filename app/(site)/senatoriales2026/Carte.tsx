@@ -27,22 +27,25 @@ export default function Carte({ parSlug, om }: { parSlug: Record<string, Donnees
 
   return (
     <figure className="carte-fr" style={{ margin: 0 }}>
-      <div className="carte-outils" style={{ display: "flex", gap: 8, alignItems: "center", margin: "0 0 8px" }}>
-        <button type="button" onClick={() => setVue((v) => zoomer(v, 1))} aria-label="Zoomer sur la carte">
-          ＋ Zoom
+      <div
+        className="carte-outils"
+        style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", margin: "0 0 10px", padding: "0 6px" }}
+      >
+        <button type="button" className="secondaire" style={{ margin: 0, padding: "5px 12px", fontSize: "0.85rem" }} onClick={() => setVue((v) => zoomer(v, 1))} aria-label="Zoomer sur la carte">
+          Zoom +
         </button>
-        <button type="button" onClick={() => setVue((v) => zoomer(v, -1))} aria-label="Dézoomer la carte">
-          － Dézoom
+        <button type="button" className="secondaire" style={{ margin: 0, padding: "5px 12px", fontSize: "0.85rem" }} onClick={() => setVue((v) => zoomer(v, -1))} aria-label="Dézoomer la carte">
+          Zoom −
         </button>
-        <button type="button" onClick={() => setVue(INITIAL)} aria-label="Réinitialiser le zoom de la carte">
-          ↺ Réinitialiser
+        <button type="button" className="secondaire" style={{ margin: 0, padding: "5px 12px", fontSize: "0.85rem" }} onClick={() => setVue(INITIAL)} aria-label="Réinitialiser le zoom de la carte">
+          Réinitialiser
         </button>
+        <span className="meta" style={{ fontSize: "0.78rem" }}>zoom centré sur la France métropolitaine</span>
       </div>
       <svg
         viewBox={`${vue.x} ${vue.y} ${vue.l} ${vue.h}`}
         role="group"
         aria-label="Carte des départements français renouvelés aux sénatoriales 2026"
-        style={{ touchAction: "none" }}
       >
         {DEPARTEMENTS.map((d) => {
           const data = parSlug[d.slug];

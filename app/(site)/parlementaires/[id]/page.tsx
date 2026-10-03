@@ -88,7 +88,10 @@ export default async function Parlementaire({ params }: Props) {
   const nbCollabs = new Set(periodes.map((p) => p.collab_id)).size;
   const depuis = periodes.map((p) => p.debut).filter(Boolean).sort()[0];
   const commissionsActuelles = fusionner(appartenances.filter((a) => a.chambre === f.chambre && a.elu_id === f.elu_id && a.type !== "groupe")).filter((a) => !a.fin);
-  const autres = fiches.filter((x) => x.chambre !== f.chambre);
+  // Les autres fiches actives de la même personne (une fiche ancienne et inactive
+  // — ex. député devenu sénateur — est déjà résumée par ses mandats ci-dessous,
+  // et son URL renvoie vers la fiche active).
+  const autres = fiches.filter((x) => x.chambre !== f.chambre && x.actif);
 
   const jsonLd = {
     "@context": "https://schema.org", "@type": "Person", name: nom, givenName: f.prenom, familyName: f.nom,
