@@ -23,7 +23,12 @@ export async function avecAdmin(req: Request, fn: (a: Admin) => Promise<unknown>
     return NextResponse.json(out ?? { ok: true }, { headers: { "Cache-Control": "no-store" } });
   } catch (e) {
     console.error("admin", e);
-    return NextResponse.json({ error: "erreur serveur" }, { status: 500, headers: { "Cache-Control": "no-store" } });
+    // Une variable d'environnement manquante ne doit pas se cacher derrière un
+    // « erreur serveur » générique : l'admin a besoin du nom pour la corriger.
+    const message = e instanceof Error && e.message.startsWith("Variable d'environnement manquante")
+      ? `${e.message} — à ajouter dans les variables du projet sur Vercel`
+      : "erreur serveur";
+    return NextResponse.json({ error: message }, { status: 500, headers: { "Cache-Control": "no-store" } });
   }
 }
 
