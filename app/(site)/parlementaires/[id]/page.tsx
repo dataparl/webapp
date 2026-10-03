@@ -28,7 +28,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${nom} : équipe et parcours`, description,
       alternates: { canonical: url },
       openGraph: { title: `${nom} · DataParl'`, description, url, type: "profile", images: photo ? [{ url: photo, width: 400, height: 400, alt: `Photo officielle de ${nom}` }] : undefined },
-      twitter: { card: "summary", title: `${nom} · DataParl'`, description, images: photo ? [photo] : undefined },
+      twitter: { card: "s
+ummary", title: `${nom} · DataParl'`, description, images: photo ? [photo] : undefined },
     };
   }
   const e = await eluDepuisId(id).catch(() => null);
@@ -75,7 +76,8 @@ export default async function Parlementaire({ params }: Props) {
   const e = eluDepuisFiche(f);
   const [collabs, mouvements, stats, periodes, commeCollab] = await Promise.all([
     f.actif && f.chambre !== "europarl" ? equipe(e) : Promise.resolve([]),
-    mouvementsElu(e, 5).catch(() => []),
+    m
+ouvementsElu(e, 5).catch(() => []),
     f.actif ? statsElu(e).catch(() => null) : Promise.resolve(null),
     periodesElu(fiches).catch(() => []),
     collaborateurDeLaPersonne(f.personne_id).catch(() => null),
@@ -107,6 +109,7 @@ export default async function Parlementaire({ params }: Props) {
             {f.actif && f.groupe ? <> · <Groupe chambre={f.chambre} sigle={f.groupe} libelle={f.groupe_libelle} /></> : null}
           </p>
           <p className="meta" style={{ marginTop: 6 }}>
+
             {f.actif ? `En fonction depuis ${moisAnnee(dernierDebut(mandats, f))}` : f.fin_mandat ? `Mandat terminé en ${moisAnnee(f.fin_mandat)}` : ""}
             {f.url_officielle && <> · <a href={f.url_officielle}>fiche officielle</a></>}
             {autres.map((x) => <span key={x.chambre}> · <a href={`/parlementaires/${encodeURIComponent(x.slug)}`}>fiche {CHAMBRE_LONG[x.chambre]}</a></span>)}
@@ -143,7 +146,8 @@ export default async function Parlementaire({ params }: Props) {
       )}
 
       {f.actif && f.chambre === "europarl" && (
-        <p className="meta">Le suivi des assistants parlementaires européens est en pause : le site du Parlement européen bloque aujourd&apos;hui la lecture automatique de ses listes.</p>
+        <p className="meta">Le suivi des assistants parlementaires européens est en pause : le site du Parlement européen bloque aujourd&apos;hui la lecture automat
+ique de ses listes.</p>
       )}
       {f.actif && f.chambre !== "europarl" && (
         <>
@@ -181,7 +185,8 @@ export default async function Parlementaire({ params }: Props) {
           Avant ou après ses mandats, {nom} figure aussi sur les listes de collaborateurs parlementaires
           ({commeCollab.chambres.split(" ").map((c) => CHAMBRE_LONG[c]).join(", ")}, {commeCollab.premiere_date.slice(0, 4)}
           {commeCollab.derniere_date.slice(0, 4) !== commeCollab.premiere_date.slice(0, 4) ? `-${commeCollab.derniere_date.slice(0, 4)}` : ""}).{" "}
-          <a href={`/collab/${commeCollab.slug}`}>Voir son parcours de {f.civilite === "Mme" ? "collaboratrice" : "collaborateur"}</a>
+          <a href={`/collab/${commeCollab.slug}`}>Voir son parcours de {f.ci
+vilite === "Mme" ? "collaboratrice" : "collaborateur"}</a>
           <span className="meta"> · rapprochement par le nom, sans chevauchement avec ses mandats</span>
         </p>
       )}
@@ -219,9 +224,10 @@ export default async function Parlementaire({ params }: Props) {
       </ol>
       {mandats.length === 0 && <p className="meta">Mandats non disponibles.</p>}
 
-      <h2>Derniers mouvements</h2>
+      <h2>De
+rniers mouvements</h2>
       {mouvements.length === 0 ? <p className="meta">Aucun mouvement enregistré.</p> : <ListeMouvements mouvements={mouvements} />}
-      <p><a href="/mouvements">Tout l&apos;historique (compte gratuit)</a></p>
+      <p><a href={`/parlementaires/${encodeURIComponent(f.slug)}/historique`}>Tout l&apos;historique (compte gratuit)</a></p>
     </>
   );
 }
@@ -262,7 +268,8 @@ async function FicheSimple({ id }: { id: string }) {
       <p className="lead">{e.groupe ? `Groupe ${e.groupe}. ` : ""}{officiel && <a href={officiel}>Fiche officielle</a>}</p>
       <h2>L&apos;équipe</h2>
       <table className="stats">
-        <tbody>{collabs.map((c, i) => <tr key={i}><td>{prenomNom(c.collab_prenom, c.collab_nom)}</td><td>{c.fonction || "Collaborateur"}</td></tr>)}</tbody>
+    
+    <tbody>{collabs.map((c, i) => <tr key={i}><td>{prenomNom(c.collab_prenom, c.collab_nom)}</td><td>{c.fonction || "Collaborateur"}</td></tr>)}</tbody>
       </table>
       <h2>Derniers mouvements</h2>
       <ListeMouvements mouvements={mouvements} />
