@@ -18,13 +18,21 @@ export async function GET() {
   const base = "https://www.dataparl.fr";
   const inactifs = await cheminsInactifs();
   const jour = aujourdhuiParis();
-  const urls: Url[] = [...PAGES.filter((p) => p.sitemap).map((p) => p.chemin), ...CHAMBRES, ...LEGALES]
+  const urls: Url[] = [...PAGES.filter((p) => p.sitemap).map((p) => p.chemin), ...CHAMBRES, ...LEGALES, "/senatoriales2026"]
     .filter((c) => !estInactif(c, inactifs))
     .map((c) => ({
       loc: `${base}${c === "/" ? "/" : c}`, lastmod: QUOTIDIENNES.has(c) ? jour : undefined,
       changefreq: QUOTIDIENNES.has(c) ? "daily" : c.startsWith("/informations-legales") ? "yearly" : "weekly",
-      priority: c === "/" ? "1.0" : QUOTIDIENNES.has(c) ? "0.9" : c.startsWith("/informations-legales") ? "0.2" : "0.6",
+      priority: c === "/" ? "1.0" : QUOTIDIENNES.has(c) ? "0.9" : c.startsWith("/informations-legales") ? "0.2" : c === "/senatoriales2026" ? "0.8" : "0.6",
     }));
+  // Une page par département renouvelé aux sénatoriales 2026 (données du référentiel).
+  if (!estInactif("/senatoriales2026", inactifs)) {
+    try {
+      const { senatoriales2026 } = await import("@/lib/senatoriales");
+      const { departements } = await senatoriales2026();
+      for (const d of departements) urls.push({ loc: `${base}/senatoriales2026/${d.slug}`, changefreq: "weekly", priority: "0.7" });
+    } catch { /* sans les sénatoriales */ }
+  }
   if (!estInactif("/presse/communiques", inactifs)) {
     try {
       const { data } = await authAdmin().from("communiques").select("slug, publie_le").eq("statut", "publie").order("publie_le", { ascending: false }).limit(500);

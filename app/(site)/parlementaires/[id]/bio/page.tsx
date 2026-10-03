@@ -1,0 +1,168 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import ListeMouvements from "@/app/_components/ListeMouvements";
+import Photo from "@/app/_components/Photo";
+import { eluDepuisFiche, eluDepuisId, mouvementsElu } from "@/lib/elus";
+import { CHAMBRE_LONG, nomAffiche, prenomNom } from "@/lib/format";
+import { chevauche, libellePeriode, moisAnnee } from "@/lib/periodes";
+import { collaborateurDeLaPersonne, parlementaireDepuisId, personne, type Appartenance, type Mandat, type Parlementaire } from "@/lib/referentiel";
+
+export const revalidate = 3600;
+type Props = { params: Promise<{ id: string }> };
+
+const TITRE: Record<string, [string, string]> = {
+  assemblee: ["député", "députée"], senat: ["sénateur", "sénatrice"], europarl: ["député européen", "députée européenne"],
+};
+const role = (f: Pick<Parlementaire, "chambre" | "civilite">) => TITRE[f.chambre][f.civilite === "Mme" ? 1 : 0];
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const id = decodeURIComponent((await params).id);
+  const f = await parlementaireDepuisId(id).catch(() => null);
+  if (!f) return { title: "Biographie" };
+  const nom = prenomNom(f.prenom, f.nom);
+  const r = f.actif ? role(f) : `${f.civilite === "Mme" ? "ancienne" : "ancien"} ${role(f)}`;
+  const description = `Biographie de ${nom}, ${r}${f.circonscription && f.chambre !== "europarl" ? ` (${f.circonscription})` : ""}${f.groupe ? `, groupe ${f.groupe}` : ""} : mandats, groupes et commissions, collaborateurs et mouvements de son équipe parlementaire.`;
+  return {
+    title: `${nom} : biographie et parcours parlementaire`,
+    description,
+    alternates: { canonical: `/parlementaires/${encodeURIComponent(f.slug)}/bio` },
+    openGraph: { title: `${nom} : biographie · DataParl'`, description, url: `https://www.dataparl.fr/parlementaires/${encodeURIComponent(f.slug)}/bio`, type: "profile" },
+  };
+}
+
+export default async function Bio({ params }: Props) {
+  const id = decodeURIComponent((await params).id);
+  const f = await parlementaireDepuisId(id).catch(() => null);
+  if (!f) {
+    const e = await eluDepuisId(id).catch(() => null);
+    if (!e) notFound();
+    return <p className="meta">Fiche indisponible pour {nomAffiche(e.nom)}. <a href={`/parlementaires/${encodeURIComponent(id)}`}>Voir l&apos;équipe</a></p>;
+  }
+  const { fiches, mandats, appartenances } = await personne(f.personne_id);
+  const e = eluDepuisFiche(f);
+  const [mouvements, commeCollab] = await Promise.all([
+    mouvementsElu(e, 5).catch(() => []),
+    collaborateurDeLaPersonne(f.personne_id).catch(() => null),
+  ]);
+  const nom = prenomNom(f.prenom, f.nom);
+  const ficheUrl = `/parlementaires/${encodeURIComponent(f.slug)}`;
+
+  // Mandats de la chambre courante, puis les autres chambres.
+  const ici = mandats.filter((m) => m.chambre === f.chambre).sort((a, b) => a.debut.localeCompare(b.debut));
+  const autres = mandats.filter((m) => m.chambre !== f.chambre);
+  const groupes = (m: Mandat) =>
+    appartenances.filter((a) => a.chambre === m.chambre && a.type === "groupe" && chevauche(a, m, 7) && (!m.elu_id || a.elu_id === m.elu_id));
+  const dernier = ici[ici.length - 1];
+  const commissions = appartenances.filter((a) => a.chambre === f.chambre && a.type !== "groupe" && (!a.fin || f.actif));
+
+  const phrases: string[] = [];
+  const elu = f.civilite === "Mme" ? "élue" : "élu";
+  phrases.push(
+    f.actif
+      ? `${nom} est ${role(f)}${dernier?.debut ? ` depuis ${moisAnnee(dernier.debut)}` : ""}` +
+        `${f.circonscription && f.chambre !== "europarl" ? `, pour la circonscription « ${f.circonscription} »` : ""}` +
+        `${f.groupe ? `, au sein du groupe ${f.groupe}${f.groupe_libelle ? ` (${f.groupe_libelle})` : ""}` : ""}.`
+      : `${nom} a été ${role(f)} à ${CHAMBRE_LONG[f.chambre]}${dernier?.debut ? `, ${elu} ${moisAnnee(dernier.debut)}${dernier.fin ? ` pour un mandat terminé en ${moisAnnee(dernier.fin)}` : ""}` : ""}` +
+        `${f.groupe ? `, au sein du groupe ${f.groupe}` : ""}.`,
+  );
+  if (ici.length > 1)
+    phrases.push(`Au total, ${nom} compte ${ici.length} mandats à ${CHAMBRE_LONG[f.chambre]}, le premier ${moisAnnee(ici[0].debut)}.`);
+  if (autres.length)
+    phrases.push(`${f.civilite === "Mme" ? "Elle" : "Il"} a aussi siégé ${autres.map((m) => `à ${CHAMBRE_LONG[m.chambre]}${m.debut ? ` (de ${moisAnnee(m.debut)}${m.fin ? ` à ${moisAnnee(m.fin)}` : " à aujourd'hui"})` : ""}`).join(", ")}.`);
+  if (commeCollab)
+    phrases.push(`Avant ou entre ses mandats, ${nom} figure aussi sur les listes officielles de collaborateurs parlementaires (${commeCollab.chambres.split(" ").map((c) => CHAMBRE_LONG[c]).join(", ")}, ${commeCollab.premiere_date.slice(0, 4)}${commeCollab.derniere_date.slice(0, 4) !== commeCollab.premiere_date.slice(0, 4) ? `-${commeCollab.derniere_date.slice(0, 4)}` : ""}).`);
+
+  const jsonLd = {
+    "@context": "https://schema.org", "@type": "Person",
+    name: nom, givenName: f.prenom, familyName: f.nom,
+    birthDate: f.date_naissance || undefined,
+    url: `https://www.dataparl.fr/parlementaires/${f.slug}/bio`,
+    jobTitle: f.actif ? role(f) : undefined,
+    description: phrases.join(" "),
+    sameAs: f.url_officielle ? [f.url_officielle] : undefined,
+    memberOf: f.actif ? { "@type": "GovernmentOrganization", name: CHAMBRE_LONG[f.chambre] } : undefined,
+  };
+  const fil = {
+    "@context": "https://schema.org", "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Parlementaires", item: "https://www.dataparl.fr/parlementaires" },
+      { "@type": "ListItem", position: 2, name: nom, item: `https://www.dataparl.fr/parlementaires/${f.slug}` },
+      { "@type": "ListItem", position: 3, name: "Biographie" },
+    ],
+  };
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(fil).replace(/</g, "\\u003c") }} />
+      <p className="meta" style={{ marginTop: 0 }}><a href={ficheUrl}>← Fiche de {nom}</a></p>
+      <div className="entete-elu">
+        <Photo chambre={f.chambre} slug={f.slug} src={f.photo_url} nom={nom} />
+        <div>
+          <p className="meta" style={{ margin: 0 }}>{CHAMBRE_LONG[f.chambre]} · biographie</p>
+          <h1 style={{ margin: "2px 0 6px" }}>{nom}</h1>
+          <p className="lead" style={{ margin: 0 }}>
+            {f.actif ? role(f) : `${f.civilite === "Mme" ? "Ancienne" : "Ancien"} ${role(f)}`}
+            {f.circonscription && f.chambre !== "europarl" ? ` · ${f.circonscription}` : ""}
+            {f.actif && f.groupe ? ` · groupe ${f.groupe}` : ""}
+          </p>
+        </div>
+      </div>
+
+      <h2>Qui est {nom} ?</h2>
+      {phrases.map((p, i) => <p key={i}>{p}</p>)}
+      {f.date_naissance && (
+        <p className="meta">
+          Né{f.civilite === "Mme" ? "e" : ""} {f.date_naissance.length === 4 ? `en ${f.date_naissance}` : `le ${f.date_naissance.split("-").reverse().join("/")}`}.
+        </p>
+      )}
+
+      <h2>Mandats et parcours</h2>
+      <ol className="parcours">
+        {mandats.map((m, i) => {
+          const g = groupes(m).map((a) => a.sigle || a.libelle).filter(Boolean);
+          return (
+            <li key={`${m.chambre}-${m.debut}-${i}`}>
+              <p className="parcours-titre">
+                <strong>{m.libelle}</strong>
+                {m.circonscription && m.chambre !== "europarl" ? ` · ${m.circonscription}` : ""}
+                <span className="meta"> · {libellePeriode({ debut: m.debut, debut_connu: true, fin: m.fin, fin_connue: !!m.fin, en_cours: !m.fin })}</span>
+              </p>
+              {g.length > 0 && <p className="meta" style={{ margin: "2px 0" }}>Groupe : {g.join(", ")}</p>}
+            </li>
+          );
+        })}
+      </ol>
+      {mandats.length === 0 && <p className="meta">Mandats non disponibles.</p>}
+
+      {commissions.length > 0 && (
+        <>
+          <h2>Commissions et fonctions{f.actif ? " actuelles" : ""}</h2>
+          <ul className="organes">
+            {commissions.slice(0, 12).map((a: Appartenance, i) => (
+              <li key={`${a.code}-${a.debut}-${i}`}>
+                {a.libelle}
+                {a.fonction && a.fonction.toLowerCase() !== "membre" && <span className="puce">{a.fonction}</span>}
+                <span className="meta"> · {a.fin ? `${moisAnnee(a.debut)} à ${moisAnnee(a.fin)}` : `depuis ${moisAnnee(a.debut)}`}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      <h2>Son équipe et ses mouvements</h2>
+      <p>
+        La fiche complète de {nom} donne la liste de son équipe parlementaire, les arrivées et les départs dans son
+        cabinet, et l&apos;historique complet depuis les archives officielles. Les mouvements les plus récents :
+      </p>
+      {mouvements.length === 0 ? <p className="meta">Aucun mouvement enregistré.</p> : <ListeMouvements mouvements={mouvements} />}
+      <p>
+        <a className="btn" href={ficheUrl}>Voir l&apos;équipe de {nom}</a>{" "}
+        <a className="btn secondaire" href={`${ficheUrl}/historique`}>Historique des collaborateurs</a>
+      </p>
+      {f.url_officielle && (
+        <p className="meta">Sources officielles : <a href={f.url_officielle}>fiche institutionnelle</a> · données DataParl&apos; mises à jour chaque jour.</p>
+      )}
+    </>
+  );
+}

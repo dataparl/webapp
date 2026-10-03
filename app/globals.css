@@ -395,3 +395,22 @@ h1.marque { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .pagination { display: flex; gap: 12px; justify-content: space-between; align-items: center; margin: 16px 0; flex-wrap: wrap; }
 .titre-lien { color: inherit; text-decoration: none; } .titre-lien:hover { color: var(--bleu); }
 .matrice th[scope=row] { text-align: left; font-weight: 400; min-width: 220px; } .matrice select { min-width: 190px; } .matrice select.autorise { border-color: #1F8A4C; } .matrice select.refuse { color: var(--muted); }
+
+
+/* ── Sénatoriales 2026 : carte des départements et listes ────────────────── */
+.carte-fr { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-card); padding: 10px; margin: 16px 0 24px; }
+.carte-fr svg { width: 100%; height: auto; display: block; }
+.carte-fr a { text-decoration: none; }
+.carte-fr path.dep { fill: var(--line); stroke: var(--bg); stroke-width: 1; }
+.carte-fr a:has(path.dep.renouvele) { cursor: pointer; }
+.carte-fr path.dep.renouvele { fill: var(--bleu); }
+.carte-fr a:hover path.dep, .carte-fr a:focus-visible path.dep { fill: var(--corail); }
+.carte-fr figcaption { padding: 0 6px 4px; }
+.doms { display: flex; flex-wrap: wrap; gap: 8px; }
+.doms a.dom { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: .85rem; background: var(--bg); }
+.doms a.dom:hover { border-color: var(--bleu); }
+.liste-deps { list-style: none; padding: 0; margin: 0; columns: 3 220px; gap: 24px; }
+.liste-deps li { break-inside: avoid; padding: 4px 0; border-bottom: 1px solid var(--line); }
+.grille-senateurs { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin: 12px 0 20px; }
+.carte-elu { display: flex; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: var(--radius-card); padding: 12px 14px; background: var(--card); }
+.carte-elu .photo { flex: none; }
