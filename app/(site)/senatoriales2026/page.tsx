@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Carte, { type DonneesDep } from "./Carte";
 import { OUTRE_MER, SCRUTIN_2026, slugDepartement, senatoriales2026, type Senatoriales2026 as Donnees } from "@/lib/senatoriales";
+import { libelleElection } from "@/lib/senatorialesClassement";
 
 export const revalidate = 3600;
 
@@ -21,13 +22,13 @@ export default async function Senatoriales2026() {
   const vide: Donnees = { departements: [], nouveaux: [], sortants: [], reelus: [] };
   const { departements, nouveaux, sortants, reelus } = await senatoriales2026().catch(() => vide);
   const parSlug: Record<string, DonneesDep> = {};
-  for (const d of departements) parSlug[d.slug] = { n: d.nouveaux.length, s: d.sortants.length };
+  for (const d of departements) parSlug[d.slug] = { n: d.nouveaux.length + d.reelus.length, s: d.sortants.length };
   const om = OUTRE_MER.map((o) => {
     const slug = slugDepartement(o.nom);
     const d = departements.find((x) => x.slug === slug);
-    return { nom: o.nom, slug, n: d?.nouveaux.length ?? 0 };
+    return { nom: o.nom, slug, n: d ? d.nouveaux.length + d.reelus.length : 0 };
   }).filter((o) => parSlug[o.slug]);
-  const siege = [...new Set(departements.flatMap((d) => d.nouveaux.map((s) => s.personne_id)))].length;
+  const siege = nouveaux.length + reelus.length;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -45,16 +46,16 @@ export default async function Senatoriales2026() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <h1>Sénatoriales 2026 : <span className="surligne">les nouveaux sénateurs</span></h1>
       <p className="lead">
-        En septembre {SCRUTIN_2026.annee}, une partie du Sénat a été renouvelée : dans chaque département concerné,
-        les grands électeurs ont désigné de nouveaux sénateurs pour six ans. Voici, département par département,
-        les élus qui entrent au Palais du Luxembourg, ceux qui le quittent, leur groupe politique — et leur équipe
-        de collaborateurs, suivie chaque jour par DataParl&apos;.
+        Le {libelleElection()}, une partie du Sénat a été renouvelée : dans chaque département concerné,
+        les grands électeurs ont désigné 178 sénateurs pour six ans. Voici, département par département,
+        les élus qui entrent au Palais du Luxembourg, ceux qui y sont réélus, ceux qui le quittent, leur groupe
+        politique — et leur équipe de collaborateurs, suivie chaque jour par DataParl&apos;.
       </p>
 
       <div className="chiffres">
         <div><strong>{departements.length}</strong><span>département{departements.length > 1 ? "s" : ""} renouvelé{departements.length > 1 ? "s" : ""} en {SCRUTIN_2026.annee}</span></div>
-        <div><strong>{siege}</strong><span>nouveau{nouveaux.length > 1 ? "x" : ""} sénateur{nouveaux.length > 1 ? "s" : ""} élu{nouveaux.length > 1 ? "s" : ""}</span></div>
-        <div><strong>{sortants.length}</strong><span>sortant{sortants.length > 1 ? "s" : ""} (dont {reelus.length} réélu{reelus.length > 1 ? "s" : ""})</span></div>
+        <div><strong>{siege}</strong><span>sénateur{siege > 1 ? "s" : ""} élu{siege > 1 ? "s" : ""} : {nouveaux.length} nouveau{nouveaux.length > 1 ? "x" : ""}, {reelus.length} réélu{reelus.length > 1 ? "s" : ""}</span></div>
+        <div><strong>{sortants.length}</strong><span>sortant{sortants.length > 1 ? "s" : ""} (non réélu{sortants.length > 1 ? "s" : ""})</span></div>
       </div>
 
       <h2>La carte des départements renouvelés</h2>
@@ -72,7 +73,7 @@ export default async function Senatoriales2026() {
           {departements.map((d) => (
             <li key={d.slug}>
               <a href={`/senatoriales2026/${d.slug}`}>{d.nom}</a>
-              <span className="meta"> · {d.nouveaux.length} nouveau{d.nouveaux.length > 1 ? "x" : ""} sénateur{d.nouveaux.length > 1 ? "s" : ""}{d.sortants.length ? `, ${d.sortants.length} sortant${d.sortants.length > 1 ? "s" : ""}` : ""}</span>
+              <span className="meta"> · {d.nouveaux.length} nouveau{d.nouveaux.length > 1 ? "x" : ""} sénateur{d.nouveaux.length > 1 ? "s" : ""}{d.reelus.length ? `, ${d.reelus.length} réélu${d.reelus.length > 1 ? "s" : ""}` : ""}{d.sortants.length ? `, ${d.sortants.length} sortant${d.sortants.length > 1 ? "s" : ""}` : ""}</span>
             </li>
           ))}
         </ul>
@@ -94,7 +95,7 @@ export default async function Senatoriales2026() {
         changent de chambre — un député devenu sénateur, un collaborateur devenu parlementaire.
       </p>
       <p className="meta">
-        Voir aussi : <a href="/parlementaires">tous les parlementaires</a> · <a href="/mouvements/senat">les mouvements
+        Voir aussi : <a href="https://www.resultats-elections.interieur.gouv.fr/Senatoriales2026/nouvelle_assemblee/index.html" target="_blank" rel="noopener noreferrer">les résultats officiels du ministère de l&apos;Intérieur</a> · <a href="/parlementaires">tous les parlementaires</a> · <a href="/mouvements/senat">les mouvements
         au Sénat</a> · <a href="/vigiparl/senat/parlementaires">VigiParl&apos; au Sénat</a>
       </p>
     </>

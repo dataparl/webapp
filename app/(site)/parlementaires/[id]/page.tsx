@@ -10,6 +10,8 @@ import { CHAMBRE_LONG, nomAffiche, prenomNom } from "@/lib/format";
 import { chevauche, fusionner, libellePeriode, moisAnnee } from "@/lib/periodes";
 import { collaborateurDeLaPersonne, parlementaireDepuisId, periodesElu, personne, type Appartenance, type Mandat, type Parlementaire } from "@/lib/referentiel";
 import { partFemmes, pct, tauxTurnover } from "@/lib/stats";
+import { hrefGroupe, hrefDepartement, hrefParti } from "@/lib/collectifs";
+import { slugDepartement } from "@/lib/senatoriales";
 
 export const revalidate = 3600;
 
@@ -44,11 +46,13 @@ const ancien = (f: Pick<Parlementaire, "civilite">) => (f.civilite === "Mme" ? "
 function Groupe({ chambre, sigle, libelle }: { chambre: string; sigle: string; libelle?: string }) {
   if (!sigle) return null;
   const fam = familleDe(chambre, sigle);
-  return (
-    <span title={libelle || undefined}>
+  const href = hrefGroupe(chambre, sigle);
+  const contenu = (
+    <>
       Groupe {sigle}{fam && fam.code !== sigle ? <span className="meta"> (famille {fam.code})</span> : null}
-    </span>
+    </>
   );
+  return href ? <a href={href} title={libelle || undefined}>{contenu}</a> : <span title={libelle || undefined}>{contenu}</span>;
 }
 
 function ListeOrganes({ items }: { items: Appartenance[] }) {
@@ -117,6 +121,8 @@ export default async function Parlementaire({ params }: Props) {
           <p className="meta" style={{ marginTop: 6 }}>
             {f.actif ? `En fonction depuis ${moisAnnee(dernierDebut(mandats, f))}` : f.fin_mandat ? `Mandat terminé en ${moisAnnee(f.fin_mandat)}` : ""}
             {f.url_officielle && <> · <a href={f.url_officielle}>fiche officielle</a></>}
+            {hrefDepartement(f.departement || f.circonscription, slugDepartement) && <> · <a href={hrefDepartement(f.departement || f.circonscription, slugDepartement)!}>fiche élus de {f.departement || f.circonscription}</a></>}
+            {hrefParti(f.groupe) && f.groupe && <> · <a href={hrefParti(f.groupe)!}>fiche parti {f.groupe}</a></>}
             {autres.map((x) => <span key={x.chambre}> · <a href={`/parlementaires/${encodeURIComponent(x.slug)}`}>fiche {CHAMBRE_LONG[x.chambre]}</a></span>)}
           </p>
           <Partage compact url={`https://www.dataparl.fr/parlementaires/${encodeURIComponent(f.slug)}`} titre={nom}

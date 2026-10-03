@@ -36,7 +36,7 @@ export const APPLIXIR_SDK = "https://cdn.applixir.com/applixir.app.v6.1.0.js";
 export const DUREE_DEBLOCAGE_H = 24;
 
 type Secret =
-  | "AUTH_SUPABASE_SERVICE_ROLE_KEY" | "RESEND_API_KEY" | "CONSENT_SALT"
+  | "AUTH_SUPABASE_SERVICE_ROLE_KEY" | "DATA_SUPABASE_SERVICE_ROLE_KEY" | "RESEND_API_KEY" | "CONSENT_SALT"
   | "ADMIN_VAULT_KEY" | "ADMIN_OTP_SECRET" | "RESEND_WEBHOOK_SECRET" | "APPLIXIR_SECRET" | "CRON_SECRET";
 
 export function secret(name: Secret): string {

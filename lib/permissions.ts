@@ -6,6 +6,7 @@ export type Role = "admin" | "editeur" | "utilisateur";
 export const MODULES = [
   { cle: "boites_communes", libelle: "Emails génériques", detail: "hello@, contact@, presse@, rgpd@… dans la messagerie", defaut: ["editeur"] },
   { cle: "formulaires", libelle: "Formulaires", detail: "Messages de contact et oppositions", defaut: ["editeur"] },
+  { cle: "elus", libelle: "Élus", detail: "Biographies, mandats et fonctions des élus (édition manuelle)", defaut: ["editeur"] },
   { cle: "comptes", libelle: "Comptes et abonnés", detail: "Liste des utilisateurs et des abonnés aux alertes", defaut: ["editeur"] },
   { cle: "contenu_sitemap", libelle: "Plan du site", detail: "Activer, désactiver ou passer une page en brouillon", defaut: [], reserve: true },
   { cle: "contenu_liens", libelle: "Liens tracés", detail: "Créer des liens courts et lire leurs statistiques", defaut: ["editeur"] },
