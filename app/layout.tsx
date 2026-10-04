@@ -25,6 +25,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Spectral:wght@600;700&display=swap"
         />
+        {/* Google AdSense : validation du site et diffusion des annonces (ca-pub-6168263680630864). */}
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6168263680630864" crossOrigin="anonymous" />
       </head>
       <body>
         {children}
