@@ -37,17 +37,26 @@ export function EnTeteSite() {
   );
 }
 
-export function PiedDePage() {
+export function PiedDePage({ api = false }: { api?: boolean }) {
   return (
     <footer className="site">
       <div className="wrap pied-une-ligne">
-        <span className="meta">© 2026 DataParl&apos; : le Parlement, pièce par pièce.</span>
-        <nav aria-label="Plan du site">
-          <a href="/methode">Méthode</a>
-          <a href="/a-propos">À propos</a>
-          <a href="/sitemap">Plan du site</a>
-          <a href="/informations-legales">Informations légales</a>
-        </nav>
+        <span className="meta">
+          {api ? "© 2026 DataParl' API : DataParl' au format brut." : "© 2026 DataParl' : le Parlement, pièce par pièce."}
+        </span>
+        {api ? (
+          <nav aria-label="Plan du site de l'API">
+            <a href="/sitemap">Plan du site</a>
+            <a href="https://www.dataparl.fr/informations-legales/cgu-api">Informations légales</a>
+          </nav>
+        ) : (
+          <nav aria-label="Plan du site">
+            <a href="/methode">Méthode</a>
+            <a href="/a-propos">À propos</a>
+            <a href="/sitemap">Plan du site</a>
+            <a href="/informations-legales">Informations légales</a>
+          </nav>
+        )}
       </div>
     </footer>
   );
