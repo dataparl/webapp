@@ -1,0 +1,45 @@
+name: Test DILA
+# Test de connectivité vers les serveurs de la DILA (dumps JORFSIMPLE du
+# Journal officiel) depuis un runner GitHub Actions : le même accès que
+# utilise jorf-bot (repo privé dataparl/jorf-bot). Le résultat est publié sur
+# la branche « logs ». Peut être supprimé une fois le diagnostic terminé.
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths: [".github/workflows/dila-test.yml"]
+permissions:
+  contents: write
+jobs:
+  dila:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tests HTTPS et FTPS vers echanges.dila.gouv.fr
+        run: |
+          {
+            echo "== Test DILA $(date -u +%FT%TZ) =="
+            echo "-- 1. Index JORFSIMPLE (HTTPS) --"
+            curl -sS -m 30 -A "DataParl (https://www.dataparl.fr), jorf-bot" -o index.html -w "HTTP %{http_code}, %{size_download} octets\n" "https://echanges.dila.gouv.fr/OPENDATA/JORFSIMPLE/" || echo "ÉCHEC index : code $?"
+            grep -oE "JORFSIMPLE_[0-9]{8}\.zip" index.html 2>/dev/null | sort | (head -3; echo ...; tail -3) || echo "index illisible"
+            echo "-- 2. Zip récent (HTTPS, 500 premiers octets) --"
+            HIER=$(date -u -d '1 day ago' +%Y%m%d)
+            curl -sS -m 60 -A "DataParl (https://www.dataparl.fr), jorf-bot" -r 0-499 -o /dev/null -w "JORFSIMPLE_${HIER}.zip : HTTP %{http_code}, plage acceptée\n" "https://echanges.dila.gouv.fr/OPENDATA/JORFSIMPLE/JORFSIMPLE_${HIER}.zip" || echo "ÉCHEC zip : code $?"
+            echo "-- 3. Zip ancien hors fenêtre (2017) --"
+            curl -sS -m 60 -r 0-99 -o /dev/null -w "JORFSIMPLE_20170102.zip : HTTP %{http_code}\n" "https://echanges.dila.gouv.fr/OPENDATA/JORFSIMPLE/JORFSIMPLE_20170102.zip" || echo "code $?"
+            echo "-- 4. FTPS --"
+            curl -sS -m 40 --ssl -l "ftp://echanges.dila.gouv.fr/OPENDATA/JORFSIMPLE/" 2>&1 | head -5 || echo "FTPS indisponible"
+            echo "-- 5. IP sortante du runner --"
+            curl -sS -m 15 https://api.github.com/meta >/dev/null && echo "réseau général OK"
+          } 2>&1 | tee dila-test.log || true
+      - name: Publier le journal sur la branche logs
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin logs --depth=1 || true
+          git switch logs 2>/dev/null || git switch -c logs
+          git add dila-test.log
+          git commit -m "journal test DILA (run ${{ github.run_id }})" || echo "rien de neuf"
+          git push origin logs --force
