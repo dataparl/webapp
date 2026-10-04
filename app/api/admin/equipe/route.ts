@@ -23,10 +23,27 @@ export async function GET(req: Request) {
     ]);
     const reglagesDe = (id: string) => (perms ?? []).filter((x) => x.user_id === id).map((x) => ({ module: x.module as string, autorise: !!x.autorise }));
     const t = new Map((totp ?? []).map((x) => [x.user_id, x]));
+    // Moyens de connexion de chaque membre (email/mot de passe, Google, passkey…),
+    // lus dans les métadonnées d'auth. Tolérant : si la lecture échoue pour un
+    // compte, on affiche « – » plutôt que de casser toute la page.
+    const auths = await Promise.allSettled((staff ?? []).map((s) => db.auth.admin.getUserById(s.user_id as string)));
+    const connexions = new Map<string, { fournisseurs: string[]; derniere_connexion_auth: string | null }>();
+    auths.forEach((r, i) => {
+      const s = (staff ?? [])[i];
+      if (r.status === "fulfilled" && r.value?.data?.user) {
+        const u = r.value.data.user;
+        connexions.set(u.id, {
+          fournisseurs: (u.app_metadata?.providers as string[] | undefined) ?? [],
+          derniere_connexion_auth: u.last_sign_in_at ?? null,
+        });
+      } else if (s) connexions.set(s.user_id as string, { fournisseurs: [], derniere_connexion_auth: null });
+    });
     return {
       moi: a.userId,
       comptes: (staff ?? []).map((s) => ({
         ...s, totp_actif: !!t.get(s.user_id)?.active, derniere_connexion: t.get(s.user_id)?.last_used_at ?? null,
+        fournisseurs: connexions.get(s.user_id as string)?.fournisseurs ?? [],
+        derniere_connexion_auth: connexions.get(s.user_id as string)?.derniere_connexion_auth ?? null,
         passkeys: (cles ?? []).filter((x) => x.user_id === s.user_id).length,
         reglages: reglagesDe(s.user_id as string), modules: modulesDe(s.role as RoleP, reglagesDe(s.user_id as string)),
       })),

@@ -5,11 +5,12 @@ import Permissions from "./Permissions";
 const EXPEDITEURS_CONFIG = ["support@dataparl.fr", "it@dataparl.fr"] as const;
 import { LIBELLE_ROLE } from "@/app/_components/admin/EnTete";
 import { useAdmin, type Role } from "@/app/_components/admin/Porte";
+import { libellesFournisseurs } from "@/app/_components/admin/fournisseurs";
 import { dateHeure, useRessource } from "@/app/_components/admin/utils";
 import Marque from "@/app/_components/Marque";
 import { genererMotDePasse } from "@/lib/motDePasse";
 
-type Compte = { user_id: string; nom: string; email: string; role: Role; actif: boolean; doit_changer_mdp: boolean; cree_le: string; totp_actif: boolean; derniere_connexion: string | null };
+type Compte = { user_id: string; nom: string; email: string; role: Role; actif: boolean; doit_changer_mdp: boolean; cree_le: string; totp_actif: boolean; derniere_connexion: string | null; fournisseurs: string[]; derniere_connexion_auth: string | null; passkeys: number };
 const ROLES: Role[] = ["admin", "editeur", "utilisateur"];
 const DESCRIPTION: Record<Role, string> = {
   admin: "Contrôle total : équipe, clés API, sécurité, journal, toutes les boîtes mail.",
@@ -65,7 +66,7 @@ function Liste() {
       <div className="card" style={{ maxWidth: 720 }}>
         <p><button className="lien" onClick={() => setGere(null)}>← Retour</button></p>
         <h2 style={{ marginTop: 0 }}>{gere.nom}</h2>
-        <p className="meta">{gere.email} · créé le {dateHeure(gere.cree_le)} · {gere.actif ? "actif" : "suspendu"} · second facteur {gere.role !== "admin" ? "non requis" : gere.totp_actif ? "activé" : "à activer"}</p>
+        <p className="meta">{gere.email} · créé le {dateHeure(gere.cree_le)} · {gere.actif ? "actif" : "suspendu"} · second facteur {gere.role !== "admin" ? "non requis" : gere.totp_actif ? "activé" : "à activer"}{gere.derniere_connexion_auth && <> · dernière connexion {dateHeure(gere.derniere_connexion_auth)}</>}</p>
         <label>Rôle</label>
         <div className="cartes-roles">
           {ROLES.map((r) => (
@@ -112,12 +113,13 @@ function Liste() {
       {message && <p className="meta">{message}</p>}
       <div className="defile">
         <table className="stats">
-          <thead><tr><th>Nom</th><th>Adresse</th><th>Rôle</th><th>Statut</th><th></th></tr></thead>
+          <thead><tr><th>Nom</th><th>Adresse</th><th>Connexion</th><th>Rôle</th><th>Statut</th><th></th></tr></thead>
           <tbody>
             {visibles.map((c) => (
               <tr key={c.user_id}>
                 <td><strong>{c.nom}</strong>{c.user_id === data.moi && <span className="meta"> (toi)</span>}</td>
                 <td>{c.email}</td>
+                <td className="meta">{libellesFournisseurs(c.fournisseurs, c.passkeys).join(" · ") || "–"}</td>
                 <td><span className={`badge-role ${c.role}`}>{LIBELLE_ROLE[c.role]}</span></td>
                 <td>{c.actif ? <span className="ok">Actif</span> : <span className="meta">Suspendu</span>}{c.actif && c.doit_changer_mdp && <span className="meta"> · 1re connexion à faire</span>}</td>
                 <td className="actions" style={{ flexWrap: "nowrap" }}>
@@ -126,7 +128,7 @@ function Liste() {
                 </td>
               </tr>
             ))}
-            {visibles.length === 0 && <tr><td colSpan={5} className="meta">Aucun compte pour ce rôle.</td></tr>}
+            {visibles.length === 0 && <tr><td colSpan={6} className="meta">Aucun compte pour ce rôle.</td></tr>}
           </tbody>
         </table>
       </div>

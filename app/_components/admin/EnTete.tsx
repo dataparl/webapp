@@ -5,29 +5,46 @@ import { useAdmin, type Role } from "./Porte";
 
 export const LIBELLE_ROLE: Record<Role, string> = { admin: "Administrateur", editeur: "Éditeur", utilisateur: "Utilisateur" };
 
-// Sections de l'admin : ouvertes à des rôles, ou selon un module de la matrice de permissions.
-const SECTIONS: [string, string, Role[] | string][] = [
-  ["/", "Tableau de bord", ["admin", "editeur"]],
-  ["/contact", "Contact", "formulaires"],
-  ["/elus", "Élus", "elus"],
-  ["/jorf", "JORF", "jorf"],
-  ["/abonnes", "Abonnés", "comptes"],
-  ["/users", "Comptes", "comptes"],
-  ["/oppositions", "Oppositions", "formulaires"],
-  ["/content/sitemap", "Plan du site", "contenu_sitemap"],
-  ["/content/links", "Liens", "contenu_liens"],
-  ["/communication", "Communication", "communication"],
-  ["/cles", "Clés API", "cles_api"],
-  ["/equipe", "Équipe", ["admin"]],
-  ["/journal", "Journal", "journal"],
-  ["/moi", "Mon espace", ["admin", "editeur", "utilisateur"]],
+// Accès : liste de rôles, ou module de la matrice de permissions.
+type Acces = Role[] | string;
+type Entree = { chemin: string; libelle: string; acces: Acces };
+type Section = { chemin: string; libelle: string; acces?: Acces; entrees?: Entree[] };
+
+// Sections de l'admin, groupées selon l'organisation de l'espace :
+// tableau de bord, prise de contact, contenu, presse, actions, utilisateurs, admin, mon espace.
+const SECTIONS: Section[] = [
+  { chemin: "/", libelle: "Tableau de bord", acces: ["admin", "editeur"] },
+  { chemin: "/contact", libelle: "Contact", acces: "formulaires" },
+  {
+    chemin: "/content", libelle: "Contenu", entrees: [
+      { chemin: "/content/sitemap", libelle: "Plan du site", acces: "contenu_sitemap" },
+      { chemin: "/content/links", libelle: "Liens courts", acces: "contenu_liens" },
+      { chemin: "/elus", libelle: "Fiches élus", acces: "elus" },
+      { chemin: "/oppositions", libelle: "Suppressions de fiches", acces: "formulaires" },
+    ],
+  },
+  { chemin: "/presse", libelle: "Presse", acces: "communication" },
+  { chemin: "/jorf", libelle: "JORF", acces: "jorf" },
+  {
+    chemin: "/users", libelle: "Utilisateurs", acces: "comptes", entrees: [
+      { chemin: "/users", libelle: "Comptes", acces: "comptes" },
+      { chemin: "/users/abonnes", libelle: "Abonnés aux alertes", acces: "comptes" },
+      { chemin: "/users/api-keys", libelle: "Clés API", acces: "cles_api" },
+    ],
+  },
+  { chemin: "/journal", libelle: "Journal", acces: "journal" },
+  { chemin: "/equipe", libelle: "Équipe", acces: ["admin"] },
+  { chemin: "/moi", libelle: "Mon espace", acces: ["admin", "editeur", "utilisateur"] },
 ];
+
+const visible = (acces: Acces | undefined, role: Role, modules: string[]) =>
+  typeof acces === "string" ? modules.includes(acces) : acces.includes(role);
 
 export default function EnTete({ espace }: { espace: Espace }) {
   const { nom, email, role, modules, verrouiller } = useAdmin();
   const [actif, setActif] = useState("");
   useEffect(() => { setActif(window.location.pathname.replace(/^\/admin/, "") || "/"); }, []);
-  const sections = SECTIONS.filter(([, , acces]) => (typeof acces === "string" ? modules.includes(acces) : acces.includes(role)));
+  const sections = SECTIONS.filter((s) => visible(s.acces, role, modules) || (s.entrees ?? []).some((e) => visible(e.acces, role, modules)));
   return (
     <header className="site admin">
       <div className="wrap large">
@@ -39,9 +56,24 @@ export default function EnTete({ espace }: { espace: Espace }) {
         </div>
       </div>
       <nav className="wrap large onglets-admin">
-        {espace === "admin"
-          ? sections.map(([c, l]) => <a key={c} href={lien("admin", c)} aria-current={actif === c || (c !== "/" && actif.startsWith(`${c}/`)) ? "page" : undefined}>{l}</a>)
-          : <a href={lien("admin", role === "utilisateur" ? "/moi" : "/")}>← Espace équipe</a>}
+        {espace === "admin" ? sections.map((s) => {
+          const ouvert = actif === s.chemin || (s.chemin !== "/" && actif.startsWith(`${s.chemin}/`));
+          if (!s.entrees) {
+            const aria = actif === s.chemin || (s.chemin !== "/" && actif.startsWith(`${s.chemin}/`)) ? "page" : undefined;
+            return <a key={s.chemin} href={lien("admin", s.chemin)} aria-current={aria}>{s.libelle}</a>;
+          }
+          const entrees = s.entrees.filter((e) => visible(e.acces, role, modules));
+          return (
+            <details key={s.chemin} className="menu-admin" data-ouvert={ouvert ? "" : undefined} open={ouvert}>
+              <summary aria-current={ouvert ? "page" : undefined}>{s.libelle}</summary>
+              <div className="menu-admin-panneau">
+                {entrees.map((e) => (
+                  <a key={e.chemin} href={lien("admin", e.chemin)} aria-current={actif === e.chemin || (e.chemin !== "/" && actif.startsWith(`${e.chemin}/`)) ? "page" : undefined}>{e.libelle}</a>
+                ))}
+              </div>
+            </details>
+          );
+        }) : <a href={lien("admin", role === "utilisateur" ? "/moi" : "/")}>← Espace équipe</a>}
         {espace === "admin" && <a href={lien("webmail")}>Messagerie</a>}
       </nav>
     </header>

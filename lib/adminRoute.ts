@@ -25,9 +25,12 @@ export async function avecAdmin(req: Request, fn: (a: Admin) => Promise<unknown>
     console.error("admin", e);
     // Une variable d'environnement manquante ne doit pas se cacher derrière un
     // « erreur serveur » générique : l'admin a besoin du nom pour la corriger.
-    const message = e instanceof Error && e.message.startsWith("Variable d'environnement manquante")
-      ? `${e.message} — à ajouter dans les variables du projet sur Vercel`
-      : "erreur serveur";
+    // Idem pour toute autre erreur : les routes sont réservées à l'équipe
+    // connectée, le message exact (Supabase compris) aide au diagnostic.
+    const brut = e instanceof Error ? e.message.trim() : "";
+    const message = brut.startsWith("Variable d'environnement manquante")
+      ? `${brut} — à ajouter dans les variables du projet sur Vercel`
+      : brut ? `erreur serveur : ${brut.slice(0, 300)}` : "erreur serveur";
     return NextResponse.json({ error: message }, { status: 500, headers: { "Cache-Control": "no-store" } });
   }
 }

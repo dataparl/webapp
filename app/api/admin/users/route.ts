@@ -11,7 +11,8 @@ export async function GET(req: Request) {
     const page = Math.max(Number(u.get("page") ?? 0) || 0, 0);
     const db = authAdmin();
     const { data, error } = await db.auth.admin.listUsers({ page: page + 1, perPage: PAGE });
-    if (error) throw error;
+    if (error) throw new Error(`Supabase Auth (listUsers) : ${error.message}`);
+    if (!data?.users) throw new Error("Supabase Auth (listUsers) : réponse vide");
     const emails = data.users.map((x) => (x.email ?? "").toLowerCase()).filter(Boolean);
     const [{ data: alertes }, { data: staff }] = await Promise.all([
       emails.length ? db.from("alert_subscriptions").select("email, active, frequence").in("email", emails) : Promise.resolve({ data: [] }),

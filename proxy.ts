@@ -26,6 +26,19 @@ import { estInactif } from "./lib/pagesRegistre";
 const DOMAINE = "dataparl.fr";
 const ANCIENS = ["cavaparlement.eu", "dataparl.com"];
 
+// Anciennes adresses de l'espace admin -> nouvelles (réorganisation d'octobre 2026).
+const REDIRECTIONS_ADMIN: [avant: string, apres: string][] = [
+  ["/communication", "/presse"],
+  ["/abonnes", "/users/abonnes"],
+  ["/cles", "/users/api-keys"],
+];
+function nouvelCheminAdmin(p: string): string | null {
+  for (const [avant, apres] of REDIRECTIONS_ADMIN) {
+    if (p === avant || p.startsWith(`${avant}/`)) return apres + p.slice(avant.length);
+  }
+  return null;
+}
+
 // Ancien hôte -> nouvel hôte équivalent, ou null.
 function nouvelHote(host: string): string | null {
   for (const ancien of ANCIENS) {
@@ -130,6 +143,8 @@ export async function proxy(req: NextRequest) {
     let res: NextResponse;
     if (path.startsWith("/api/") || path.startsWith(`/${espace}`) || path === "/connexion") res = NextResponse.next();
     else {
+      const nouveau = espace === "admin" ? nouvelCheminAdmin(path) : null;
+      if (nouveau) return protege(vers(req, `admin.${DOMAINE}`, nouveau || "/", 308));
       const url = req.nextUrl.clone();
       url.pathname = `/${espace}${path === "/" ? "" : path}`;
       res = NextResponse.rewrite(url);
@@ -139,7 +154,10 @@ export async function proxy(req: NextRequest) {
 
   if (host === `www.${DOMAINE}`) {
     if (path === "/api" || path === "/api/") return vers(req, `api.${DOMAINE}`, "/", 308);
-    if (path.startsWith("/admin")) return vers(req, `admin.${DOMAINE}`, path.replace(/^\/admin/, "") || "/", 307);
+    if (path.startsWith("/admin")) {
+      const cible = (path.replace(/^\/admin/, "") || "/").replace(/\/$/, "") || "/";
+      return vers(req, `admin.${DOMAINE}`, nouvelCheminAdmin(cible) ?? cible, 307);
+    }
     if (path.startsWith("/webmail")) return vers(req, `webmail.${DOMAINE}`, path.replace(/^\/webmail/, "") || "/", 307);
     if (path.startsWith("/espace-api")) return vers(req, `api.${DOMAINE}`, path.replace(/^\/espace-api/, "") || "/", 308);
   }
