@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { assainirHtml, bioVersHtml } from "@/lib/htmlBio";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { sessionActuelle } from "@/lib/supabaseBrowser";
 import VideoDeblocage from "@/app/_components/VideoDeblocage";
 
 // Biographie complète d'un élu : le début est public (aperçu indexé par les
@@ -16,7 +16,7 @@ export default function BioComplete({ personne, nom, suite }: { personne: string
   const [pub, setPub] = useState(false);
   const [essai, setEssai] = useState(0);
 
-  useEffect(() => { authBrowser().auth.getSession().then(({ data }) => setSession(data.session)); }, []);
+  useEffect(() => { sessionActuelle().then(setSession); }, []);
   useEffect(() => {
     if (!session) return;
     fetch(`/api/bios/elu?personne=${encodeURIComponent(personne)}`, { headers: { Authorization: `Bearer ${session.access_token}` }, cache: "no-store" })
