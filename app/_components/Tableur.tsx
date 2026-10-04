@@ -12,7 +12,20 @@ const INDICE = (l: string): number => { let n = 0; for (const ch of l.toUpperCas
 
 // ── Évaluateur de formules (recursive descent) ────────────────────────────
 type Tok = { t: "num" | "ref" | "fn" | "op"; v: string };
-const TOK = /=|\d+(?:\.\d+)?|[A-Za-z_]+[A-Za-z0-9_]*|[+\-*/^();:]|\s+/y;
+// Motifs construits sans antislash littéral dans ce fichier (compatibilité push).
+const BS = String.fromCharCode(92);
+const RC = String.fromCharCode(13, 10);
+const BOM = String.fromCharCode(0xfeff);
+const RX_TOK = "=|" + BS + "d+(?:" + BS + "." + BS + "d+)?|[A-Za-z_]+[A-Za-z0-9_]*|[" + BS + "+" + BS + "-" + BS + "*/^();:]|" + BS + "s+";
+const RX_ESPACES = "^" + BS + "s+$";
+const RX_NUM = "^" + BS + "d";
+const RX_LETTRE = "^[A-Za-z_]";
+const RX_REF = "^([A-Za-z]+)(" + BS + "d+)$";
+const TOK = new RegExp(RX_TOK, "y");
+const ESPACES = new RegExp(RX_ESPACES);
+const DEBUT_NUM = new RegExp(RX_NUM);
+const DEBUT_LETTRE = new RegExp(RX_LETTRE);
+const REF = new RegExp(RX_REF);
 
 function lexer(f: string): Tok[] {
   const out: Tok[] = [];
@@ -23,9 +36,9 @@ function lexer(f: string): Tok[] {
     if (!m) throw new Error("#ERREUR!");
     const s = m[0];
     i += s.length;
-    if (/^\s+$/.test(s)) continue;
-    if (/^\d/.test(s)) out.push({ t: "num", v: s });
-    else if (/^[A-Za-z_]/.test(s)) out.push(f[i] === "(" ? { t: "fn", v: s.toUpperCase() } : { t: "ref", v: s });
+    if (ESPACES.test(s)) continue;
+    if (DEBUT_NUM.test(s)) out.push({ t: "num", v: s });
+    else if (DEBUT_LETTRE.test(s)) out.push(f[i] === "(" ? { t: "fn", v: s.toUpperCase() } : { t: "ref", v: s });
     else out.push({ t: "op", v: s });
   }
   return out;
@@ -52,7 +65,7 @@ export function evaluer(grille: string[][], r: number, c: number, vus: Set<strin
   const manger = (v: string) => { if (toks[p]?.v === v) { p++; return true; } return false; };
 
   const plageVals = (a: string, b: string): number[] => {
-    const m1 = /^([A-Za-z]+)(\d+)$/.exec(a), m2 = /^([A-Za-z]+)(\d+)$/.exec(b);
+    const m1 = REF.exec(a), m2 = REF.exec(b);
     if (!m1 || !m2) throw new Error("#REF!");
     const c1 = INDICE(m1[1]), c2 = INDICE(m2[1]), r1 = +m1[2] - 1, r2 = +m2[2] - 1;
     const out: number[] = [];
@@ -91,7 +104,7 @@ export function evaluer(grille: string[][], r: number, c: number, vus: Set<strin
     if (t.t === "ref") {
       p++;
       if (peek()?.v === ":") { p++; const fin = toks[p++]; const vals = plageVals(t.v, fin.v); return vals[0] ?? 0; }
-      const m = /^([A-Za-z]+)(\d+)$/.exec(t.v);
+      const m = REF.exec(t.v);
       if (!m) throw new Error("#NOM?");
       const v = valeurCellule(grille, +m[2] - 1, INDICE(m[1]), vus);
       if (typeof v === "number") return v;
@@ -196,9 +209,9 @@ export default function Tableur({ id, titre, description, provenance, entetes, d
   function exporterCsv() {
     const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const nombres = (v: number | string) => typeof v === "number" ? String(v).replace(".", ",") : esc(v);
-    const csv = [grille.map((l, r) => l.map((_, c) => (r === 0 ? esc(String(calculee[r][c])) : nombres(calculee[r][c]))).join(";")).join("\r\n")].join("\r\n");
+    const csv = [grille.map((l, r) => l.map((_, c) => (r === 0 ? esc(String(calculee[r][c])) : nombres(calculee[r][c]))).join(";")).join(RC)].join(RC);
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }));
+    a.href = URL.createObjectURL(new Blob([BOM + csv], { type: "text/csv;charset=utf-8" }));
     a.download = `${id}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
