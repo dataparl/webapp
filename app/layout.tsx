@@ -25,6 +25,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Spectral:wght@600;700&display=swap"
         />
+        {/* Consent Mode v2 (Google) : tout refusé par défaut, AVANT tout script
+            publicitaire. Le bandeau du site actualise ces signaux après choix
+            du visiteur (lib/consentement.ts) — pas de bannière Google. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500});`,
+          }}
+        />
         {/* Google AdSense : validation du site et diffusion des annonces (ca-pub-6168263680630864). */}
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6168263680630864" crossOrigin="anonymous" />
         {/* Google Tag Manager (GTM-KW3MJMTK) : le plus haut possible dans le head. */}

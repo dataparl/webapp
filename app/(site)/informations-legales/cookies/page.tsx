@@ -9,9 +9,10 @@ export default function Cookies() {
       <h1><span className="surligne">Cookies</span></h1>
       <p className="meta">Dernière mise à jour : {MISE_A_JOUR}</p>
       <p>
-        DataParl&apos; n&apos;utilise aucun outil de mesure d&apos;audience. Par défaut, les seuls cookies déposés sont
-        strictement nécessaires au service : ils sont dispensés de consentement (article 82 de la loi Informatique
-        et libertés), c&apos;est pourquoi le bandeau d&apos;accueil se contente de t&apos;en informer.
+        Par défaut, les seuls cookies déposés sont strictement nécessaires au service : ils sont dispensés de
+        consentement (article 82 de la loi Informatique et libertés). La mesure d&apos;audience et la publicité
+        ne sont activées qu&apos;après ton accord, donné dans le bandeau d&apos;accueil — et tu peux les refuser
+        ou les ajuster à tout moment en supprimant tes cookies.
       </p>
       <p>
         Une seule exception, à ta demande : pour débloquer gratuitement le parcours d&apos;une fiche collaborateur, tu
@@ -38,8 +39,8 @@ export default function Cookies() {
             <td>Quelques minutes</td>
           </tr>
           <tr>
-            <td><code>dp_info_cookies_v1.0</code> (cookie)</td>
-            <td>Ne pas réafficher le bandeau d&apos;information</td>
+            <td><code>dp_consentement_v1.0</code> (cookie)</td>
+            <td>Mémoriser ton choix de consentement : mesure d&apos;audience et publicité accordées ou refusées</td>
             <td>30 jours</td>
           </tr>
         </tbody>
@@ -47,6 +48,23 @@ export default function Cookies() {
       <p>
         Si tu choisis de te connecter avec Google ou GitHub, ces services déposent leurs propres cookies sur leurs
         domaines, selon leurs politiques respectives. DataParl&apos; n&apos;y a pas accès.
+      </p>
+
+      <h2>Mesure d&apos;audience et publicité (avec ton accord)</h2>
+      <p>
+        Si tu les acceptes, deux traitements complémentaires sont activés, pilotés par le bandeau du site (pas par
+        une bannière Google) :
+      </p>
+      <ul>
+        <li><strong>Mesure d&apos;audience</strong> : statistiques de fréquentation anonymisées, pour savoir quelles
+          pages sont lues et améliorer le site ;</li>
+        <li><strong>Publicité</strong> : annonces de Google AdSense, avec personnalisation publicitaire si tu
+          l&apos;acceptes — sinon, des annonces non personnalisées.</li>
+      </ul>
+      <p>
+        Ces choix sont transmis à Google (Tag Manager et AdSense) via les signaux de consentement officiels
+        (Consent Mode v2) : tant que tu n&apos;as pas répondu, ou en cas de refus, aucun cookie publicitaire
+        ni cookie de mesure n&apos;est déposé et aucune annonce personnalisée n&apos;est diffusée.
       </p>
 
       <h2>Vidéo publicitaire (sur ta demande)</h2>
@@ -70,9 +88,9 @@ export default function Cookies() {
         simplement déconnecté(e).
       </p>
       <p>
-        Si DataParl&apos; ajoutait un jour une mesure d&apos;audience nécessitant ton accord, le bandeau te demanderait
-        ton choix avant tout dépôt, et cette page serait mise à jour. Un bloqueur de publicité empêche la vidéo de
-        se charger : la fiche reste alors bloquée, le reste du site fonctionne normalement.
+        Un bloqueur de publicité empêche la vidéo de se charger : la fiche reste alors bloquée, le reste du site
+        fonctionne normalement. Pour revoir tes choix de consentement, supprime les cookies du site : le bandeau
+        s&apos;affichera à nouveau.
       </p>
     </>
   );
