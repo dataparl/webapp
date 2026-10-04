@@ -16,8 +16,6 @@ export default function RechercheGlobale({ placeholder = "Un élu ou un collabor
       const champ = document.getElementById(id) as HTMLInputElement | null;
       if (!champ) return;
       e.preventDefault();
-      // En mobile, la barre peut être repliée derrière la bulle 🔍 : on l'ouvre.
-      champ.closest(".barre-header")?.classList.add("ouverte");
       champ.focus();
     };
     window.addEventListener("keydown", surTouche);
