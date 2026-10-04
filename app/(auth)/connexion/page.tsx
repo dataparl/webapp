@@ -2,9 +2,11 @@
 import { useEffect, useState } from "react";
 import { authBrowser } from "@/lib/supabaseBrowser";
 
-// DataParl' Auth : connexion ou création de compte par GitHub, Google ou code
-// email. Servie sur www. et admin. pour que le flux OAuth (PKCE) reste sur
-// l'origine qui l'a lancé.
+// DataParl' Auth : connexion ou création de compte. Servie sur www., drive. et
+// admin. pour que le flux OAuth (PKCE) reste sur l'origine qui l'a lancé.
+// Les fournisseurs dépendent du sous-domaine : Slack réservé à l'espace
+// équipe (admin.dataparl.fr) ; Google, GitHub et X pour les comptes du site
+// (www et drive).
 
 const CGU_OK = "dp_cgu_acceptees";
 const IDENTITE = "dp_identite"; // prénom et nom saisis à la création, enregistrés une fois connecté
@@ -29,6 +31,22 @@ function IconeGoogle() {
   );
 }
 
+function IconeSlack() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="#611f69">
+      <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" />
+    </svg>
+  );
+}
+
+function IconeX() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+      <path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z" />
+    </svg>
+  );
+}
+
 export default function Connexion() {
   const [onglet, setOnglet] = useState<"connexion" | "creation">("connexion");
   const [cgu, setCgu] = useState(false);
@@ -39,6 +57,11 @@ export default function Connexion() {
   const [code, setCode] = useState("");
   const [message, setMessage] = useState("");
   const [enCours, setEnCours] = useState(false);
+  const [surAdmin, setSurAdmin] = useState(false);
+
+  useEffect(() => {
+    setSurAdmin(window.location.hostname.startsWith("admin."));
+  }, []);
 
   const creation = onglet === "creation";
   const identite = prenom.trim().length > 0 && nom.trim().length > 0;
@@ -90,7 +113,7 @@ export default function Connexion() {
     } catch {}
   }
 
-  async function oauth(provider: "github" | "google") {
+  async function oauth(provider: "github" | "google" | "slack_oidc" | "twitter") {
     if (bloque) return setMessage(motif);
     memoriserCgu();
     const suite = encodeURIComponent(destination());
@@ -157,12 +180,31 @@ export default function Connexion() {
 
         {etape !== "code" && (
           <>
-            <button className="fournisseur github" onClick={() => oauth("github")} disabled={bloque}>
-              <IconeGitHub /> Continuer avec GitHub
-            </button>
-            <button className="fournisseur" onClick={() => oauth("google")} disabled={bloque}>
-              <IconeGoogle /> Continuer avec Google
-            </button>
+            {surAdmin ? (
+              <>
+                <button className="fournisseur slack" onClick={() => oauth("slack_oidc")} disabled={bloque}>
+                  <IconeSlack /> Continuer avec Slack
+                </button>
+                <p className="meta" style={{ margin: "10px 0" }}>
+                  L&apos;espace équipe se connecte avec Slack (ou GitHub pour les comptes historiques).
+                </p>
+                <button className="fournisseur github" onClick={() => oauth("github")} disabled={bloque}>
+                  <IconeGitHub /> Continuer avec GitHub
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="fournisseur" onClick={() => oauth("google")} disabled={bloque}>
+                  <IconeGoogle /> Continuer avec Google
+                </button>
+                <button className="fournisseur github" onClick={() => oauth("github")} disabled={bloque}>
+                  <IconeGitHub /> Continuer avec GitHub
+                </button>
+                <button className="fournisseur" onClick={() => oauth("twitter")} disabled={bloque}>
+                  <IconeX /> Continuer avec X
+                </button>
+              </>
+            )}
             <div className="separateur">ou</div>
           </>
         )}

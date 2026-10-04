@@ -3,6 +3,8 @@ export const LIBELLE_FOURNISSEURS: Record<string, string> = {
   email: "Email / mot de passe",
   google: "Google",
   github: "GitHub",
+  slack_oidc: "Slack",
+  twitter: "X (Twitter)",
   gitlab: "GitLab",
   apple: "Apple",
   azure: "Microsoft",

@@ -16,7 +16,7 @@ const CHAMBRES = [
   { v: "europarl", l: "Parlement européen" },
 ];
 
-const NOMS: Record<string, string> = { email: "Code par email", google: "Google", github: "GitHub" };
+const NOMS: Record<string, string> = { email: "Code par email", google: "Google", github: "GitHub", twitter: "X (Twitter)", slack_oidc: "Slack" };
 
 export default function MonCompte() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
@@ -66,7 +66,7 @@ export default function MonCompte() {
   }
   if (!compte) return <p className="meta">{message?.texte ?? "Chargement…"}</p>;
 
-  async function associer(provider: "google" | "github") {
+  async function associer(provider: "google" | "github" | "twitter") {
     const { error } = await authBrowser().auth.linkIdentity({
       provider,
       options: { redirectTo: `${window.location.origin}/mon-compte` },
@@ -116,6 +116,9 @@ export default function MonCompte() {
         )}{" "}
         {!compte.fournisseurs.includes("github") && (
           <button className="secondaire" onClick={() => associer("github")}>Associer mon compte GitHub</button>
+        )}{" "}
+        {!compte.fournisseurs.includes("twitter") && (
+          <button className="secondaire" onClick={() => associer("twitter")}>Associer mon compte X</button>
         )}
         <p><button className="lien" onClick={deconnexion}>Se déconnecter</button></p>
       </section>

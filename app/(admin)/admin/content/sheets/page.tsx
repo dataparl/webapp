@@ -43,7 +43,7 @@ export default function FeuillesSheets() {
                 <button onClick={() => changer(f, !f.publie)}>{f.publie ? "Masquer" : "Publier"}</button>
               </td>
             </tr>
-          )))}</tbody>
+          ))}</tbody>
         </table>
       </div>
     </>
