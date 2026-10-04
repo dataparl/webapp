@@ -8,7 +8,7 @@ import { familleDe } from "@/lib/familles";
 import { photoAbsolue } from "@/lib/media";
 import { CHAMBRE_LONG, nomAffiche, prenomNom } from "@/lib/format";
 import { chevauche, fusionner, libellePeriode, moisAnnee } from "@/lib/periodes";
-import { collaborateurDeLaPersonne, parlementaireDepuisId, periodesElu, personne, type Appartenance, type Mandat, type Parlementaire } from "@/lib/referentiel";
+import { collaborateurDeLaPersonne, fonctionsGouvernement, parlementaireDepuisId, periodesElu, personne, type Appartenance, type Mandat, type Ministre, type Parlementaire } from "@/lib/referentiel";
 import { partFemmes, pct, tauxTurnover } from "@/lib/stats";
 import { hrefGroupe, hrefDepartement, hrefParti, sansGroupe } from "@/lib/collectifs";
 import { slugDepartement } from "@/lib/senatoriales";
@@ -78,12 +78,14 @@ export default async function Parlementaire({ params }: Props) {
 
   const { fiches, mandats, appartenances } = await personne(f.personne_id);
   const e = eluDepuisFiche(f);
-  const [collabs, mouvements, stats, periodes, commeCollab] = await Promise.all([
+  const [collabs, mouvements, stats, periodes, commeCollab, gouvernement] = await Promise.all([
     f.actif && f.chambre !== "europarl" ? equipe(e) : Promise.resolve([]),
     mouvementsElu(e, 5).catch(() => []),
     f.actif ? statsElu(e).catch(() => null) : Promise.resolve(null),
     periodesElu(fiches).catch(() => []),
     collaborateurDeLaPersonne(f.personne_id).catch(() => null),
+    // Table ministres absente ou vide tant que la migration n'est pas passée : fiche intacte.
+    fonctionsGouvernement(f.personne_id).catch(() => []),
   ]);
   const nom = prenomNom(f.prenom, f.nom);
   const nbCollabs = new Set(periodes.map((p) => p.collab_id)).size;
@@ -212,6 +214,25 @@ export default async function Parlementaire({ params }: Props) {
           <a href={`/collab/${commeCollab.slug}`}>Voir son parcours de {f.civilite === "Mme" ? "collaboratrice" : "collaborateur"}</a>
           <span className="meta"> · rapprochement par le nom, sans chevauchement avec ses mandats</span>
         </p>
+      )}
+
+      {gouvernement.length > 0 && (
+        <>
+          <h2>Au gouvernement</h2>
+          <ol className="parcours">
+            {gouvernement.map((g, i) => (
+              <li key={`${g.gouvernement}-${g.debut}-${i}`}>
+                <p className="parcours-titre">
+                  <strong>{g.fonction}</strong>
+                  <span className="meta">
+                    {" · "}gouvernement {g.gouvernement} · {libellePeriode({ debut: g.debut, debut_connu: true, fin: g.fin, fin_connue: !!g.fin, en_cours: !g.fin })}
+                  </span>
+                </p>
+                {g.portefeuille && <p className="meta" style={{ margin: "2px 0" }}>{g.portefeuille}</p>}
+              </li>
+            ))}
+          </ol>
+        </>
       )}
 
       <h2>Parcours parlementaire</h2>

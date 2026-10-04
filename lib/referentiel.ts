@@ -14,6 +14,7 @@ export type Parlementaire = {
 };
 export type Mandat = { personne_id: string; chambre: Chambre; elu_id: string; debut: string; fin: string; libelle: string; circonscription: string; legislature: string; cause_fin: string };
 export type Appartenance = { personne_id: string; chambre: Chambre; elu_id: string; type: string; code: string; libelle: string; sigle: string; fonction: string; debut: string; fin: string };
+export type Ministre = { personne_id: string; fonction: string; portefeuille: string; gouvernement: string; rang: string; debut: string; fin: string; source: string };
 export type Collaborateur = {
   collab_id: string; collab_cle: string; slug: string; prenom: string; nom: string; civilite: string; genre: string;
   chambres: string; n_elus: number; premiere_date: string; derniere_date: string; actif: boolean;
@@ -63,6 +64,14 @@ export async function personne(personneId: string) {
     dataQueryTout<Appartenance>("appartenances", new URLSearchParams({ ...Object.fromEntries(q("*")), order: "debut.desc" })),
   ]);
   return { fiches: fiches.rows, mandats: mandats.rows, appartenances };
+}
+
+// Fonctions gouvernementales d'une personne (table ministres, alimentée par le
+// pipeline gouvernement ou la rédaction) : affichées sur la fiche parlementaire.
+export async function fonctionsGouvernement(personneId: string): Promise<Ministre[]> {
+  const { rows } = await dataQuery<Ministre>("ministres",
+    new URLSearchParams({ select: "personne_id,fonction,portefeuille,gouvernement,rang,debut,fin,source", personne_id: `eq.${personneId}`, order: "debut.desc" }), 3600);
+  return rows;
 }
 
 // Toutes les fiches, en version compacte (autocomplétion).
