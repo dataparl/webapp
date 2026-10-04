@@ -14,8 +14,8 @@ export default function FeuillesSheets() {
 
   async function changer(f: Feuille, publie: boolean) {
     const texte = publie
-      ? `Publier « ${f.titre} » en libre accès sur drive.dataparl.fr ?`
-      : `Masquer « ${f.titre} » ? La feuille répondra 404 sur drive.dataparl.fr (l'accès direct redirige vers dataparl.fr).`;
+      ? `Publier « ${f.titre} » en libre accès sur www.dataparl.fr/sheets ?`
+      : `Masquer « ${f.titre} » ? La feuille répondra 404 (l'accès direct redirige vers la liste des feuilles).`;
     if (!confirm(texte)) return;
     try { await api("/api/admin/content/sheets", { method: "PATCH", body: { id: f.id, publie } }); setMessage(null); await recharger(); }
     catch (e) { setMessage((e as Error).message); }
@@ -25,7 +25,7 @@ export default function FeuillesSheets() {
     <>
       <h1>DataParl&apos; Sheets</h1>
       <p className="meta">
-        Feuilles du tableur drive.dataparl.fr. Une feuille publiée est en libre accès (connexion + vidéo
+        Feuilles du tableur (www.dataparl.fr/sheets). Une feuille publiée est en libre accès (connexion + vidéo
         publicitaire pour la consulter) ; une feuille masquée répond 404. Le changement est effectif en une
         minute environ.
       </p>
@@ -36,7 +36,7 @@ export default function FeuillesSheets() {
           <tbody>{data.feuilles.map((f) => (
             <tr key={f.id}>
               <td><strong>{f.titre}</strong><span className="meta"> · {f.description}</span></td>
-              <td><a className="mono" href={`https://drive.dataparl.fr/sheets/${f.id}`} target="_blank" rel="noreferrer">/sheets/{f.id}</a></td>
+              <td><a className="mono" href={`https://www.dataparl.fr/sheets/${f.id}`} target="_blank" rel="noreferrer">/sheets/{f.id}</a></td>
               <td>{f.publie ? <span className="ok">Publiée</span> : <span className="meta">Masquée</span>}</td>
               <td className="meta">{dateHeure(f.maj_le)}</td>
               <td>
