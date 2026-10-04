@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { lien, type Espace } from "./liens";
 import { useAdmin, type Role } from "./Porte";
+import { authBrowser } from "@/lib/supabaseBrowser";
 
 export const LIBELLE_ROLE: Record<Role, string> = { admin: "Administrateur", editeur: "Éditeur", utilisateur: "Utilisateur" };
 
@@ -32,6 +33,7 @@ const SECTIONS: Section[] = [
       { chemin: "/users", libelle: "Comptes", acces: "comptes" },
       { chemin: "/users/abonnes", libelle: "Abonnés aux alertes", acces: "comptes" },
       { chemin: "/users/api-keys", libelle: "Clés API", acces: "cles_api" },
+      { chemin: "/telechargements", libelle: "Téléchargements Sheets", acces: "comptes" },
     ],
   },
   { chemin: "/journal", libelle: "Journal", acces: "journal" },
@@ -57,6 +59,7 @@ export default function EnTete({ espace }: { espace: Espace }) {
           <span className={`badge-role ${role}`}>{LIBELLE_ROLE[role]}</span>
           <span className="qui-nom"><strong>{nom}</strong><span className="meta">{email}</span></span>
           <button className="lien" onClick={verrouiller}>Verrouiller</button>
+          <button className="lien" onClick={async () => { await authBrowser().auth.signOut(); window.location.href = lien(espace, "/connexion"); }}>Déconnexion</button>
         </div>
       </div>
       <nav className="wrap large onglets-admin">
