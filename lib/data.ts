@@ -41,13 +41,14 @@ export async function dataQuery<T>(table: string, params: URLSearchParams, reval
   return { rows: (await r.json()) as T[], total };
 }
 
-export async function derniersMouvements(limit = 10): Promise<Mouvement[]> {
+export async function derniersMouvements(limit = 10, chambre?: Mouvement["chambre"]): Promise<Mouvement[]> {
   const p = new URLSearchParams({
     select: COLONNES_PUBLIQUES,
     source: "eq.live",
     order: "date_event.desc,chambre.asc",
     limit: String(limit),
   });
+  if (chambre) p.set("chambre", `eq.${chambre}`);
   return (await dataQuery<Mouvement>("mouvements", p)).rows;
 }
 

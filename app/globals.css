@@ -472,3 +472,37 @@ a.pastille-groupe:hover, a.pastille-groupe:focus-visible { border-color: var(--c
 .etapes-methode > li { counter-increment: etape; margin: 0 0 14px; padding-left: 34px; position: relative; }
 .etapes-methode > li::before { content: counter(etape); position: absolute; left: 0; top: 1px; width: 22px; height: 22px; border-radius: 6px; background: color-mix(in srgb, var(--jaune) 45%, transparent); font-weight: 700; font-size: .8rem; display: inline-flex; align-items: center; justify-content: center; }
 .logo-groupe { display: inline-block; vertical-align: -14px; margin-right: 10px; width: 56px; height: 56px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); }
+
+/* ── Navigation principale (v2 UX) ───────────────────────────────────────── */
+header.site .nav-principal { display: flex; gap: 16px; font-size: .92rem; flex-wrap: wrap; align-items: center; }
+.menu-mobile { display: none; }
+@media (max-width: 720px) {
+  header.site .wrap { flex-wrap: nowrap; justify-content: space-between; }
+  header.site .nav-principal { display: none; }
+  .menu-mobile { display: block; position: relative; flex: none; }
+  .menu-mobile summary { cursor: pointer; list-style: none; font-weight: 600; padding: 9px 14px; border: 1px solid var(--line); border-radius: var(--radius-btn); font-size: .92rem; color: var(--ink); }
+  .menu-mobile summary::-webkit-details-marker { display: none; }
+  .menu-mobile summary::after { content: " ▾"; color: var(--muted); }
+  .menu-mobile[open] summary { border-color: var(--bleu); color: var(--bleu); }
+  .menu-mobile nav { position: absolute; right: 0; top: calc(100% + 6px); display: grid; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px; min-width: 220px; z-index: 60; box-shadow: 0 10px 30px rgba(7, 26, 65, .15); }
+  .menu-mobile nav a { padding: 10px 12px; text-decoration: none; color: var(--ink); border-radius: 8px; }
+  .menu-mobile nav a:hover { background: color-mix(in srgb, var(--bleu) 10%, transparent); color: var(--bleu); }
+}
+
+/* Pied de page : plan du site complet */
+footer.site .pied-nav { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 12px; }
+footer.site .pied-nav a { color: var(--muted); text-decoration: none; }
+footer.site .pied-nav a:hover { color: var(--bleu); }
+
+/* Bandeau cookies : plus discret, surtout sur mobile */
+.cookies .consentement-boutons .lien { white-space: nowrap; align-self: center; }
+@media (max-width: 640px) {
+  .cookies { left: 8px; right: 8px; bottom: 8px; max-width: none; padding: 14px; border-radius: 12px; }
+  .cookies .titre { font-size: 1.1rem; }
+  .cookies p { font-size: .88rem; margin: 0 0 8px; }
+  .cookies button { padding: 9px 14px; }
+}
+
+/* Aperçu libre des mouvements */
+.apercu-libre { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+.apercu-libre .meta { margin: 0; }

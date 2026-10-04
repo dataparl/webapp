@@ -5,8 +5,8 @@ import { appliquer, enregistrer, lire } from "@/lib/consentement";
 
 // Bandeau de consentement maison (pas une bannière Google) : recueille l'accord
 // pour la mesure d'audience et la publicité, et transmet les signaux Consent
-// Mode v2 à GTM et AdSense. Deux choix en bas : « Autoriser » et « Gérer les
-// options » (puis tout refuser ou ajuster).
+// Mode v2 à GTM et AdSense. Trois choix en bas : « Autoriser », « Gérer les
+// options » et « Tout refuser » (accessible sans ouvrir les options).
 
 export default function BandeauCookies() {
   const [visible, setVisible] = useState(false);
@@ -64,6 +64,7 @@ export default function BandeauCookies() {
         <div className="consentement-boutons">
           <button onClick={tout}>Autoriser</button>
           <button className="secondaire" onClick={() => setOptions(true)}>Gérer les options</button>
+          <button className="lien" onClick={rien}>Tout refuser</button>
         </div>
       )}
     </div>

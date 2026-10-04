@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
+import ListeMouvements from "@/app/_components/ListeMouvements";
 import { notFound } from "next/navigation";
+import { derniersMouvements, type Mouvement } from "@/lib/data";
 import Onglets from "../Onglets";
 import Recherche from "../Recherche";
+
+export const revalidate = 900;
 
 const PAGES = {
   parlement: { titre: "Les trois chambres", chambre: undefined },
@@ -26,6 +30,9 @@ export default async function MouvementsChambre({ params }: { params: Promise<{ 
   const { chambre } = await params;
   const page = PAGES[chambre as Slug];
   if (!page) notFound();
+  // Aperçu libre : les 15 derniers mouvements, sans compte. La recherche
+  // complète (filtres, historique depuis 2015) reste réservée aux comptes.
+  const apercu: Mouvement[] = await derniersMouvements(15, page.chambre).catch(() => []);
   return (
     <>
       <h1>Mouvements : <span className="surligne">{page.titre}</span></h1>
@@ -33,6 +40,15 @@ export default async function MouvementsChambre({ params }: { params: Promise<{ 
         <p className="meta">Le suivi quotidien du Parlement européen est en pause : son site bloque actuellement les robots.</p>
       )}
       <Onglets actif={chambre} />
+      {apercu.length > 0 && (
+        <>
+          <div className="apercu-libre">
+            <h2 style={{ margin: "0 0 8px" }}>Les 15 derniers mouvements</h2>
+            <span className="meta">Gratuit, sans compte — le reste de l&apos;historique est réservé aux comptes.</span>
+          </div>
+          <ListeMouvements mouvements={apercu} />
+        </>
+      )}
       <Recherche chambre={page.chambre} />
     </>
   );
