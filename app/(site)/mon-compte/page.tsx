@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { authBrowser, sessionActuelle } from "@/lib/supabaseBrowser";
 
 type Compte = {
   email: string;
@@ -25,9 +25,13 @@ export default function MonCompte() {
   const [enCours, setEnCours] = useState(false);
 
   const appel = useCallback(
-    (url: string, init: RequestInit = {}) =>
-      fetch(url, { ...init, headers: { ...(init.headers ?? {}), Authorization: `Bearer ${session?.access_token}` } }),
-    [session],
+    // Le jeton est relu à chaque appel : la session en mémoire peut être
+    // expirée (onglet en arrière-plan) — sessionActuelle() la rafraîchit.
+    async (url: string, init: RequestInit = {}) => {
+      const s = await sessionActuelle();
+      return fetch(url, { ...init, headers: { ...(init.headers ?? {}), Authorization: `Bearer ${s?.access_token}` } });
+    },
+    [],
   );
 
   useEffect(() => {
@@ -43,7 +47,7 @@ export default function MonCompte() {
       });
       window.history.replaceState(null, "", "/mon-compte");
     }
-    authBrowser().auth.getSession().then(({ data }) => setSession(data.session));
+    sessionActuelle().then(setSession);
   }, []);
 
   useEffect(() => {
