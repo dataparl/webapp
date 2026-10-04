@@ -179,7 +179,7 @@ export default async function MethodeVigiParl() {
           <p className="meta">
             Cette table est consultable en direct dans <strong>DataParl&apos; Sheets</strong>, le tableur maison de
             DataParl&apos; (données lues en continu sur l&apos;API, tri, filtre, export) :
-            <a href="https://drive.dataparl.fr/sheets/vigiparl-annual-chart"> drive.dataparl.fr/sheets/vigiparl-annual-chart</a>.
+            <a href="https://www.dataparl.fr/sheets/vigiparl-annual-chart"> www.dataparl.fr/sheets/vigiparl-annual-chart</a>.
           </p>
         </>
       )}
