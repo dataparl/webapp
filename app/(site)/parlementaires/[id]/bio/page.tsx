@@ -108,12 +108,14 @@ export default async function Bio({ params }: Props) {
   // éditions manuelles) et fonctions gouvernementales, du plus récent au plus ancien.
   // Fonctions gouvernementales représentées comme des mandats (« chambre »
   // virtuelle « gouvernement ») pour figurer dans le parcours chronologique.
-  const mandatsGouv = gouvernement.map((g: Ministre) => ({
-    chambre: "gouvernement", elu_id: "", personne_id: f.personne_id,
+  type MandatGouv = Omit<Mandat, "chambre"> & { chambre: "gouvernement" };
+  type Etape = Mandat | MandatGouv;
+  const mandatsGouv: MandatGouv[] = gouvernement.map((g: Ministre) => ({
+    chambre: "gouvernement" as const, elu_id: "", personne_id: f.personne_id,
     libelle: g.fonction, circonscription: g.portefeuille || "", legislature: "",
     debut: g.debut, fin: g.fin, cause_fin: "",
-  }) as unknown as Mandat);
-  const parcours = [...mandats, ...mandatsManuels, ...mandatsGouv].sort((a, b) => (b.debut || "").localeCompare(a.debut || ""));
+  }));
+  const parcours: Etape[] = ([...mandats, ...mandatsManuels, ...mandatsGouv] as Etape[]).sort((a, b) => (b.debut || "").localeCompare(a.debut || ""));
 
   const phrases: string[] = [];
   const elu = f.civilite === "Mme" ? "élue" : "élu";
@@ -200,8 +202,6 @@ export default async function Bio({ params }: Props) {
       <h2>Parcours parlementaire et gouvernemental</h2>
       <ol className="parcours">
         {parcours.map((m, i) => {
-          const g = m.chambre === f.chambre ? groupes(m).map((a) => a.sigle || a.libelle).filter(Boolean) : [];
-          const manuelItem = mandatsManuels.includes(m);
           if (m.chambre === "gouvernement") {
             return (
               <li key={`gouv-${m.debut}-${i}`}>
@@ -214,12 +214,15 @@ export default async function Bio({ params }: Props) {
               </li>
             );
           }
+          const mandat = m as Mandat;
+          const g = mandat.chambre === f.chambre ? groupes(mandat).map((a) => a.sigle || a.libelle).filter(Boolean) : [];
+          const manuelItem = mandatsManuels.includes(mandat);
           return (
-            <li key={`${m.chambre}-${m.debut}-${i}`}>
+            <li key={`${mandat.chambre}-${mandat.debut}-${i}`}>
               <p className="parcours-titre">
-                <strong>{m.libelle}</strong>
-                {m.circonscription && m.chambre !== "europarl" ? ` · ${m.circonscription}` : ""}
-                <span className="meta"> · {libellePeriode({ debut: m.debut, debut_connu: !!m.debut, fin: m.fin, fin_connue: !!m.fin, en_cours: !m.fin })}</span>
+                <strong>{mandat.libelle}</strong>
+                {mandat.circonscription && mandat.chambre !== "europarl" ? ` · ${mandat.circonscription}` : ""}
+                <span className="meta"> · {libellePeriode({ debut: mandat.debut, debut_connu: !!mandat.debut, fin: mandat.fin, fin_connue: !!mandat.fin, en_cours: !mandat.fin })}</span>
                 {manuelItem && <span className="puce">précisé par DataParl&apos;</span>}
               </p>
               {g.length > 0 && <p className="meta" style={{ margin: "2px 0" }}>Groupe : {g.join(", ")}</p>}
