@@ -444,6 +444,8 @@ h1.marque { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .doms { display: flex; flex-wrap: wrap; gap: 8px; }
 .doms a.dom { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: .85rem; background: var(--bg); }
 .doms a.dom:hover { border-color: var(--bleu); }
+.carte-fr text.om-label { fill: var(--muted); font-size: 8.5px; font-family: inherit; }
+.carte-fr .doms span.dom.inactif { opacity: .55; cursor: default; }
 .liste-deps { list-style: none; padding: 0; margin: 0; columns: 3 220px; gap: 24px; }
 .liste-deps li { break-inside: avoid; padding: 4px 0; border-bottom: 1px solid var(--line); }
 .grille-senateurs { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin: 12px 0 20px; }

@@ -27,7 +27,7 @@ export default async function Senatoriales2026() {
     const slug = slugDepartement(o.nom);
     const d = departements.find((x) => x.slug === slug);
     return { nom: o.nom, slug, n: d ? d.nouveaux.length + d.reelus.length : 0 };
-  }).filter((o) => parSlug[o.slug]);
+  });
   const siege = nouveaux.length + reelus.length;
 
   const jsonLd = {
@@ -60,8 +60,9 @@ export default async function Senatoriales2026() {
 
       <h2>La carte des départements renouvelés</h2>
       <p className="meta">
-        En bleu, les départements où des sénateurs ont été élus en {SCRUTIN_2026.annee}. Cliquez sur un département
-        pour voir les nouveaux sénateurs et les sortants ; l&apos;outre-mer est listé sous la carte.
+        En bleu, les territoires où des sénateurs ont été élus en {SCRUTIN_2026.annee} : départements métropolitains
+        et outre-mer, dessinés sur la même carte (DROM et COM dans le bandeau du bas, en gris ceux qui ne sont pas
+        renouvelés cette année). Cliquez sur un territoire pour voir les nouveaux sénateurs et les sortants.
       </p>
       <Carte parSlug={parSlug} om={om} />
 
