@@ -22,7 +22,8 @@ versionnement [SemVer](https://semver.org/lang/fr/).
   `drive.dataparl.fr` redirigent en 308 vers `media`.
 - Interstitiel sur `media.dataparl.fr` : tout chemin autre que les photos
   et le tableur affiche un message pendant 15 secondes avant la bascule
-  automatique vers la même adresse sur `www.dataparl.fr`.
+  automatique vers la même adresse sur `www.dataparl.fr` (page
+  `redirection-media`, compte à rebours).
 - En-tête www : logo à gauche, recherche au centre, menu déroulant à droite
   sur toutes les tailles d'écran.
 - Session : rafraîchissement explicite du jeton avant chaque action —
