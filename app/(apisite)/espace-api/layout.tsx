@@ -34,7 +34,7 @@ export default function ApiLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main><div className="wrap">{children}</div></main>
-      <PiedDePage />
+      <PiedDePage api />
       <RetourHaut />
     </div>
   );
