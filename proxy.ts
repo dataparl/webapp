@@ -14,6 +14,7 @@ import { estInactif } from "./lib/pagesRegistre";
 //   mail.dataparl.fr        /lire/<jeton> (version en ligne des emails), le reste -> www
 //   link.dataparl.fr        /<code> -> /l/<code> (liens tracés), le reste -> www
 //   media.dataparl.fr       /<chambre>/<fichier>.png -> /media/… (photos des élus)
+//   drive.dataparl.fr       /sheets/*, /search, /informations-legales ; le reste -> www
 // Sur www : une page désactivée dans l'admin (Plan du site) répond 404.
 // Anciens domaines (cavaparlement.eu, dataparl.com) : redirection 308 vers la
 // même adresse sur dataparl.fr. Exceptions, servies telles quelles pendant la
@@ -138,6 +139,22 @@ export async function proxy(req: NextRequest) {
     return vers(req, `www.${DOMAINE}`, "/", 307);
   }
 
+  // drive.dataparl.fr : le tableur DataParl' Sheets et sa recherche. Le reste
+  // du domaine n'existe pas : tout revient vers www.dataparl.fr (même chemin).
+  // Les feuilles non publiées répondent 404 (lib/sheetsPublication + page).
+  if (host === `drive.${DOMAINE}`) {
+    const autorise =
+      path === "/sheets" || path.startsWith("/sheets/") ||
+      path === "/search" ||
+      path.startsWith("/informations-legales") ||
+      path === "/connexion" ||
+      path.startsWith("/api/") ||
+      path.startsWith("/preferences") ||
+      path.startsWith("/desinscription");
+    if (autorise) return NextResponse.next();
+    return vers(req, `www.${DOMAINE}`, path, 308);
+  }
+
   for (const espace of ["admin", "webmail"] as const) {
     if (host !== `${espace}.${DOMAINE}`) continue;
     let res: NextResponse;
@@ -154,6 +171,10 @@ export async function proxy(req: NextRequest) {
 
   if (host === `www.${DOMAINE}`) {
     if (path === "/api" || path === "/api/") return vers(req, `api.${DOMAINE}`, "/", 308);
+    // Le tableur vit sur son propre domaine.
+    if (path === "/sheets" || path.startsWith("/sheets/") || path === "/search") {
+      return vers(req, `drive.${DOMAINE}`, path, 308);
+    }
     if (path.startsWith("/admin")) {
       const cible = (path.replace(/^\/admin/, "") || "/").replace(/\/$/, "") || "/";
       return vers(req, `admin.${DOMAINE}`, nouvelCheminAdmin(cible) ?? cible, 307);

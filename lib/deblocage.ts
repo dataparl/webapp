@@ -12,9 +12,13 @@ import { authAdmin } from "./supabaseAdmin";
 // Cibles de déblocage : identifiant court d'un collaborateur (8 chiffres
 // hexadécimaux, format historique), « bio:<personne_id> » pour la biographie
 // complète d'un élu, « equipe:<personne_id> » pour l'historique de ses
-// collaborateurs. La colonne collab_id sert de stockage pour toutes.
+// collaborateurs, « feuille:<id> » pour une feuille du tableur DataParl'
+// Sheets. La colonne collab_id sert de stockage pour toutes.
+import { FEUILLES } from "./sheets";
+
 export const cibleValide = (c: string) =>
-  /^(?:[0-9a-f]{8}|(?:bio|equipe):[A-Z]?[A-Za-z0-9]{1,20})$/.test(c);
+  /^(?:[0-9a-f]{8}|(?:bio|equipe):[A-Z]?[A-Za-z0-9]{1,20})$/.test(c) ||
+  (c.startsWith("feuille:") && FEUILLES.some((f) => f.id === c.slice(8)));
 
 export function pubActive(): boolean {
   return !!(APPLIXIR_API_KEY && process.env.APPLIXIR_SECRET);

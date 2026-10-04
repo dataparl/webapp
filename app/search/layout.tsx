@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import { EnTeteDrive, PiedDrive } from "@/app/_components/ChromeDrive";
 
 export const metadata: Metadata = {
-  title: "DataParl' Sheets",
-  description:
-    "Le tableur de DataParl' : les données du Parlement, feuille par feuille, lues en direct sur l'API. Connexion requise, accès gratuit.",
+  title: "Recherche Base de Données",
+  description: "Rechercher dans les bases de données publiées de DataParl' Sheets : renouvellement des équipes, mixité, gouvernements.",
 };
 
-export default function SheetsLayout({ children }: { children: React.ReactNode }) {
+export default function SearchLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="page sheets">
       <EnTeteDrive />

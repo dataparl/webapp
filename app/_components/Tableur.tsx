@@ -158,9 +158,9 @@ export function evaluer(grille: string[][], r: number, c: number, vus: Set<strin
 }
 
 // ── Composant ─────────────────────────────────────────────────────────────
-type Props = { id: string; titre: string; description: string; provenance: string; entetes: string[]; donnees: (string | number | null)[][] };
+type Props = { id: string; titre: string; description: string; provenance: string; entetes: string[]; donnees: (string | number | null)[][]; lectureSeule?: boolean };
 
-export default function Tableur({ id, titre, description, provenance, entetes, donnees }: Props) {
+export default function Tableur({ id, provenance, entetes, donnees, lectureSeule = false }: Props) {
   const CLE = `dp-sheets-${id}`;
   const initiales = useMemo(() => {
     const g: string[][] = [entetes.map(String), ...donnees.map((l) => l.map((v) => (v === null || v === undefined ? "" : String(v))))];
@@ -174,25 +174,26 @@ export default function Tableur({ id, titre, description, provenance, entetes, d
   const [edition, setEdition] = useState("");
   const [charge, setCharge] = useState(false);
 
-  // Restaurer les modifications sauvegardées (une seule fois).
+  // Restaurer les modifications sauvegardées (une seule fois, hors lecture seule).
   useEffect(() => {
+    if (lectureSeule) { setCharge(true); return; }
     try {
       const sauve = localStorage.getItem(CLE);
       if (sauve) { const g = JSON.parse(sauve) as string[][]; if (Array.isArray(g) && g.length) setGrille(g); }
     } catch {}
     setCharge(true);
-  }, [CLE]);
-  // Sauvegarde automatique.
-  useEffect(() => { if (charge) { try { localStorage.setItem(CLE, JSON.stringify(grille)); } catch {} } }, [grille, charge, CLE]);
+  }, [CLE, lectureSeule]);
+  // Sauvegarde automatique (jamais en lecture seule).
+  useEffect(() => { if (charge && !lectureSeule) { try { localStorage.setItem(CLE, JSON.stringify(grille)); } catch {} } }, [grille, charge, CLE, lectureSeule]);
 
   // Grille calculée (une passe, mémo par évaluation).
   const calculee = useMemo(() => grille.map((ligne, r) => ligne.map((_, c) => evaluer(grille, r, c, new Set()))), [grille]);
 
   const choisir = useCallback((r: number, c: number) => {
-    setGrille((g) => { const n = [...g]; n[sel.r] = [...n[sel.r]]; n[sel.r][sel.c] = edition; return n; });
+    if (!lectureSeule) setGrille((g) => { const n = [...g]; n[sel.r] = [...n[sel.r]]; n[sel.r][sel.c] = edition; return n; });
     setSel({ r, c });
     setEdition(grille[r]?.[c] ?? "");
-  }, [grille, sel, edition]);
+  }, [grille, sel, edition, lectureSeule]);
 
   const deplacer = useCallback((dr: number, dc: number) => {
     const r = Math.max(0, Math.min(grille.length - 1, sel.r + dr));
@@ -205,6 +206,8 @@ export default function Tableur({ id, titre, description, provenance, entetes, d
   }, [sel]);
 
   const reinitialiser = () => { if (confirm("Revenir aux données DataParl' (l'API) et perdre les modifications ?")) { localStorage.removeItem(CLE); setGrille(initiales); setEdition(""); } };
+
+  // En lecture seule, aucune saisie ne peut partir : les touches d'édition sont sans effet.
 
   function exporterCsv() {
     const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
@@ -224,18 +227,15 @@ export default function Tableur({ id, titre, description, provenance, entetes, d
 
   return (
     <>
-      <p className="meta"><a href="/sheets">DataParl&apos; Sheets</a></p>
-      <h1>{titre}</h1>
-      <p className="lead">{description}</p>
-      <p className="meta">Données de base : {provenance}. Grille modifiable, formules et sauvegarde automatiques dans le navigateur — rien ne sort de l&apos;appareil. Licence ODbL.</p>
+      <p className="meta">Données de base : {provenance}. Licence ODbL.</p>
 
       <div className="tableur-barre">
         <span className="mono ref-active">{LETTRES(sel.c)}{sel.r + 1}</span>
-        <input className="formule" type="text" value={edition} aria-label="Contenu de la cellule"
+        <input className="formule" type="text" value={edition} aria-label="Contenu de la cellule" readOnly={lectureSeule}
           placeholder="Valeur ou formule, ex. =SOMME(A2:A19)"
           onChange={(e) => { setEdition(e.target.value); poser(e.target.value); }}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); deplacer(1, 0); } }} />
-        <button className="secondaire" onClick={reinitialiser}>Réinitialiser</button>
+        {!lectureSeule && <button className="secondaire" onClick={reinitialiser}>Réinitialiser</button>}
         <button className="secondaire" onClick={exporterCsv}>Exporter (CSV)</button>
       </div>
 
@@ -244,7 +244,7 @@ export default function Tableur({ id, titre, description, provenance, entetes, d
           if ((e.target as HTMLElement).tagName === "INPUT") return;
           const fleches: Record<string, [number, number]> = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] };
           if (fleches[e.key]) { e.preventDefault(); deplacer(...fleches[e.key]); }
-          if (e.key === "Delete" || e.key === "Backspace") { e.preventDefault(); poser(""); setEdition(""); }
+          if (!lectureSeule && (e.key === "Delete" || e.key === "Backspace")) { e.preventDefault(); poser(""); setEdition(""); }
         }}>
         <table className="feuille-grille">
           <thead>
@@ -260,9 +260,10 @@ export default function Tableur({ id, titre, description, provenance, entetes, d
                 {ligne.map((_, c) => {
                   const actif = r === sel.r && c === sel.c;
                   const v = calculee[r][c];
+                  const saisie = actif && !lectureSeule;
                   return (
                     <td key={c} className={actif ? "cell-active" : ""} onClick={() => choisir(r, c)}>
-                      {actif ? (
+                      {saisie ? (
                         <input type="text" autoFocus value={edition}
                           onChange={(e) => { setEdition(e.target.value); poser(e.target.value); }}
                           onKeyDown={(e) => {
@@ -281,9 +282,9 @@ export default function Tableur({ id, titre, description, provenance, entetes, d
         </table>
       </div>
       <p className="meta">
-        Formules : <code>=SOMME(A2:A19)</code>, <code>=MOYENNE(B2:B19)</code>, <code>=MIN</code>, <code>=MAX</code>, <code>=NB</code>,
-        références (<code>=B2*2</code>), opérations <code>+ - * / ^</code>. Ligne 1 : en-têtes. Les données DataParl&apos; restent
-        disponibles à tout moment via « Réinitialiser » ; les modifications sont conservées dans le navigateur.
+        {lectureSeule
+          ? "Feuille en lecture seule : seule l'équipe DataParl' peut modifier une grille. Les données peuvent être exportées en CSV."
+          : "Formules : =SOMME(A2:A19), =MOYENNE(B2:B19), =MIN, =MAX, =NB, références (=B2*2), opérations + - * / ^. Ligne 1 : en-têtes. Les modifications sont conservées dans le navigateur de l'équipe."}
       </p>
     </>
   );

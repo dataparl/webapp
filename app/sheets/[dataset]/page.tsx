@@ -1,36 +1,31 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Tableur from "@/app/_components/Tableur";
-import { FEUILLES, feuille } from "@/lib/sheets";
+import FeuilleGate from "./FeuilleGate";
+import { feuille } from "@/lib/sheets";
+import { feuillesPubliees } from "@/lib/sheetsPublication";
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 type Props = { params: Promise<{ dataset: string }> };
 
-export function generateStaticParams() {
-  return FEUILLES.map((f) => ({ dataset: f.id }));
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const f = feuille((await params).dataset);
+  const id = (await params).dataset;
+  const f = feuille(id);
   return f
-    ? { title: `${f.titre} · DataParl' Sheets`, description: f.description, alternates: { canonical: `/sheets/${f.id}` } }
+    ? { title: `${f.titre} · DataParl' Sheets`, description: f.description, alternates: { canonical: `https://drive.dataparl.fr/sheets/${f.id}` } }
     : { title: "DataParl' Sheets" };
 }
 
 export default async function PageFeuille({ params }: Props) {
-  const f = feuille((await params).dataset);
-  if (!f) notFound();
-  let lignes: Awaited<ReturnType<typeof f.charger>> = [];
-  try { lignes = await f.charger(); } catch {}
-  if (lignes.length === 0) {
-    return <p className="erreur">Les données sont momentanément indisponibles. Réessaie dans quelques minutes.</p>;
-  }
+  const id = (await params).dataset;
+  const f = feuille(id);
+  if (!f || !(await feuillesPubliees()).includes(id)) notFound();
   return (
-    <Tableur
-      id={f.id} titre={f.titre} description={f.description} provenance={f.provenance}
-      entetes={f.colonnes.map((c) => c.label)}
-      donnees={lignes.map((l) => f.colonnes.map((c) => l[c.cle] ?? null))}
-    />
+    <>
+      <p className="meta"><a href="/sheets">DataParl&apos; Sheets</a></p>
+      <h1>{f.titre}</h1>
+      <p className="lead">{f.description}</p>
+      <FeuilleGate id={f.id} titre={f.titre} />
+    </>
   );
 }
