@@ -16,6 +16,7 @@ export async function GET() {
         "Disallow: /desinscription",
         "Disallow: /connexion",
         "Disallow: /l/",
+        "Disallow: /informations-legales",
         "Allow: /media/",
         "",
         `Sitemap: https://${host}/sitemap.xml`,

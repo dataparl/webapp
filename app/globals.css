@@ -519,3 +519,10 @@ footer.site .pied-nav a:hover { color: var(--bleu); }
 .feuille table.stats th { position: sticky; top: 0; background: var(--bg); border-bottom: 2px solid var(--line); white-space: nowrap; }
 .feuille table.stats th button.tri { color: var(--ink); font-weight: 700; white-space: nowrap; }
 .feuille table.stats td { white-space: nowrap; }
+
+/* Réseaux sociaux (page À propos) */
+ul.reseaux { list-style: none; padding: 0; margin: 8px 0 24px; display: grid; gap: 10px; max-width: 420px; }
+ul.reseaux a { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--radius-card); text-decoration: none; color: var(--ink); background: var(--card); }
+ul.reseaux a:hover { border-color: var(--bleu); color: var(--bleu); }
+ul.reseaux a svg { flex: none; }
+ul.reseaux a .meta { margin-left: auto; }

@@ -8,7 +8,6 @@ import { authAdmin } from "@/lib/supabaseAdmin";
 export const revalidate = 3600;
 
 const QUOTIDIENNES = new Set(["/", "/mouvements", "/daily", "/vigiparl", "/mixiparl"]);
-const LEGALES = ["/informations-legales/mentions-legales", "/informations-legales/cgu", "/informations-legales/cgu-api", "/informations-legales/confidentialite", "/informations-legales/cookies", "/informations-legales/licences"];
 const CHAMBRES = ["/mouvements/parlement", "/mouvements/assemblee", "/mouvements/senat", "/mouvements/europarl"];
 
 // Pages éditoriales actives (d'après le Plan du site de l'admin) et communiqués publiés.
@@ -18,8 +17,8 @@ export async function GET() {
   const base = "https://www.dataparl.fr";
   const inactifs = await cheminsInactifs();
   const jour = aujourdhuiParis();
-  const urls: Url[] = [...PAGES.filter((p) => p.sitemap).map((p) => p.chemin), ...CHAMBRES, ...LEGALES, "/senatoriales2026"]
-    .filter((c) => !estInactif(c, inactifs))
+  const urls: Url[] = [...PAGES.filter((p) => p.sitemap).map((p) => p.chemin), ...CHAMBRES, ...[], "/senatoriales2026"]
+    .filter((c) => !estInactif(c, inactifs) && !c.startsWith("/informations-legales"))
     .map((c) => ({
       loc: `${base}${c === "/" ? "/" : c}`, lastmod: QUOTIDIENNES.has(c) ? jour : undefined,
       changefreq: QUOTIDIENNES.has(c) ? "daily" : c.startsWith("/informations-legales") ? "yearly" : "weekly",

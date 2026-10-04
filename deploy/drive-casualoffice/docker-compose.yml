@@ -1,0 +1,10 @@
+# DataParl' Drive — Casual Sheets (drive.dataparl.fr)
+# Un conteneur, un port : https://casualoffice.org/
+services:
+  sheets:
+    image: casualoffice/sheets:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    # Mode anonyme par défaut : pas de comptes, pas de persistance hors volumes.
+    # Réverse proxy + HTTPS : voir README.md (Caddy).

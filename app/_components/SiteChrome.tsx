@@ -53,6 +53,7 @@ export function PiedDePage() {
           <a href="/alertes">Alertes</a>
           <a href="/methode">Méthode</a>
           <a href={API_URL}>API</a>
+          <a href="/a-propos">À propos</a>
           <a href="/presse">Presse</a>
           <a href="/informations-legales">Informations légales</a>
         </nav>
