@@ -10,26 +10,29 @@ const WWW = "https://www.dataparl.fr";
 const DUREE = 15;
 
 export default function RedirectionMedia() {
-  const [vers] = useState(() => {
-    const c = new URLSearchParams(window.location.search).get("vers") ?? "/";
-    // N'accepter que les chemins internes relatifs.
-    return c.startsWith("/") && !c.startsWith("//") ? c : "/";
-  });
+  // Le paramètre n'est lu qu'ici, jamais pendant le prérendu (pas de window
+  // au moment du build).
+  const [vers, setVers] = useState("/");
   const [reste, setReste] = useState(DUREE);
 
   useEffect(() => {
-    const t = setInterval(() => {
+    const c = new URLSearchParams(window.location.search).get("vers") ?? "/";
+    setVers(c.startsWith("/") && !c.startsWith("//") ? c : "/");
+  }, []);
+
+  useEffect(() => {
+    if (reste <= 0) return;
+    const t = setTimeout(() => {
       setReste((r) => {
         if (r <= 1) {
-          clearInterval(t);
           window.location.replace(`${WWW}${vers}`);
           return 0;
         }
         return r - 1;
       });
     }, 1000);
-    return () => clearInterval(t);
-  }, [vers]);
+    return () => clearTimeout(t);
+  }, [reste, vers]);
 
   return (
     <div className="etroit">
