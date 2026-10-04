@@ -9,14 +9,19 @@ versionnement [SemVer](https://semver.org/lang/fr/).
 ### Ajouté
 
 - Schémas Table Schema des jeux de données data.gouv.fr (membres des
-  gouvernements, turnover annuel, mixité annuelle) : dossier `schemas/`.
+  gouvernements, turnover annuel, mixité annuelle, parlementaires) : dossier
+  `public/schemas/`, servis sur `raw.dataparl.fr/schemas/…`.
+- Feuille « Parlementaires (2017 → aujourd'hui) » dans DataParl' Sheets.
 - Fichiers de gouvernance du dépôt : `LICENSE` (MIT), `SECURITY.md`,
   `CHANGELOG.md`.
 
 ### Modifié
 
+- Le tableur DataParl' Sheets vit désormais sur `www.dataparl.fr/sheets`
+  (et `/search`) : plus de domaine `drive.` — `drive.dataparl.fr` redirige
+  en 308 vers `www`.
 - En-tête www : logo à gauche, recherche au centre, menu déroulant à droite
-  (logo / recherche / ☰) sur toutes les tailles d'écran.
+  sur toutes les tailles d'écran.
 - Session : rafraîchissement explicite du jeton avant chaque action —
   fin des « non connecté » après une inactivité (onglet en arrière-plan).
 - Cron Vercel `/api/cron/jorf` retiré (DILA injoignable depuis les IP Vercel).
