@@ -10,6 +10,7 @@ const SECTIONS: [string, string, Role[] | string][] = [
   ["/", "Tableau de bord", ["admin", "editeur"]],
   ["/contact", "Contact", "formulaires"],
   ["/elus", "Élus", "elus"],
+  ["/jorf", "JORF", "jorf"],
   ["/abonnes", "Abonnés", "comptes"],
   ["/users", "Comptes", "comptes"],
   ["/oppositions", "Oppositions", "formulaires"],
