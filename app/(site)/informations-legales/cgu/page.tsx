@@ -16,26 +16,37 @@ export default function CGU() {
         l&apos;utilisation du site, des alertes par email et du compte utilisateur. L&apos;usage de l&apos;API relève en
         plus des <a href="/informations-legales/cgu-api">conditions d&apos;utilisation de l&apos;API</a>.
       </p>
+      <p>
+        <strong>Définition de l&apos;utilisateur.</strong> Au sens des présentes conditions, l&apos;utilisateur désigne toute
+        personne qui consulte le site, y effectue une recherche, s&apos;abonne aux alertes par email ou crée un compte.
+        L&apos;utilisateur est informé que ces conditions s&apos;appliquent dès la première visite du site.
+      </p>
       <p>Utiliser le site, créer un compte ou s&apos;abonner aux alertes vaut acceptation de ces conditions.</p>
 
       <h2>2. Accès</h2>
+      <p>Le service est gratuit.</p>
       <p>
-        Le service est gratuit, sans publicité et sans pistage. Il est fourni en l&apos;état, sans garantie de
-        disponibilité : il peut être interrompu pour maintenance, en cas d&apos;indisponibilité d&apos;une source ou de
-        l&apos;hébergeur.
+        <strong>Spécificité des fiches collaborateurs et vidéo publicitaire :</strong> le déblocage temporaire des fiches via
+        une courte vidéo publicitaire sert directement à financer l&apos;infrastructure technique (serveurs et nom de domaine).
+        Le visionnage complet est requis et toute tentative de contournement, de profilage ou de démarchage à partir de ces
+        données est strictement interdite.
+      </p>
+      <p>
+        Le service est fourni en l&apos;état, sans garantie de disponibilité : il peut être interrompu pour maintenance, en
+        cas d&apos;indisponibilité d&apos;une source ou de l&apos;hébergeur.
       </p>
 
       <h2>3. Compte</h2>
       <p>
-        Un compte se crée avec une adresse email (code de connexion à usage unique) ou via Google ou GitHub. Tu es
-        responsable de l&apos;accès à ta messagerie et aux comptes utilisés pour te connecter. Tu peux exporter tes
-        données ou supprimer ton compte à tout moment depuis <a href="/mon-compte">Mon compte</a>.
+        Un compte se crée avec une adresse email (code de connexion à usage unique) ou via Google ou GitHub.
+        L&apos;utilisateur peut exporter ses données ou supprimer son compte à tout moment depuis{" "}
+        <a href="/mon-compte">Mon compte</a>.
       </p>
 
       <h2>4. Alertes par email</h2>
       <p>
-        L&apos;abonnement aux alertes repose sur ton consentement, confirmé par email (double validation). Chaque alerte
-        contient un lien pour régler tes préférences et un lien de désinscription en un clic.
+        L&apos;abonnement aux alertes repose sur le consentement de l&apos;utilisateur, confirmé par email (double
+        validation). Chaque alerte contient un lien pour régler ses préférences et un lien de désinscription en un clic.
       </p>
 
       <h2>5. Nature et limites des informations</h2>

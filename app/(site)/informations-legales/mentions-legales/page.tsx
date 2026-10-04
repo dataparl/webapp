@@ -27,12 +27,10 @@ export default function MentionsLegales() {
         Bases de données et comptes : Supabase Inc. (supabase.com), serveurs situés dans l&apos;Union européenne
         (Irlande).
       </p>
-      <p>Code source et données publiées : GitHub Inc. (github.com), comptes « dataparl ».</p>
 
       <h2>Nom de domaine</h2>
       <p>
-        Le site est accessible à l&apos;adresse dataparl.fr (ancienne adresse : cavaparlement.eu, redirigée), enregistrée auprès d&apos;IONOS SE,
-        Elgendorfer Straße 57, 56410 Montabaur, Allemagne.
+        Le site est accessible à l&apos;adresse dataparl.fr, enregistrée auprès d&apos;IONOS SE, Elgendorfer Straße 57, 56410 Montabaur, Allemagne.
       </p>
 
       <h2>Propriété intellectuelle</h2>
@@ -48,16 +46,22 @@ export default function MentionsLegales() {
 
       <h2 id="photos">Photos des élus</h2>
       <p>
-        Les portraits des parlementaires sont les photos officielles publiées par les assemblées : © Assemblée nationale pour les
-        députés, © Sénat pour les sénateurs, © Union européenne (source : Parlement européen) pour les députés européens. Ils
-        illustrent les fiches à titre d&apos;information et ne sont ni modifiés (hors redimensionnement) ni utilisés à des fins publicitaires.
+        Les portraits des parlementaires sont les photos officielles publiées par les assemblées : © Assemblée nationale pour
+        les députés, © Sénat pour les sénateurs, © Union européenne (source : Parlement européen) pour les députés européens.
       </p>
       <p>
-        Ces photos sont servies depuis <span className="mono">media.dataparl.fr</span>, sous un nom de la forme{" "}
-        <span className="mono">chambre/identifiant_crédit_taille.png</span>. Le segment <span className="mono">_crédit_</span> du nom de
-        fichier indique l&apos;institution détentrice de chaque photo : <span className="mono">an</span> (Assemblée nationale),{" "}
-        <span className="mono">senat</span> (Sénat), <span className="mono">pe</span> (Parlement européen). Toute demande de modification ou
-        de recadrage est à adresser à l&apos;institution concernée.
+        Ils illustrent les fiches à titre d&apos;information et ne sont ni modifiés (hors redimensionnement) ni utilisés à des
+        fins publicitaires.
+      </p>
+      <p>
+        Pour faciliter l&apos;accès à ces portraits de manière centralisée, les photos sont regroupées et servies depuis le
+        sous-domaine dédié <span className="mono">media.dataparl.fr</span>.
+      </p>
+      <p>
+        Ces images ne sont pas la propriété de DataParl&apos; et restent la propriété exclusive des institutions émettrices.
+        Le segment <span className="mono">_crédit_</span> du nom de fichier indique l&apos;institution détentrice de chaque
+        photo : <span className="mono">an</span> (Assemblée nationale), <span className="mono">senat</span> (Sénat),{" "}
+        <span className="mono">pe</span> (Parlement européen).
       </p>
 
       <h2>Sources et indépendance</h2>
@@ -69,7 +73,7 @@ export default function MentionsLegales() {
 
       <h2>Signaler une erreur ou un contenu</h2>
       <p>
-        Une information inexacte, un contenu illicite ou une demande relative à des données personnelles : utilise le{" "}
+        Une information inexacte, un contenu illicite ou une demande relative à des données personnelles : passe par le{" "
         <a href={CONTACT_URL}>formulaire de contact</a>. Voir aussi la page{" "}
         <a href="/informations-legales/confidentialite">Données personnelles</a>.
       </p>

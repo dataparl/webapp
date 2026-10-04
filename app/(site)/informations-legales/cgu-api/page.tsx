@@ -19,9 +19,9 @@ export default function CGUAPI() {
         <li>Une seule clé par compte. Elle peut être révoquée puis remplacée à tout moment depuis l&apos;espace API.</li>
         <li>
           La clé est transmise dans l&apos;en-tête <code>Authorization: Bearer &lt;clé&gt;</code> (ou <code>X-API-Key</code>).
-          Elle est personnelle : ne la publie pas (dépôt de code public, application côté navigateur) et ne la cède pas.
+          Elle est personnelle : l&apos;utilisateur ne doit ni la publier (dépôt de code public, application côté navigateur), ni la céder.
         </li>
-        <li>DataParl&apos; ne conserve qu&apos;une empreinte de la clé : si tu la perds, révoque-la et demandes-en une nouvelle.</li>
+        <li>DataParl&apos; ne conserve qu&apos;une empreinte de la clé : en cas de perte, la clé doit être révoquée puis remplacée.</li>
       </ul>
 
       <h2>2. Quotas</h2>
@@ -46,8 +46,8 @@ export default function CGUAPI() {
 
       <h2>4. Données personnelles</h2>
       <p>
-        Les données contiennent les noms de collaborateurs et d&apos;élus. En les réutilisant, tu deviens responsable de
-        ton propre traitement au sens du RGPD et tu dois en respecter les obligations (finalité légitime,
+        Les données contiennent les noms de collaborateurs et d&apos;élus. En les réutilisant, l&apos;utilisateur devient responsable de
+        son propre traitement au sens du RGPD et doit en respecter les obligations (finalité légitime,
         information, droits des personnes). Sont notamment interdits :
       </p>
       <ul>

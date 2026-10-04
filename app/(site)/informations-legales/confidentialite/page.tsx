@@ -17,7 +17,7 @@ export default function Confidentialite() {
       <h2>1. Responsable du traitement</h2>
       <p>
         L&apos;éditeur de DataParl&apos; (voir les <a href="/informations-legales/mentions-legales">mentions légales</a>).
-        Pour toute question ou demande relative à tes données : <a href={CONTACT_RGPD}>formulaire de contact</a>, sujet
+        Pour toute question ou demande relative à ses données : <a href={CONTACT_RGPD}>formulaire de contact</a>, sujet
         « Demande RGPD ».
       </p>
 
@@ -28,8 +28,8 @@ export default function Confidentialite() {
         </thead>
         <tbody>
           <tr>
-            <td>Adresse email ; identifiant, nom et photo transmis par Google ou GitHub si tu les utilises</td>
-            <td>Créer et sécuriser ton compte</td>
+            <td>Adresse email ; identifiant, nom et photo transmis par Google ou GitHub si l&apos;utilisateur choisit ces services</td>
+            <td>Créer et sécuriser le compte de l&apos;utilisateur</td>
             <td>Exécution des conditions d&apos;utilisation</td>
             <td>Jusqu&apos;à la suppression du compte, ou 3 ans sans connexion</td>
           </tr>
@@ -47,7 +47,7 @@ export default function Confidentialite() {
           </tr>
           <tr>
             <td>Prénom, nom, email, sujet et contenu des messages envoyés via le formulaire de contact</td>
-            <td>Répondre à ta demande</td>
+            <td>Répondre à la demande</td>
             <td>Intérêt légitime ; obligation légale pour les demandes RGPD</td>
             <td>2 ans après le dernier échange</td>
           </tr>
@@ -88,8 +88,8 @@ export default function Confidentialite() {
       </p>
       <p>
         <strong>Journalistes.</strong> Le carnet presse (nom, média, adresse professionnelle) sert à envoyer nos communiqués, sur la base de
-        notre intérêt légitime à informer la presse. Chaque communiqué contient un lien de désinscription ; tu peux aussi écrire à
-        presse@dataparl.fr.
+        notre intérêt légitime à informer la presse. Chaque communiqué contient un lien de désinscription ; toute personne
+        concernée peut aussi écrire à presse@dataparl.fr.
       </p>
 
       <h2>3. Personnes citées dans les données</h2>
@@ -147,12 +147,12 @@ export default function Confidentialite() {
         </li>
       </ul>
 
-      <h3>Tes droits si tu es concerné(e)</h3>
+      <h3>Droits des personnes concernées</h3>
       <p>
-        Tu peux demander l&apos;accès à tes données, la rectification d&apos;une erreur, le masquage de ton adresse
-        déduite, ou t&apos;opposer au traitement pour des raisons tenant à ta situation particulière. Chaque demande
-        d&apos;opposition est examinée au cas par cas, en la mettant en balance avec l&apos;intérêt public de
-        l&apos;information. Cette page tient lieu d&apos;information des personnes concernées : les contacter
+        Toute personne concernée peut demander l&apos;accès à ses données, la rectification d&apos;une erreur, le
+        masquage de son adresse déduite, ou s&apos;opposer au traitement pour des raisons tenant à sa situation
+        particulière. Chaque demande d&apos;opposition est examinée au cas par cas, en la mettant en balance avec
+        l&apos;intérêt public de l&apos;information. Cette page tient lieu d&apos;information des personnes concernées : les contacter
         individuellement exigerait des efforts disproportionnés (art. 14, 5, b du RGPD).
       </p>
 
@@ -163,8 +163,8 @@ export default function Confidentialite() {
           <tr><td>Supabase</td><td>Base de données, comptes</td><td>Union européenne (Irlande)</td></tr>
           <tr><td>Vercel</td><td>Hébergement du site</td><td>États-Unis, réseau mondial</td></tr>
           <tr><td>Resend</td><td>Envoi des emails</td><td>Envoi depuis l&apos;Union européenne (Irlande) ; société américaine</td></tr>
-          <tr><td>AppLixir (et ses régies)</td><td>Vidéo publicitaire, seulement si tu choisis de la regarder pour débloquer une fiche ; reçoit un jeton aléatoire, pas ton compte</td><td>Société américaine ; responsable de ses propres traitements publicitaires (voir la page Cookies)</td></tr>
-          <tr><td>Google, GitHub</td><td>Connexion, uniquement si tu choisis ces services</td><td>Union européenne et États-Unis</td></tr>
+          <tr><td>AppLixir (et ses régies)</td><td>Vidéo publicitaire, seulement si l&apos;utilisateur choisit de la regarder pour débloquer une fiche ; reçoit un jeton aléatoire, pas le compte</td><td>Société américaine ; responsable de ses propres traitements publicitaires (voir la page Cookies)</td></tr>
+          <tr><td>Google, GitHub</td><td>Connexion, uniquement si l&apos;utilisateur choisit ces services</td><td>Union européenne et États-Unis</td></tr>
           <tr><td>Infomaniak</td><td>Réception des messages du formulaire de contact</td><td>Suisse</td></tr>
         </tbody>
       </table>
@@ -174,19 +174,19 @@ export default function Confidentialite() {
         bénéficie d&apos;une décision d&apos;adéquation.
       </p>
 
-      <h2>5. Tes droits</h2>
+      <h2>5. Droits de l&apos;utilisateur</h2>
       <p>
-        Tu disposes des droits d&apos;accès, de rectification, d&apos;effacement, de limitation, de portabilité et
-        d&apos;opposition, ainsi que du droit de retirer ton consentement à tout moment et de définir des directives
-        sur le sort de tes données après ton décès.
+        L&apos;utilisateur dispose des droits d&apos;accès, de rectification, d&apos;effacement, de limitation, de
+        portabilité et d&apos;opposition, ainsi que du droit de retirer son consentement à tout moment et de définir
+        des directives sur le sort de ses données après son décès.
       </p>
       <ul>
-        <li>Export et suppression de ton compte : directement depuis <a href="/mon-compte">Mon compte</a>.</li>
+        <li>Export et suppression du compte : directement depuis <a href="/mon-compte">Mon compte</a>.</li>
         <li>Alertes : désactivation depuis la page <a href="/alertes">Alertes</a> ou lien de désinscription dans chaque email.</li>
         <li>Toute autre demande : <a href={CONTACT_RGPD}>formulaire de contact</a>, sujet « Demande RGPD ». Réponse sous un mois.</li>
       </ul>
       <p>
-        Si tu estimes que tes droits ne sont pas respectés, tu peux saisir la CNIL (<a href="https://www.cnil.fr">cnil.fr</a>).
+        Si l&apos;utilisateur estime que ses droits ne sont pas respectés, il peut saisir la CNIL (<a href="https://www.cnil.fr">cnil.fr</a>).
       </p>
     </>
   );

@@ -56,7 +56,7 @@ export default function Licences() {
       <h2>Licence de la base DataParl&apos;</h2>
       <p>
         La base des mouvements et des affectations est diffusée sous <a href="https://opendatacommons.org/licenses/odbl/1-0/">Open Database License (ODbL) 1.0</a>.
-        Tu peux la copier, la diffuser et l&apos;adapter, y compris à des fins commerciales, à trois conditions :
+        Toute personne peut la copier, la diffuser et l&apos;adapter, y compris à des fins commerciales, à trois conditions :
       </p>
       <ul>
         <li><strong>Attribution</strong> : « DataParl&apos; (dataparl.fr), d&apos;après les publications de l&apos;Assemblée nationale et du Sénat » ;</li>
@@ -65,7 +65,7 @@ export default function Licences() {
       </ul>
       <p>
         Les œuvres produites à partir des données (articles, graphiques, études) peuvent être publiées sous la licence
-        de ton choix, avec la mention de la source.
+        de son choix, avec la mention de la source.
       </p>
 
       <h2>Accéder aux données</h2>

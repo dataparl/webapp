@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Feuille from "@/app/_components/Feuille";
+import Tableur from "@/app/_components/Tableur";
 import { FEUILLES, feuille } from "@/lib/sheets";
 
 export const revalidate = 3600;
@@ -23,13 +23,14 @@ export default async function PageFeuille({ params }: Props) {
   if (!f) notFound();
   let lignes: Awaited<ReturnType<typeof f.charger>> = [];
   try { lignes = await f.charger(); } catch {}
+  if (lignes.length === 0) {
+    return <p className="erreur">Les données sont momentanément indisponibles. Réessaie dans quelques minutes.</p>;
+  }
   return (
-    <>
-      {lignes.length === 0 ? (
-        <p className="erreur">Les données sont momentanément indisponibles. Réessaie dans quelques minutes.</p>
-      ) : (
-        <Feuille titre={f.titre} description={f.description} provenance={f.provenance} colonnes={f.colonnes} lignes={lignes} />
-      )}
-    </>
+    <Tableur
+      id={f.id} titre={f.titre} description={f.description} provenance={f.provenance}
+      entetes={f.colonnes.map((c) => c.label)}
+      donnees={lignes.map((l) => f.colonnes.map((c) => l[c.cle] ?? null))}
+    />
   );
 }
