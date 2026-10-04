@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { authBrowser, sessionActuelle } from "@/lib/supabaseBrowser";
 
-// DataParl' Auth : connexion ou création de compte. Servie sur www., drive. et
+// DataParl' Auth : connexion ou création de compte. Servie sur www., api. et
 // admin. pour que le flux OAuth (PKCE) reste sur l'origine qui l'a lancé.
 // Les fournisseurs dépendent du sous-domaine : Slack réservé à l'espace
 // équipe (admin.dataparl.fr) ; Google, GitHub et X pour les comptes du site
