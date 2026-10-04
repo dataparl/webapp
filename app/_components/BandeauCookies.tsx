@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { cookieStorage } from "@/lib/cookieStorage";
-import { appliquer, enregistrer, lire, type Choix } from "@/lib/consentement";
+import { appliquer, enregistrer, lire } from "@/lib/consentement";
 
 // Bandeau de consentement maison (pas une bannière Google) : recueille l'accord
 // pour la mesure d'audience et la publicité, et transmet les signaux Consent
@@ -22,12 +22,12 @@ export default function BandeauCookies() {
     } else setVisible(true);
   }, []);
 
-  function valider(c: Choix) {
+  function valider(c: { mesure: boolean; pub: boolean }) {
     enregistrer({ ...c, date: new Date().toISOString().slice(0, 10) });
     setVisible(false);
   }
-  const tout = () => valider({ mesure: true, pub: true, date: "" });
-  const rien = () => valider({ mesure: false, pub: false, date: "" });
+  const tout = () => valider({ mesure: true, pub: true });
+  const rien = () => valider({ mesure: false, pub: false });
 
   if (!visible) return null;
 
