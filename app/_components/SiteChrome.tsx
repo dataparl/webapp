@@ -3,7 +3,7 @@ import BarreRechercheHeader from "./BarreRechercheHeader";
 
 export const API_URL = "https://api.dataparl.fr";
 
-// Liens clés : desktop dans l'en-tête, mobile dans le menu déroulant.
+// Liens du menu de navigation (en-tête www).
 const NAV = [
   { href: "/mouvements", label: "Mouvements" },
   { href: "/collab", label: "Collaborateurs" },
@@ -13,23 +13,20 @@ const NAV = [
   { href: "/alertes", label: "Alertes" },
 ];
 
+// En-tête www : logo à gauche, recherche au milieu, menu ☰ à droite
+// (les liens de navigation, dont « Mon compte », sont dans le menu déroulant).
 export function EnTeteSite() {
   const liens = [...NAV, { href: "/mon-compte", label: "Mon compte" }];
   return (
-    <header className="site">
+    <header className="site entete-principale">
       <div className="wrap">
         <LogoSite />
-        <nav className="nav-principal" aria-label="Navigation principale">
-          {liens.map((l) => (
-            <a key={l.href} href={l.href}>{l.label}</a>
-          ))}
-        </nav>
         {/* Recherche élus / collaborateurs, présente sur presque toutes les pages. */}
         <BarreRechercheHeader />
-        {/* Menu mobile : déroulant natif, sans JavaScript, en haut à gauche. */}
-        <details className="menu-mobile">
-          <summary aria-label="Ouvrir le menu de navigation">☰</summary>
-          <nav aria-label="Navigation principale mobile">
+        {/* Menu déroulant natif, sans JavaScript, à droite. */}
+        <details className="menu-site">
+          <summary aria-label="Ouvrir le menu de navigation">☰ Menu</summary>
+          <nav aria-label="Navigation principale">
             {liens.map((l) => (
               <a key={l.href} href={l.href}>{l.label}</a>
             ))}
