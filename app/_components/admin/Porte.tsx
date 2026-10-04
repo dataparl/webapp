@@ -87,8 +87,8 @@ export default function Porte({ titre, children }: { titre: string; children: Re
           <button className="secondaire" onClick={async () => { await authBrowser().auth.signOut(); setEtat({ e: "anonyme" }); }}>Changer de compte</button>
         </>}
         {etat.e === "erreur" && <p className="erreur">Service indisponible. Réessaie dans un instant.</p>}
-        {etat.e === "enrolement" && <Enrolement github={etat.nom} onOk={verifier} />}
-        {etat.e === "code" && <SaisieCode github={etat.nom} passkey={etat.passkey} totp={etat.totp} onOk={verifier} />}
+        {etat.e === "enrolement" && <Enrolement github={etat.nom} onOk={verifier} onDeco={async () => { await authBrowser().auth.signOut(); setEtat({ e: "anonyme" }); }} />}
+        {etat.e === "code" && <SaisieCode github={etat.nom} passkey={etat.passkey} totp={etat.totp} onOk={verifier} onDeco={async () => { await authBrowser().auth.signOut(); setEtat({ e: "anonyme" }); }} />}
       </div>
     </div>
   );
@@ -134,7 +134,7 @@ async function parCleDAcces(chemin: string, avecSession: boolean): Promise<{ ok:
   }
 }
 
-function SaisieCode({ github, passkey, totp, onOk }: { github: string; passkey: boolean; totp: boolean; onOk: () => void }) {
+function SaisieCode({ github, passkey, totp, onOk, onDeco }: { github: string; passkey: boolean; totp: boolean; onOk: () => void; onDeco: () => void }) {
   const f = useEnvoiCode(onOk);
   const [errCle, setErrCle] = useState<string | null>(null);
   async function cle() {
@@ -156,11 +156,14 @@ function SaisieCode({ github, passkey, totp, onOk }: { github: string; passkey: 
         {f.err && <p className="erreur">{f.err}</p>}
         <button className={passkey ? "secondaire" : undefined} disabled={f.envoi || f.code.length !== 6}>Valider</button>
       </>}
+      <p className="meta" style={{ marginTop: 14 }}>
+        <button className="lien" onClick={onDeco}>Se déconnecter (changer de compte)</button>
+      </p>
     </form>
   );
 }
 
-function Enrolement({ github, onOk }: { github: string; onOk: () => void }) {
+function Enrolement({ github, onOk, onDeco }: { github: string; onOk: () => void; onDeco: () => void }) {
   const [qr, setQr] = useState<{ qr: string; secret: string } | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const f = useEnvoiCode(onOk);
@@ -183,6 +186,9 @@ function Enrolement({ github, onOk }: { github: string; onOk: () => void }) {
         <button disabled={f.envoi || f.code.length !== 6}>Activer</button>
       </>}
       {err && <p className="erreur">{err}</p>}
+      <p className="meta" style={{ marginTop: 14 }}>
+        <button className="lien" onClick={onDeco}>Se déconnecter (changer de compte)</button>
+      </p>
     </form>
   );
 }
