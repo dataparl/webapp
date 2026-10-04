@@ -4,7 +4,7 @@ import type { Session } from "@supabase/supabase-js";
 import Autocompletion, { chargerElus } from "@/app/_components/Autocompletion";
 import { familleDe, FAMILLES } from "@/lib/familles";
 import { CHAMBRE_LONG, nomAffiche, prenomNom } from "@/lib/format";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { sessionActuelle } from "@/lib/supabaseBrowser";
 
 type Elu = { chambre: string; cle: string; nom: string; groupe: string };
 type EluCompact = { s: string; p: string; n: string; c: string };
@@ -27,7 +27,7 @@ export default function ReglageAlertes() {
   const [message, setMessage] = useState<{ ok: boolean; t: string } | null>(null);
   const [enCours, setEnCours] = useState(false);
 
-  useEffect(() => { authBrowser().auth.getSession().then(({ data }) => setSession(data.session)); }, []);
+  useEffect(() => { sessionActuelle().then(setSession); }, []);
   useEffect(() => {
     fetch("/api/referentiel").then((x) => (x.ok ? x.json() : null)).then((d) => { if (d) setElus(d.elus); });
     chargerElus().then(setCompacts);
