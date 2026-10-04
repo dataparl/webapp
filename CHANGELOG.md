@@ -27,6 +27,9 @@ versionnement [SemVer](https://semver.org/lang/fr/).
 - Site de l'API : pied de page dédié («© 2026 DataParl' API : DataParl' au
   format brut. ») avec Plan du site (api.dataparl.fr/sitemap, nouvelle page)
   et Informations légales (CGU API sur www, avec retour vers l'API).
+- Polices DM Sans et Spectral auto-hébergées via next/font (préchargées,
+  police de repli aux métriques ajustées) : fin du reflow au chargement des
+  polices Google (CLS 0,27 → ~0 sur l'accueil).
 - En-tête www : logo à gauche, recherche au centre, menu déroulant à droite
   sur toutes les tailles d'écran.
 - Session : rafraîchissement explicite du jeton avant chaque action —
