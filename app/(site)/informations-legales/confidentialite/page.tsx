@@ -111,7 +111,8 @@ export default function Confidentialite() {
           caractère public de ces informations.
         </li>
         <li>
-          <strong>Fiches de parcours.</strong> Pour chaque collaborateur, DataParl&apos; rassemble sur une fiche les
+ 
+         <strong>Fiches de parcours.</strong> Pour chaque collaborateur, DataParl&apos; rassemble sur une fiche les
           élus pour lesquels la personne a figuré sur les listes officielles, avec les dates et la chambre. Ces fiches ne
           sont pas indexées par les moteurs de recherche, et le parcours complet n&apos;est visible que par les comptes
           connectés. Une personne est reconnue à son nom : deux homonymes peuvent être confondus, ce qui se corrige sur
@@ -165,7 +166,6 @@ export default function Confidentialite() {
           <tr><td>Resend</td><td>Envoi des emails</td><td>Envoi depuis l&apos;Union européenne (Irlande) ; société américaine</td></tr>
           <tr><td>AppLixir (et ses régies)</td><td>Vidéo publicitaire, seulement si l&apos;utilisateur choisit de la regarder pour débloquer une fiche ; reçoit un jeton aléatoire, pas le compte</td><td>Société américaine ; responsable de ses propres traitements publicitaires (voir la page Cookies)</td></tr>
           <tr><td>Google, GitHub</td><td>Connexion, uniquement si l&apos;utilisateur choisit ces services</td><td>Union européenne et États-Unis</td></tr>
-          <tr><td>Infomaniak</td><td>Réception des messages du formulaire de contact</td><td>Suisse</td></tr>
         </tbody>
       </table>
       <p>
