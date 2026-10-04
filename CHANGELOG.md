@@ -24,6 +24,9 @@ versionnement [SemVer](https://semver.org/lang/fr/).
   et le tableur affiche un message pendant 15 secondes avant la bascule
   automatique vers la même adresse sur `www.dataparl.fr` (page
   `redirection-media`, compte à rebours).
+- Site de l'API : pied de page dédié («© 2026 DataParl' API : DataParl' au
+  format brut. ») avec Plan du site (api.dataparl.fr/sitemap, nouvelle page)
+  et Informations légales (CGU API sur www, avec retour vers l'API).
 - En-tête www : logo à gauche, recherche au centre, menu déroulant à droite
   sur toutes les tailles d'écran.
 - Session : rafraîchissement explicite du jeton avant chaque action —
