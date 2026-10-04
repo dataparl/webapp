@@ -20,13 +20,7 @@ const config: NextConfig = {
       { source: "/vigiparl/methodologie", destination: "/vigiparl/methode", permanent: true },
       { source: "/mixiparl/methodologie", destination: "/mixiparl/methode", permanent: true },
       { source: "/parlementaires/:id/PAhistory", destination: "/parlementaires/:id/historique", permanent: true },
-    ];
-  },
-  async rewrites() {
-    return [
-      // drive.dataparl.fr : exports CSV des données, pour les visualisations
-      // Google Sheets (IMPORTDATA) — ex. /sheets/vigiparl/annual-chart.
-      { source: "/sheets/:chemin*", destination: "/api/sheets/:chemin*" },
+      { source: "/sheets/vigiparl/annual-chart", destination: "/sheets/vigiparl-annual-chart", permanent: true },
     ];
   },
   async headers() {

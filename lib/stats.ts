@@ -81,7 +81,7 @@ export const HISTORIQUE_METHODE: Record<"vigiparl" | "mixiparl", { date: string;
   vigiparl: [
     { date: "2026-10-01", texte: "Publication de la méthode détaillée ; départs exclus (fin de mandat de l'élu) et taux de couverture des durées affichés." },
     { date: "2026-10-02", texte: "Les chiffres sont présentés avec leurs sources dans la page, sans fichier à télécharger." },
-    { date: "2026-10-04", texte: "Table annuelle enrichie (arrivées comptées, arrivées et départs exclus) avec graphique par chambre ; données publiées en CSV pour la visualisation Google Sheets (drive.dataparl.fr/sheets/vigiparl/annual-chart)." },
+    { date: "2026-10-04", texte: "Table annuelle enrichie (arrivées comptées, arrivées et départs exclus) avec graphique par chambre ; feuille interactive dans DataParl' Sheets (drive.dataparl.fr/sheets/vigiparl-annual-chart)." },
   ],
   mixiparl: [
     { date: "2026-10-01", texte: "Les équipes comptant un membre de genre indéterminé sont exclues des indicateurs de parité et de non-mixité (auparavant, seuls les membres de genre déterminé étaient comptés)." },

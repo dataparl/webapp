@@ -177,10 +177,9 @@ export default async function MethodeVigiParl() {
             </table>
           </div>
           <p className="meta">
-            Ces données sont publiées en CSV, mises à jour automatiquement :
-            <a href="https://drive.dataparl.fr/sheets/vigiparl/annual-chart"> drive.dataparl.fr/sheets/vigiparl/annual-chart</a>.
-            Une feuille Google peut les suivre jour après jour avec
-            <code> =IMPORTDATA(&quot;https://drive.dataparl.fr/sheets/vigiparl/annual-chart&quot;)</code>.
+            Cette table est consultable en direct dans <strong>DataParl&apos; Sheets</strong>, le tableur maison de
+            DataParl&apos; (données lues en continu sur l&apos;API, tri, filtre, export) :
+            <a href="https://drive.dataparl.fr/sheets/vigiparl-annual-chart"> drive.dataparl.fr/sheets/vigiparl-annual-chart</a>.
           </p>
         </>
       )}

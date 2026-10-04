@@ -1,0 +1,128 @@
+import "server-only";
+import { dataQuery, dataQueryTout, COLONNES_PUBLIQUES } from "./data";
+import { PREMIERE_ANNEE, turnoverAnnuel } from "./stats";
+
+// DataParl' Sheets : tableur en ligne maison, open source. Chaque feuille lit
+// directement les données via l'API Supabase de DataParl' (lecture publique,
+// licence ODbL), sans export ni intermédiaire. La liste des feuilles
+// disponibles est déclarée ici.
+
+export type Genre = "texte" | "entier" | "decimal" | "pourcent";
+export type Colonne = { cle: string; label: string; genre: Genre; largeur?: number };
+export type Ligne = Record<string, string | number | null>;
+export type FeuilleDef = {
+  id: string;
+  titre: string;
+  description: string;
+  provenance: string; // source affichée sous le titre
+  colonnes: Colonne[];
+  charger: () => Promise<Ligne[]>;
+};
+
+const CHAMBRE_LONG: Record<string, string> = { assemblee: "Assemblée nationale", senat: "Sénat", europarl: "Parlement européen" };
+const n = (x: number) => x.toLocaleString("fr-FR");
+
+export const FEUILLES: FeuilleDef[] = [
+  {
+    id: "vigiparl-annual-chart",
+    titre: "Renouvellement annuel des équipes",
+    description: "Effectifs au 1er janvier, arrivées et départs comptés ou exclus (fin ou début de mandat), taux de renouvellement — année par année, chambre par chambre.",
+    provenance: "Table stats_annuelles (API DataParl'/Supabase) · méthode VigiParl'",
+    colonnes: [
+      { cle: "an", label: "Année", genre: "entier" },
+      { cle: "chambre", label: "Chambre", genre: "texte" },
+      { cle: "effectif", label: "Effectif 1er janv.", genre: "entier" },
+      { cle: "effectif_suivant", label: "Effectif 1er janv. suivant", genre: "entier" },
+      { cle: "arrivees", label: "Arrivées comptées", genre: "entier" },
+      { cle: "arrivees_debut_mandat", label: "Arrivées exclues (début de mandat)", genre: "entier" },
+      { cle: "departs", label: "Départs comptés", genre: "entier" },
+      { cle: "departs_fin_mandat", label: "Départs exclus (fin de mandat)", genre: "entier" },
+      { cle: "taux", label: "Taux", genre: "pourcent" },
+    ],
+    charger: async () => {
+      const rows = await dataQueryTout<{ an: number; chambre: string; effectif: number; effectif_suivant: number; arrivees: number | null; arrivees_debut_mandat: number | null; departs: number; departs_fin_mandat: number | null }>(
+        "stats_annuelles", new URLSearchParams({ select: "an,chambre,effectif,effectif_suivant,arrivees,arrivees_debut_mandat,departs,departs_fin_mandat", order: "chambre,an" }),
+      );
+      return rows
+        .filter((r) => r.an >= (PREMIERE_ANNEE[r.chambre] ?? 0))
+        .map((r) => ({
+          an: r.an, chambre: CHAMBRE_LONG[r.chambre] ?? r.chambre, effectif: r.effectif, effectif_suivant: r.effectif_suivant,
+          arrivees: r.arrivees ?? 0, arrivees_debut_mandat: r.arrivees_debut_mandat ?? 0,
+          departs: r.departs, departs_fin_mandat: r.departs_fin_mandat ?? 0,
+          taux: (() => { const t = turnoverAnnuel(r as never); return t === null ? null : t; })(),
+        }));
+    },
+  },
+  {
+    id: "mixiparl-annual-chart",
+    titre: "Mixité annuelle des équipes",
+    description: "Nombre d'équipes, équipes non mixtes et taux de mixité moyen (100 % à 50/50) — année par année, chambre par chambre.",
+    provenance: "Vue stats_mixite_annuelle (API DataParl'/Supabase) · méthode MixiParl'",
+    colonnes: [
+      { cle: "an", label: "Année", genre: "entier" },
+      { cle: "chambre", label: "Chambre", genre: "texte" },
+      { cle: "equipes", label: "Équipes", genre: "entier" },
+      { cle: "equipes_exclues", label: "Équipes exclues", genre: "entier" },
+      { cle: "non_mixtes", label: "Équipes non mixtes", genre: "entier" },
+      { cle: "mixite_moyenne", label: "Taux de mixité moyen", genre: "pourcent" },
+    ],
+    charger: async () => {
+      const rows = await dataQueryTout<{ an: number; chambre: string; equipes: number; equipes_exclues: number; non_mixtes: number; mixite_moyenne: number }>(
+        "stats_mixite_annuelle", new URLSearchParams({ select: "*", order: "chambre,an" }),
+      );
+      return rows.map((r) => ({ ...r, chambre: CHAMBRE_LONG[r.chambre] ?? r.chambre }));
+    },
+  },
+  {
+    id: "gouvernements-2017-2026",
+    titre: "Membres des gouvernements 2017 → aujourd'hui",
+    description: "Premier ministre, ministres, ministres délégués et secrétaires d'État de chaque gouvernement, une ligne par personne et par période.",
+    provenance: "Table ministres (API DataParl'/Supabase) · JORF et archives",
+    colonnes: [
+      { cle: "debut", label: "Début", genre: "texte" },
+      { cle: "fin", label: "Fin", genre: "texte" },
+      { cle: "civilite", label: "Civ.", genre: "texte" },
+      { cle: "prenom", label: "Prénom", genre: "texte" },
+      { cle: "nom", label: "Nom", genre: "texte" },
+      { cle: "fonction", label: "Fonction", genre: "texte" },
+      { cle: "portefeuille", label: "Portefeuille", genre: "texte" },
+      { cle: "gouvernement", label: "Gouvernement", genre: "texte" },
+      { cle: "rang", label: "Rang", genre: "texte" },
+      { cle: "source", label: "Source", genre: "texte" },
+    ],
+    charger: async () => {
+      const rows = await dataQueryTout<{ debut: string; fin: string | null; civilite: string; prenom: string; nom: string; fonction: string; portefeuille: string | null; gouvernement: string; rang: string; source: string }>(
+        "ministres", new URLSearchParams({ select: "debut,fin,civilite,prenom,nom,fonction,portefeuille,gouvernement,rang,source", order: "debut.desc,nom.asc" }),
+      );
+      return rows.map((r) => ({ ...r, fin: r.fin ?? "en fonction" }));
+    },
+  },
+  {
+    id: "mouvements-recents",
+    titre: "Derniers mouvements",
+    description: `Les ${n(2000)} mouvements les plus récents : arrivées, départs et transferts de collaborateurs parlementaires.`,
+    provenance: "Table mouvements (API DataParl'/Supabase) · suivi quotidien et archives",
+    colonnes: [
+      { cle: "date_event", label: "Date", genre: "texte" },
+      { cle: "chambre", label: "Chambre", genre: "texte" },
+      { cle: "type", label: "Type", genre: "texte" },
+      { cle: "collab", label: "Collaborateur", genre: "texte" },
+      { cle: "elu_nom", label: "Élu", genre: "texte" },
+      { cle: "elu_groupe", label: "Groupe", genre: "texte" },
+      { cle: "fonction", label: "Fonction", genre: "texte" },
+    ],
+    charger: async () => {
+      const { rows } = await dataQuery<{ date_event: string; chambre: string; type: string; collab_prenom: string; collab_nom: string; elu_nom: string; elu_groupe: string | null; fonction: string | null }>(
+        "mouvements", new URLSearchParams({ select: COLONNES_PUBLIQUES, source: "eq.live", order: "date_event.desc,id.asc", limit: "2000" }), 900,
+      );
+      return rows.map((r) => ({
+        date_event: r.date_event, chambre: CHAMBRE_LONG[r.chambre] ?? r.chambre, type: r.type,
+        collab: `${r.collab_prenom} ${r.collab_nom}`.trim(), elu_nom: r.elu_nom, elu_groupe: r.elu_groupe, fonction: r.fonction,
+      }));
+    },
+  },
+];
+
+export function feuille(id: string): FeuilleDef | undefined {
+  return FEUILLES.find((f) => f.id === id);
+}

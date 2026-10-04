@@ -509,3 +509,13 @@ footer.site .pied-nav a:hover { color: var(--bleu); }
 
 /* Graphiques annuels côte à côte (méthode VigiParl') */
 .graphes-annuels { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px 24px; margin: 8px 0 20px; }
+
+/* DataParl' Sheets : tableur maison (drive.dataparl.fr) */
+.sheets main { padding: 24px 0 48px; }
+.feuille-outils { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 18px 0 10px; }
+.feuille-outils input[type=text] { flex: 1 1 260px; max-width: 360px; margin: 0; }
+.feuille-outils .meta { margin: 0; }
+.feuille-outils button { margin: 0; padding: 8px 14px; }
+.feuille table.stats th { position: sticky; top: 0; background: var(--bg); border-bottom: 2px solid var(--line); white-space: nowrap; }
+.feuille table.stats th button.tri { color: var(--ink); font-weight: 700; white-space: nowrap; }
+.feuille table.stats td { white-space: nowrap; }
