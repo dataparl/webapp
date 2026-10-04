@@ -1,5 +1,5 @@
 "use client";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import { cookieStorage } from "./cookieStorage";
 import { AUTH_SUPABASE_KEY, AUTH_SUPABASE_URL } from "./env";
 
@@ -15,4 +15,21 @@ export function authBrowser(): SupabaseClient {
     });
   }
   return client;
+}
+
+// Session avec un jeton à jour. supabase-js rafraîchit le jeton par un
+// minuteur en mémoire, mais les navigateurs suspendent les minuteurs d'un
+// onglet en arrière-plan : après un moment (ou une nuit d'onglet ouvert), le
+// jeton stocké est expiré et la première action échoue avec « non connecté ».
+// On rafraîchit donc explicitement la session quand elle touche à sa fin.
+export async function sessionActuelle(): Promise<Session | null> {
+  const a = authBrowser();
+  const { data } = await a.auth.getSession();
+  const s = data.session;
+  if (!s) return null;
+  if (s.expires_at && s.expires_at * 1000 < Date.now() + 60_000) {
+    const { data: r } = await a.auth.refreshSession();
+    return r.session ?? null;
+  }
+  return s;
 }
