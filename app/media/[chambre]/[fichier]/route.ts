@@ -17,18 +17,27 @@ export async function GET(_req: Request, { params }: { params: Promise<{ chambre
   if (!f || !chambre || f.credit !== code) return absente();
   const elu = await parlementaireDepuisId(f.id).catch(() => null);
   if (!elu || elu.chambre !== chambre || !elu.photo_url || !sourceAutorisee(elu.photo_url)) return absente();
-  try {
-    const r = await fetch(elu.photo_url, { headers: { "User-Agent": "DataParl (https://www.dataparl.fr)" }, signal: AbortSignal.timeout(8000), redirect: "error" });
-    if (!r.ok || !(r.headers.get("content-type") ?? "").startsWith("image/")) return absente();
-    const brut = Buffer.from(await r.arrayBuffer());
-    if (brut.length > 8_000_000) return absente();
-    const png = await sharp(brut).resize(f.taille, f.taille, { fit: "cover", position: "top" }).png({ compressionLevel: 9, palette: true }).toBuffer();
-    return new Response(new Uint8Array(png), {
-      headers: {
-        "Content-Disposition": `inline; filename="${f.id}_${f.credit}_${f.taille}.png"`,
-        "Content-Type": "image/png", "Cache-Control": "public, max-age=31536000, immutable", "Vary": "Accept",
-        "X-Credit": encodeURIComponent(`Photo : ${CREDIT[code]}`), "Access-Control-Allow-Origin": "*", "X-Robots-Tag": "noarchive",
-      },
-    });
-  } catch { return absente(); }
+  // Les photos de l'AN portent un segment « /carre/ » que le site a supprimé
+  // pour les anciennes législatures (12e–15e : 404). Sans le segment, la même
+  // photo existe sur toutes les législatures : on l'essaie en repli.
+  const candidates = elu.photo_url.includes("/carre/")
+    ? [elu.photo_url, elu.photo_url.replace("/carre/", "/")]
+    : [elu.photo_url];
+  for (const source of candidates) {
+    try {
+      const r = await fetch(source, { headers: { "User-Agent": "DataParl (https://www.dataparl.fr)" }, signal: AbortSignal.timeout(8000), redirect: "error" });
+      if (!r.ok || !(r.headers.get("content-type") ?? "").startsWith("image/")) continue;
+      const brut = Buffer.from(await r.arrayBuffer());
+      if (brut.length > 8_000_000) continue;
+      const png = await sharp(brut).resize(f.taille, f.taille, { fit: "cover", position: "top" }).png({ compressionLevel: 9, palette: true }).toBuffer();
+      return new Response(new Uint8Array(png), {
+        headers: {
+          "Content-Disposition": `inline; filename="${f.id}_${f.credit}_${f.taille}.png"`,
+          "Content-Type": "image/png", "Cache-Control": "public, max-age=31536000, immutable", "Vary": "Accept",
+          "X-Credit": encodeURIComponent(`Photo : ${CREDIT[code]}`), "Access-Control-Allow-Origin": "*", "X-Robots-Tag": "noarchive",
+        },
+      });
+    } catch { /* on essaie la variante suivante */ }
+  }
+  return absente();
 }
