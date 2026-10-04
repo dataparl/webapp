@@ -19,7 +19,7 @@ select
   u.created_at,
   u.last_sign_in_at,
   u.raw_user_meta_data as user_metadata,
-  u.app_metadata,
+  u.raw_app_meta_data as app_metadata,
   u.banned_until,
   u.deleted_at
 from auth.users u;
