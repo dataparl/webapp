@@ -7,7 +7,7 @@ import { authAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
 
-// DataParl' Sheets (drive.dataparl.fr) : quelles feuilles sont publiées en
+// DataParl' Sheets (www.dataparl.fr/sheets) : quelles feuilles sont publiées en
 // libre accès. Une feuille absente de la table (ou publie=false) répond 404.
 export async function GET(req: Request) {
   return avecAdmin(req, async () => {
