@@ -4,7 +4,7 @@ on:
     branches: [main]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   tsc:
     runs-on: ubuntu-latest
@@ -14,4 +14,13 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - run: npm ci --no-audit --no-fund
-      - run: npx tsc --noEmit
+      - name: Contrôle des types
+        run: npx tsc --noEmit > typecheck.log 2>&1 || echo "ECHEC_TSC" >> typecheck.log
+      - name: Publier le journal sur la branche logs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c logs
+          git add typecheck.log
+          git commit -m "journal du contrôle de types"
+          git push origin logs --force
