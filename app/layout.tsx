@@ -16,6 +16,12 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Axeptio (CMP certifiée Google, n°260) : renseigner NEXT_PUBLIC_AXEPTIO_CLIENT_ID
+  // dans les variables d'environnement Vercel (puis redéployer) pour activer leur
+  // bandeau à la place de celui du site. Tant que la variable est vide, le bandeau
+  // maison (app/_components/BandeauCookies.tsx) continue de gérer le consentement.
+  const axeptio = (process.env.NEXT_PUBLIC_AXEPTIO_CLIENT_ID ?? "").trim();
+
   return (
     <html lang="fr">
       <head>
@@ -26,14 +32,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Spectral:wght@600;700&display=swap"
         />
         {/* Consent Mode v2 (Google) : tout refusé par défaut, AVANT tout script
-            publicitaire. Le bandeau du site actualise ces signaux après choix
-            du visiteur (lib/consentement.ts) — pas de bannière Google. */}
+            publicitaire. Le bandeau actif (Axeptio, ou celui du site) actualise
+            ensuite ces signaux selon le choix du visiteur. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
 gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500});`,
           }}
         />
+        {/* Axeptio (si configuré) : SDK du bandeau de consentement (CMP certifiée). */}
+        {axeptio && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.axeptioSettings={clientId:"${axeptio.replace(/[^a-zA-Z0-9-]/g, "")}"};
+(function(d,s){var t=d.getElementsByTagName(s)[0],e=d.createElement(s);e.async=true;
+e.src="//sdk.axept.io/axeptio-sdk.js";t.parentNode.insertBefore(e,t);})(document,"script");`,
+            }}
+          />
+        )}
         {/* Google AdSense : validation du site et diffusion des annonces (ca-pub-6168263680630864). */}
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6168263680630864" crossOrigin="anonymous" />
         {/* Google Tag Manager (GTM-KW3MJMTK) : le plus haut possible dans le head. */}
@@ -57,8 +73,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
+        {axeptio && <div id="axeptio-holder" />}
         {children}
-        <BandeauCookies />
+        {!axeptio && <BandeauCookies />}
       </body>
     </html>
   );
