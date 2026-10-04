@@ -161,6 +161,7 @@ export default async function MethodeVigiParl() {
           <div className="graphes-annuels">
             {CH.filter((c) => annees.some((a) => a.chambre === c)).map((c) => (
               <BarresAnnuelles key={c} titre={`Renouvellement annuel · ${CHAMBRE_LONG[c]}`} couleur="var(--vigi)" enCours={anneeCourante}
+                format={(v) => pct(v)} max={0.8}
                 points={annees.filter((a) => a.chambre === c).map((a) => ({ an: a.an, valeur: turnoverAnnuel(a), detail: `${a.departs} départs, ${a.effectif} collaborateurs au 1er janvier` }))} />
             ))}
           </div>

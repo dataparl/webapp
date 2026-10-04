@@ -1,8 +1,5 @@
 import { statsAnnuelles, turnoverAnnuel } from "@/lib/stats";
 
-export const revalidate = 3600;
-export const dynamic = "force-static";
-
 // Données annuelles VigiParl' au format CSV, pour la visualisation publiée
 // sur Google Sheets (drive.dataparl.fr/sheets/vigiparl/annual-chart). Une
 // feuille Google peut les suivre automatiquement avec :
@@ -22,7 +19,7 @@ export async function GET() {
       a.arrivees_debut_mandat ?? 0,
       a.departs,
       a.departs_fin_mandat ?? 0,
-      (() => { const t = turnoverAnnuel(a); return t === null ? "" : (t * 100).toFixed(1).replace(".", ","); })(),
+      (() => { const t = turnoverAnnuel(a); return t === null ? `""` : `"${(t * 100).toFixed(1).replace(".", ",")}"`; })(),
     ].join(",")),
   ];
   // BOM UTF-8 pour que Sheets/Excel détectent l'encodage, CRLF standard CSV.
