@@ -34,7 +34,7 @@ export default function MentionsLegales() {
       </p>
       <p>
         Plusieurs sous-domaines organisent le service : <strong>www.dataparl.fr</strong> (le site public),
-        <strong> drive.dataparl.fr</strong> (DataParl&apos; Sheets, le tableur et la recherche dans les bases de
+        <strong> www.dataparl.fr/sheets</strong> (DataParl&apos; Sheets, le tableur et la recherche dans les bases de
         données), <strong>api.dataparl.fr</strong> (l&apos;API publique et sa documentation),
         <strong> admin.dataparl.fr</strong> (l&apos;espace équipe, réservé aux personnes habilitées) et{" "}
         <strong>webmail.dataparl.fr</strong> (la messagerie interne de l&apos;équipe). S&apos;y ajoutent des
