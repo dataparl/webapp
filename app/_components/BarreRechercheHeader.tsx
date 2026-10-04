@@ -17,7 +17,7 @@ export default function BarreRechercheHeader() {
   const [ouvert, setOuvert] = useState(false);
   useEffect(() => { setOuvert(false); }, [chemin]);
   if (SANS_BARRE.some((p) => chemin === p || chemin.startsWith(`${p}/`))) return null;
-  const outil = chemin.startsWith("/vigiparl") ? "vigiparl" : chemin.startsWith("/mixiparl") ? "mixiparl" : null;
+  const outil: string | undefined = chemin.startsWith("/vigiparl") ? "vigiparl" : chemin.startsWith("/mixiparl") ? "mixiparl" : undefined;
   return (
     <>
       <div className={ouvert ? "barre-header ouverte" : "barre-header"}>

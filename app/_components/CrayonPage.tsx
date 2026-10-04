@@ -91,7 +91,7 @@ export default function CrayonPage() {
   }
 
   function cmd(nom: string, arg?: string) {
-    document.querySelector("main .wrap")?.focus();
+    (document.querySelector("main .wrap") as HTMLElement | null)?.focus();
     document.execCommand(nom, false, arg);
   }
 
