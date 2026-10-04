@@ -491,13 +491,27 @@ header.site .nav-principal { display: flex; gap: 16px; font-size: .92rem; flex-w
 
 /* Barre de recherche dans l'en-tête : compacte, à droite ; pleine largeur
    sur une seconde ligne en mobile. */
-.barre-header { flex: 1; max-width: 340px; margin-left: auto; min-width: 160px; }
+.barre-header { flex: 1; max-width: 440px; margin: 0 auto; min-width: 120px; }
 .barre-header .recherche-globale { margin: 0; }
 .barre-header .recherche-globale input { font-size: .95rem; padding: 9px 12px; border-radius: 10px; }
 .barre-header .recherche-globale .raccourci { top: 8px; }
-@media (max-width: 720px) {
-  .barre-header { flex-basis: 100%; max-width: none; min-width: 0; order: 10; margin: 2px 0 8px; }
-  .barre-header .recherche-globale .raccourci { display: none; }
+
+/* ── En-tête www (v4) : logo à gauche, recherche au milieu, menu à droite ── */
+header.site.entete-principale .wrap { flex-wrap: nowrap; }
+header.site.entete-principale .logo, header.site.entete-principale .logo-marque { flex: none; }
+.menu-site { display: block; position: relative; flex: none; }
+.menu-site summary { cursor: pointer; list-style: none; font-weight: 600; padding: 8px 14px; border: 1px solid var(--line); border-radius: var(--radius-btn); font-size: .95rem; line-height: 1; color: var(--ink); white-space: nowrap; }
+.menu-site summary::-webkit-details-marker { display: none; }
+.menu-site summary::after { content: ""; }
+.menu-site[open] summary { border-color: var(--bleu); color: var(--bleu); }
+.menu-site nav { position: absolute; right: 0; left: auto; top: calc(100% + 6px); display: grid; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px; min-width: 220px; z-index: 60; box-shadow: 0 10px 30px rgba(7, 26, 65, .15); }
+.menu-site nav a { padding: 10px 12px; text-decoration: none; color: var(--ink); border-radius: 8px; }
+.menu-site nav a:hover { background: color-mix(in srgb, var(--bleu) 10%, transparent); color: var(--bleu); }
+/* Très petits écrans : la recherche passe sur une seconde ligne. */
+@media (max-width: 420px) {
+  header.site.entete-principale .wrap { flex-wrap: wrap; row-gap: 6px; }
+  .entete-principale .barre-header { flex-basis: 100%; max-width: none; min-width: 0; order: 10; margin: 2px 0 8px; }
+  .entete-principale .barre-header .recherche-globale .raccourci { display: none; }
 }
 
 /* Crayon d'édition directe sur le site public (équipe connectée) */
@@ -605,23 +619,6 @@ table.feuille-grille td input { width: 100%; height: 100%; border: 0; padding: 5
 /* Tableur en lecture seule : cellules non éditables */
 table.feuille-grille td[role="gridcell"] { cursor: default; }
 .fournisseur.slack { background: #611f69; color: #fff; border-color: #611f69; }
-
-/* ── Bulle de recherche mobile (v3 UX) ──────────────────────────────────────
-   En mobile, la barre de l'en-tête est repliée : une petite bulle 🔍 l'ouvre
-   (une ligne, sous l'en-tête), la refermer d'un nouveau clic. */
-.loupe-mobile { display: none; }
-@media (max-width: 720px) {
-  .barre-header { display: none; }
-  .barre-header.ouverte { display: block; flex-basis: 100%; max-width: none; min-width: 0; order: 10; margin: 2px 0 8px; }
-  .barre-header.ouverte .recherche-globale .raccourci { display: none; }
-  .loupe-mobile {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 38px; height: 38px; border-radius: 50%; flex: none;
-    border: 1px solid var(--line); background: var(--card); font-size: 1rem;
-    cursor: pointer; line-height: 1; padding: 0;
-  }
-  .loupe-mobile[aria-expanded="true"] { border-color: var(--bleu); background: color-mix(in srgb, var(--bleu) 10%, var(--card)); }
-}
 
 /* ── Crayon « tout éditer » (contenu des pages, hors en-tête/pied/menus) ──── */
 .crayon-flottant {
