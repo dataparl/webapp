@@ -4,6 +4,7 @@ import ListeMouvements from "@/app/_components/ListeMouvements";
 import Partage from "@/app/_components/Partage";
 import Photo from "@/app/_components/Photo";
 import PubGoogle from "@/app/_components/PubGoogle";
+import CrayonEdition from "@/app/_components/CrayonEdition";
 import { eluDepuisFiche, eluDepuisId, equipe, lienOfficiel, mouvementsElu, statsElu } from "@/lib/elus";
 import { familleDe } from "@/lib/familles";
 import { photoAbsolue } from "@/lib/media";
@@ -144,6 +145,7 @@ export default async function Parlementaire({ params }: Props) {
             texte={`${nom} : son équipe de collaborateurs, ses arrivées et ses départs, sur DataParl'`} />
         </div>
       </div>
+      <CrayonEdition personneId={f.personne_id} nom={nom} />
 
       <p className="lead" style={{ marginBottom: 0 }}>
         {nom}, {f.actif ? titre(f).toLowerCase() : `${ancien(f).toLowerCase()} ${titre(f).toLowerCase()}`}
