@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+import { DM_Sans, Spectral } from "next/font/google";
 import BandeauCookies from "./_components/BandeauCookies";
 import "./globals.css";
+
+// Polices auto-hébergées par next/font : préchargées, avec une police de
+// repli aux métriques ajustées — le texte n'est jamais reflowé au chargement
+// (fin du décalage de mise en page mesuré par Lighthouse, CLS 0,27).
+const dmSans = DM_Sans({ subsets: ["latin"], weight: ["400", "600", "700"], variable: "--font-dm-sans", display: "swap" });
+const spectral = Spectral({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-spectral", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.dataparl.fr"),
@@ -17,14 +24,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
+    <html lang="fr" className={`${dmSans.variable} ${spectral.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Spectral:wght@600;700&display=swap"
-        />
         {/* Consent Mode v2 (Google) : tout refusé par défaut, AVANT tout script
             publicitaire. Le bandeau du site actualise ensuite ces signaux selon
             le choix du visiteur (lib/consentement.ts). */}
