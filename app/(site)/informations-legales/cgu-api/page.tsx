@@ -11,6 +11,7 @@ export default function CGUAPI() {
       <p>
         Ces conditions complètent les <a href="/informations-legales/cgu">conditions générales d&apos;utilisation</a>.
         La documentation est sur <a href="https://api.dataparl.fr/docs">api.dataparl.fr/docs</a>.
+        Retour à l&apos;API : <a href="https://api.dataparl.fr/">api.dataparl.fr</a>.
       </p>
 
       <h2>1. Accès par clé</h2>
