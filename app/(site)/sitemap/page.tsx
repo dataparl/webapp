@@ -75,7 +75,7 @@ export default async function PlanDuSite() {
     {
       titre: "Autres services DataParl'",
       liens: [
-        { href: "https://drive.dataparl.fr/sheets", libelle: "DataParl' Sheets — le tableur", externe: true },
+        { href: "/sheets", libelle: "DataParl' Sheets — le tableur" },
         { href: "https://api.dataparl.fr", libelle: "L'API DataParl'", externe: true },
         { href: "/sitemap.xml", libelle: "Plan du site pour les moteurs (XML)" },
       ],
