@@ -4,6 +4,7 @@ import ListeElus, { CHAMBRE_LONG } from "@/app/_components/ListeElus";
 import { elusDuGroupe, groupesExistants } from "@/lib/collectifsData";
 import { CHAMBRE_COURTE, hrefParti, groupeDepuisSlug, slugCollectif } from "@/lib/collectifs";
 import { couleurParti } from "@/lib/couleurs";
+import { cheminLogoGroupe } from "@/lib/media";
 
 export const revalidate = 3600;
 type Props = { params: Promise<{ groupe: string }> };
@@ -70,6 +71,7 @@ export default async function FicheGroupe({ params }: Props) {
     );
   }
   const elus = await elusDuGroupe(g.chambre, g.groupe).catch(() => []);
+  const logo = g.chambre === "assemblee" ? cheminLogoGroupe(g.chambre, g.groupe) : null;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -92,7 +94,13 @@ export default async function FicheGroupe({ params }: Props) {
       <p className="meta" style={{ marginTop: 0 }}>
         <a href="/senatoriales2026">← Sénatoriales 2026</a> · <a href="/groupe">← Tous les groupes</a>
       </p>
-      <h1>Groupe <span className="surligne">{g.groupe_libelle || g.groupe}</span> — {CHAMBRE_LONG[g.chambre]}</h1>
+      <h1>
+        {logo && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="logo-groupe" src={logo} alt={`Logo du groupe ${g.groupe}`} width={64} height={64} />
+        )}
+        Groupe <span className="surligne">{g.groupe_libelle || g.groupe}</span> — {CHAMBRE_LONG[g.chambre]}
+      </h1>
       <p className="lead">
         Les {elus.length} élu{elus.length > 1 ? "s" : ""} du groupe {g.groupe} à {CHAMBRE_LONG[g.chambre]}, avec pour chacun sa fiche,
         sa biographie et l&apos;équipe de ses collaborateurs.
