@@ -22,6 +22,13 @@ const config: NextConfig = {
       { source: "/parlementaires/:id/PAhistory", destination: "/parlementaires/:id/historique", permanent: true },
     ];
   },
+  async rewrites() {
+    return [
+      // drive.dataparl.fr : exports CSV des données, pour les visualisations
+      // Google Sheets (IMPORTDATA) — ex. /sheets/vigiparl/annual-chart.
+      { source: "/sheets/:chemin*", destination: "/api/sheets/:chemin*" },
+    ];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

@@ -506,3 +506,6 @@ footer.site .pied-nav a:hover { color: var(--bleu); }
 /* Aperçu libre des mouvements */
 .apercu-libre { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
 .apercu-libre .meta { margin: 0; }
+
+/* Graphiques annuels côte à côte (méthode VigiParl') */
+.graphes-annuels { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px 24px; margin: 8px 0 20px; }

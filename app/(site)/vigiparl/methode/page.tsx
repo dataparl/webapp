@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import BarresAnnuelles from "@/app/_components/BarresAnnuelles";
 import { PiedMethode, VersionMethode } from "@/app/_components/EnTeteMethode";
 import { derniersJours } from "@/lib/daily";
 import { CHAMBRE_LONG } from "@/lib/format";
@@ -152,16 +153,34 @@ export default async function MethodeVigiParl() {
       {annees.length > 0 && (
         <>
           <h2 id="table-annuelle">La table annuelle</h2>
+          <p>
+            Les graphiques « année par année » de VigiParl&apos;, chiffre par chiffre : effectifs au 1er janvier,
+            arrivées et départs — en distinguant les mouvements comptés dans le taux et ceux exclus
+            (fin ou début de mandat de l&apos;élu).
+          </p>
+          <div className="graphes-annuels">
+            {CH.filter((c) => annees.some((a) => a.chambre === c)).map((c) => (
+              <BarresAnnuelles key={c} titre={`Renouvellement annuel · ${CHAMBRE_LONG[c]}`} couleur="var(--vigi)" enCours={anneeCourante}
+                points={annees.filter((a) => a.chambre === c).map((a) => ({ an: a.an, valeur: turnoverAnnuel(a), detail: `${a.departs} départs, ${a.effectif} collaborateurs au 1er janvier` }))} />
+            ))}
+          </div>
           <div className="defile">
             <table className="stats">
-              <thead><tr><th>Année</th><th>Chambre</th><th className="num">Effectif 1er janv.</th><th className="num">Effectif 1er janv. suivant</th><th className="num">Départs comptés</th><th className="num">Départs exclus</th><th className="num">Taux</th></tr></thead>
+              <thead><tr><th>Année</th><th>Chambre</th><th className="num">Effectif 1er janv.</th><th className="num">Effectif 1er janv. suivant</th><th className="num">Arrivées comptées</th><th className="num">Arrivées exclues (début de mandat)</th><th className="num">Départs comptés</th><th className="num">Départs exclus (fin de mandat)</th><th className="num">Taux</th></tr></thead>
               <tbody>{annees.map((a) => (
                 <tr key={`${a.chambre}-${a.an}`}><td>{a.an}{a.an === anneeCourante ? " (en cours)" : ""}</td><td>{CHAMBRE_LONG[a.chambre]}</td>
-                  <td className="num">{n(a.effectif)}</td><td className="num">{n(a.effectif_suivant)}</td><td className="num">{n(a.departs)}</td>
+                  <td className="num">{n(a.effectif)}</td><td className="num">{n(a.effectif_suivant)}</td><td className="num">{n(a.arrivees ?? 0)}</td>
+                  <td className="num">{n(a.arrivees_debut_mandat ?? 0)}</td><td className="num">{n(a.departs)}</td>
                   <td className="num">{n(a.departs_fin_mandat ?? 0)}</td><td className="num">{pct(turnoverAnnuel(a), 1)}</td></tr>
               ))}</tbody>
             </table>
           </div>
+          <p className="meta">
+            Ces données sont publiées en CSV, mises à jour automatiquement :
+            <a href="https://drive.dataparl.fr/sheets/vigiparl/annual-chart"> drive.dataparl.fr/sheets/vigiparl/annual-chart</a>.
+            Une feuille Google peut les suivre jour après jour avec
+            <code> =IMPORTDATA(&quot;https://drive.dataparl.fr/sheets/vigiparl/annual-chart&quot;)</code>.
+          </p>
         </>
       )}
       <PiedMethode historique={HISTORIQUE_METHODE.vigiparl} extractions={extractions} />
