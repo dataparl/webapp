@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { CHAMBRE_LONG } from "@/lib/format";
 import { dureeMois, libellePeriode } from "@/lib/periodes";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { sessionActuelle } from "@/lib/supabaseBrowser";
 import VideoDeblocage from "@/app/_components/VideoDeblocage";
 
 type Ligne = {
@@ -19,7 +19,7 @@ export default function HistoriqueEquipe({ personne, suite, multi }: { personne:
   const [essai, setEssai] = useState(0);
   const [filtre, setFiltre] = useState({ chambre: "", etat: "", q: "" });
 
-  useEffect(() => { authBrowser().auth.getSession().then(({ data }) => setSession(data.session)); }, []);
+  useEffect(() => { sessionActuelle().then(setSession); }, []);
   useEffect(() => {
     if (!session) return;
     fetch(`/api/parcours/elu?personne=${encodeURIComponent(personne)}`, { headers: { Authorization: `Bearer ${session.access_token}` }, cache: "no-store" })
