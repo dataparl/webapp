@@ -3,7 +3,7 @@ import { CONTACT_URL, MISE_A_JOUR } from "../maj";
 
 export const metadata: Metadata = { title: "CGU DataParl' Sheets" };
 
-// Conditions d'utilisation propres au tableur drive.dataparl.fr. Vouvoiement :
+// Conditions d'utilisation propres au tableur DataParl' Sheets (/sheets). Vouvoiement :
 // « l'utilisateur », comme les autres pages légales.
 export default function CguSheets() {
   return (
@@ -13,7 +13,7 @@ export default function CguSheets() {
 
       <h2>1. Objet</h2>
       <p>
-        DataParl&apos; Sheets (drive.dataparl.fr) est le tableur de DataParl&apos; : des feuilles de calcul
+        DataParl&apos; Sheets (<a href="https://www.dataparl.fr/sheets">www.dataparl.fr/sheets</a>) est le tableur de DataParl&apos; : des feuilles de calcul
         construites à partir des données publiées par l&apos;API DataParl&apos;. Les présentes conditions
         complètent les <a href="/informations-legales/cgu">conditions d&apos;utilisation</a> générales du site,
         qui s&apos;appliquent également à l&apos;utilisateur.
