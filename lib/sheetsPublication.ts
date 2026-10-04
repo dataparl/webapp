@@ -1,7 +1,7 @@
 import "server-only";
 import { AUTH_SUPABASE_KEY, AUTH_SUPABASE_URL } from "./env";
 
-// Feuilles du tableur DataParl' Sheets (drive.dataparl.fr) publiées en libre
+// Feuilles du tableur DataParl' Sheets (www.dataparl.fr/sheets) publiées en libre
 // accès : lues dans sheets_publication (dataparl-auth) avec la clé publique,
 // gardées 60 s en mémoire. L'équipe choisit ce qui est publié dans l'admin
 // (Contenu → DataParl' Sheets). En cas de panne : les trois feuilles publiées
