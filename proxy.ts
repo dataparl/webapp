@@ -105,6 +105,12 @@ export async function proxy(req: NextRequest) {
       url.pathname = `/media${path}`;
       return NextResponse.rewrite(url);
     }
+    // media.dataparl.fr/groupes/<sigle>-<chambre>-<législature>.png : logos des groupes.
+    if (/^\/groupes\/[a-z0-9-]+-(an|senat|pe)-[IVXLC]+e\.png$/.test(path)) {
+      const url = req.nextUrl.clone();
+      url.pathname = `/media${path}`;
+      return NextResponse.rewrite(url);
+    }
     if (path.startsWith("/photo-credit")) return vers(req, `www.${DOMAINE}`, "/", 307);
     return vers(req, `www.${DOMAINE}`, path, 307);
   }
