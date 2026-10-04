@@ -8,10 +8,18 @@ export function EnTeteDrive() {
     <header className="site">
       <div className="wrap">
         <a className="logo" href="/sheets">Data<span className="surligne">Parl&apos;</span> Sheets</a>
-        <nav aria-label="Navigation DataParl' Sheets">
+        <nav className="nav-principal" aria-label="Navigation DataParl' Sheets">
           <a href="https://www.dataparl.fr/">DataParl&apos;</a>
           <a href="/search">Recherche Base de Données</a>
         </nav>
+        {/* Menu mobile : déroulant natif, sans JavaScript (même motif que l'en-tête www). */}
+        <details className="menu-mobile">
+          <summary aria-label="Ouvrir le menu de navigation">Menu</summary>
+          <nav aria-label="Navigation DataParl' Sheets mobile">
+            <a href="https://www.dataparl.fr/">DataParl&apos;</a>
+            <a href="/search">Recherche Base de Données</a>
+          </nav>
+        </details>
       </div>
     </header>
   );
