@@ -5,7 +5,7 @@ import Photo from "@/app/_components/Photo";
 import { CHAMBRE_LONG } from "@/lib/format";
 import { libellePeriode } from "@/lib/periodes";
 import { authBrowser } from "@/lib/supabaseBrowser";
-import VideoDeblocage from "./VideoDeblocage";
+import VideoDeblocage from "@/app/_components/VideoDeblocage";
 
 type Periode = {
   chambre: string; debut: string; debut_connu: boolean; fin: string; fin_connue: boolean; en_cours: boolean; fonction: string;
@@ -42,7 +42,7 @@ export default function ParcoursCollab({ id, suite }: { id: string; suite: strin
     );
   }
   if (erreur) return <p className="erreur">Le parcours n&apos;a pas pu être chargé.</p>;
-  if (pub) return <VideoDeblocage session={session} collabId={id} onDebloque={() => setEssai((n) => n + 1)} />;
+  if (pub) return <VideoDeblocage session={session} cible={id} objet="Le parcours complet de cette fiche" onDebloque={() => setEssai((n) => n + 1)} />;
   if (!periodes) return <p className="meta">Chargement du parcours…</p>;
 
   const tries = [...periodes].sort((a, b) => Number(b.en_cours) - Number(a.en_cours) || (b.debut || "").localeCompare(a.debut || ""));

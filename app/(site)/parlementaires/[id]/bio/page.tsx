@@ -8,6 +8,8 @@ import { chevauche, libellePeriode, moisAnnee } from "@/lib/periodes";
 import { collaborateurDeLaPersonne, parlementaireDepuisId, personne, type Appartenance, type Mandat, type Parlementaire } from "@/lib/referentiel";
 import { assainirHtml, estHtml } from "@/lib/htmlBio";
 import { editionsManuelles } from "@/lib/editionsManuelles";
+import { pubActive } from "@/lib/deblocage";
+import BioComplete from "./BioComplete";
 
 export const revalidate = 3600;
 type Props = { params: Promise<{ id: string }> };
@@ -50,6 +52,23 @@ function ParagrapheBio({ texte, i }: { texte: string; i: number }) {
       ))}
     </p>
   );
+}
+
+// Aperçu public de la biographie (premiers paragraphes), pour les moteurs
+// de recherche et pour donner envie de lire la suite.
+function apercuTexte(texte: string): string {
+  const paras = texte.split(/\n\s*\n/).filter((p) => p.trim());
+  let s = paras[0] ?? "";
+  if (s.length < 350 && paras[1]) s += `\n\n${paras[1]}`;
+  return s.length > 800 ? `${s.slice(0, 800).trim()}…` : s;
+}
+
+function apercuHtml(texte: string): string {
+  const html = assainirHtml(texte);
+  let fin = -1;
+  for (let i = 0; i < 2; i++) fin = html.indexOf("</p>", fin + 1);
+  const coupe = fin > 0 ? html.slice(0, fin + 4) : html.slice(0, 600);
+  return html.length > coupe.length ? `${coupe}<p>…</p>` : coupe;
 }
 
 export default async function Bio({ params }: Props) {
@@ -139,9 +158,18 @@ export default async function Bio({ params }: Props) {
         </div>
       </div>
 
-      {manuel.bio && (
+      {manuel.bio && (pubActive() ? (
         <>
-          <h2>Biographie</h2>
+          <h2>Biographie de {nom}</h2>
+          {estHtml(manuel.bio.texte)
+            ? <div className="bio-html" dangerouslySetInnerHTML={{ __html: apercuHtml(manuel.bio.texte) }} />
+            : apercuTexte(manuel.bio.texte).split(/\n\s*\n/).map((p, i) => <ParagrapheBio key={i} texte={p.trim()} i={i} />)}
+          <p className="meta" style={{ marginTop: 12 }}>La suite de la biographie de {nom} est réservée aux comptes DataParl&apos; (gratuits) : elle se débloque en quelques secondes contre une courte vidéo publicitaire.</p>
+          <BioComplete personne={f.personne_id} nom={nom} suite={`/parlementaires/${encodeURIComponent(f.slug)}/bio`} />
+        </>
+      ) : (
+        <>
+          <h2>Biographie de {nom}</h2>
           {estHtml(manuel.bio.texte)
             ? <div className="bio-html" dangerouslySetInnerHTML={{ __html: assainirHtml(manuel.bio.texte) }} />
             : manuel.bio.texte.split(/\n\s*\n/).map((p, i) => <ParagrapheBio key={i} texte={p.trim()} i={i} />)}
@@ -149,7 +177,7 @@ export default async function Bio({ params }: Props) {
             <p className="meta">Source : {manuel.bio.source} · biographie éditée par l&apos;équipe DataParl&apos;.</p>
           )}
         </>
-      )}
+      ))}
 
       <h2>Qui est {nom} ?</h2>
       {phrases.map((p, i) => <p key={i}>{p}</p>)}

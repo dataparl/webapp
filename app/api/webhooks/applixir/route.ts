@@ -22,7 +22,7 @@ async function traiter(params: Record<string, string>) {
     return new NextResponse("utilisateur invalide", { status: 400 });
   }
   // Sans identifiant de transaction, le jeton (usage unique) en tient lieu.
-  const etat = await enregistrerDeblocage(u.userId, u.collabId, r.tid || `jeton:${r.userId}`);
+  const etat = await enregistrerDeblocage(u.userId, u.cible, r.tid || `jeton:${r.userId}`);
   await journaliserRappel(true, etat, r.userId, r.tid);
   return new NextResponse("ok", { status: 200 });
 }

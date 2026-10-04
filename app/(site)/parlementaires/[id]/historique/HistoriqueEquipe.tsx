@@ -4,6 +4,7 @@ import type { Session } from "@supabase/supabase-js";
 import { CHAMBRE_LONG } from "@/lib/format";
 import { dureeMois, libellePeriode } from "@/lib/periodes";
 import { authBrowser } from "@/lib/supabaseBrowser";
+import VideoDeblocage from "@/app/_components/VideoDeblocage";
 
 type Ligne = {
   collab_id: string; chambre: string; debut: string; debut_connu: boolean; fin: string; fin_connue: boolean; en_cours: boolean;
@@ -14,14 +15,21 @@ export default function HistoriqueEquipe({ personne, suite, multi }: { personne:
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [lignes, setLignes] = useState<Ligne[] | null>(null);
   const [erreur, setErreur] = useState(false);
+  const [pub, setPub] = useState(false);
+  const [essai, setEssai] = useState(0);
   const [filtre, setFiltre] = useState({ chambre: "", etat: "", q: "" });
 
   useEffect(() => { authBrowser().auth.getSession().then(({ data }) => setSession(data.session)); }, []);
   useEffect(() => {
     if (!session) return;
-    fetch(`/api/parcours/elu?personne=${encodeURIComponent(personne)}`, { headers: { Authorization: `Bearer ${session.access_token}` } })
-      .then((r) => (r.ok ? r.json() : Promise.reject())).then((d) => setLignes(d.lignes)).catch(() => setErreur(true));
-  }, [session, personne]);
+    fetch(`/api/parcours/elu?personne=${encodeURIComponent(personne)}`, { headers: { Authorization: `Bearer ${session.access_token}` }, cache: "no-store" })
+      .then((r) => {
+        if (r.status === 402) { setPub(true); return null; }
+        return r.ok ? r.json() : Promise.reject();
+      })
+      .then((d) => { if (d) { setPub(false); setLignes(d.lignes); } })
+      .catch(() => setErreur(true));
+  }, [session, personne, essai]);
 
   const visibles = useMemo(() => {
     const q = filtre.q.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
@@ -42,6 +50,7 @@ export default function HistoriqueEquipe({ personne, suite, multi }: { personne:
     );
   }
   if (erreur) return <p className="erreur">L&apos;historique n&apos;a pas pu être chargé. Réessaie dans un instant.</p>;
+  if (pub) return <VideoDeblocage session={session} cible={`equipe:${personne}`} objet="La liste complète des collaborateurs" onDebloque={() => setEssai((n) => n + 1)} />;
   if (!lignes) return <p className="meta">Chargement de l&apos;historique…</p>;
   if (!lignes.length) return <p className="meta">Aucun collaborateur connu dans les archives.</p>;
 
