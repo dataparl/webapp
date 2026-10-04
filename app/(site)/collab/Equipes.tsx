@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import Autocompletion, { chargerElus } from "@/app/_components/Autocompletion";
 import { CHAMBRE_LONG, nomAffiche, prenomNom } from "@/lib/format";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { sessionActuelle } from "@/lib/supabaseBrowser";
 
 type Collab = { nom: string; prenom: string; civilite: string; fonction: string; statut: string; email: string | null };
 type Equipe = { chambre: string; elu_id: string; elu_cle: string; elu_nom: string; elu_groupe: string; elu_email: string | null; id_page: string; collabs: Collab[] };
@@ -39,7 +39,7 @@ export default function Equipes() {
   const [etat, setEtat] = useState<"idle" | "chargement">("idle");
   const [erreur, setErreur] = useState("");
 
-  useEffect(() => { authBrowser().auth.getSession().then(({ data }) => setSession(data.session)); }, []);
+  useEffect(() => { sessionActuelle().then(setSession); }, []);
   // Lien « Contacts et export de l'équipe » depuis une fiche : ?elu=<identifiant>.
   useEffect(() => {
     const elu = new URLSearchParams(window.location.search).get("elu");
