@@ -40,7 +40,8 @@ export default function Confidentialite() {
             <td>Jusqu&apos;à la désactivation des alertes ou la suppression du compte</td>
           </tr>
           <tr>
-            <td>Date, nature de l&apos;action, version de cette politique, adresse IP hachée (jamais en clair), navigateur</td>
+            <td>Date, nature de l&apos;acti
+on, version de cette politique, adresse IP hachée (jamais en clair), navigateur</td>
             <td>Prouver le consentement ; limiter les abus</td>
             <td>Obligation de pouvoir démontrer le consentement (art. 7 RGPD) ; intérêt légitime</td>
             <td>3 ans après la fin de l&apos;abonnement ou du compte</td>
@@ -78,7 +79,8 @@ export default function Confidentialite() {
       <p>
         Les emails envoyés par DataParl&apos; (depuis les adresses en @dataparl.fr) mesurent leur
         ouverture et les clics sur leurs liens, via notre prestataire d&apos;envoi Resend, pour vérifier qu&apos;ils sont
-        bien délivrés. Chaque email dispose aussi d&apos;une version en ligne, accessible uniquement par le lien
+        bien délivrés. Chaque email dispose aus
+si d&apos;une version en ligne, accessible uniquement par le lien
         unique qu&apos;il contient.
       </p>
       <p>
@@ -111,8 +113,8 @@ export default function Confidentialite() {
           caractère public de ces informations.
         </li>
         <li>
- 
-         <strong>Fiches de parcours.</strong> Pour chaque collaborateur, DataParl&apos; rassemble sur une fiche les
+
+          <strong>Fiches de parcours.</strong> Pour chaque collaborateur, DataParl&apos; rassemble sur une fiche les
           élus pour lesquels la personne a figuré sur les listes officielles, avec les dates et la chambre. Ces fiches ne
           sont pas indexées par les moteurs de recherche, et le parcours complet n&apos;est visible que par les comptes
           connectés. Une personne est reconnue à son nom : deux homonymes peuvent être confondus, ce qui se corrige sur
@@ -143,7 +145,8 @@ export default function Confidentialite() {
           avec l&apos;activité parlementaire et la revente des listes ;
         </li>
         <li>
-          cessent d&apos;être affichées dès que la personne concernée le demande : <a href={CONTACT_RGPD}>formulaire
+          cessent d&apos;être affichées dès que la personne concernée le deman
+de : <a href={CONTACT_RGPD}>formulaire
           de contact</a>, sujet « Demande RGPD ».
         </li>
       </ul>
@@ -166,11 +169,13 @@ export default function Confidentialite() {
           <tr><td>Resend</td><td>Envoi des emails</td><td>Envoi depuis l&apos;Union européenne (Irlande) ; société américaine</td></tr>
           <tr><td>AppLixir (et ses régies)</td><td>Vidéo publicitaire, seulement si l&apos;utilisateur choisit de la regarder pour débloquer une fiche ; reçoit un jeton aléatoire, pas le compte</td><td>Société américaine ; responsable de ses propres traitements publicitaires (voir la page Cookies)</td></tr>
           <tr><td>Google, GitHub</td><td>Connexion, uniquement si l&apos;utilisateur choisit ces services</td><td>Union européenne et États-Unis</td></tr>
+          <tr><td>Infomaniak</td><td>Réception des messages du formulaire de contact</td><td>Suisse</td></tr>
         </tbody>
       </table>
       <p>
         Les transferts hors de l&apos;Union européenne sont encadrés, selon le prestataire, par le cadre de protection
-        des données UE-États-Unis ou par les clauses contractuelles types de la Commission européenne. La Suisse
+        des don
+nées UE-États-Unis ou par les clauses contractuelles types de la Commission européenne. La Suisse
         bénéficie d&apos;une décision d&apos;adéquation.
       </p>
 
