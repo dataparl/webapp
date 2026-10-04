@@ -32,6 +32,16 @@ export default function MentionsLegales() {
       <p>
         Le site est accessible à l&apos;adresse dataparl.fr, enregistrée auprès d&apos;IONOS SE, Elgendorfer Straße 57, 56410 Montabaur, Allemagne.
       </p>
+      <p>
+        Plusieurs sous-domaines organisent le service : <strong>www.dataparl.fr</strong> (le site public),
+        <strong> drive.dataparl.fr</strong> (DataParl&apos; Sheets, le tableur et la recherche dans les bases de
+        données), <strong>api.dataparl.fr</strong> (l&apos;API publique et sa documentation),
+        <strong> admin.dataparl.fr</strong> (l&apos;espace équipe, réservé aux personnes habilitées) et{" "}
+        <strong>webmail.dataparl.fr</strong> (la messagerie interne de l&apos;équipe). S&apos;y ajoutent des
+        sous-domaines techniques : <strong>mail.dataparl.fr</strong> (versions en ligne des emails),
+        <strong> link.dataparl.fr</strong> (liens courts tracés) et <strong>media.dataparl.fr</strong> (les
+        photos des élus, voir ci-dessous). Tous sont hébergés dans les conditions décrites ci-dessus.
+      </p>
 
       <h2>Propriété intellectuelle</h2>
       <p>

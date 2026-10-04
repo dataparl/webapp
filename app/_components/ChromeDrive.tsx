@@ -7,7 +7,7 @@ export function EnTeteDrive() {
   return (
     <header className="site">
       <div className="wrap">
-        <a className="logo" href="/sheets">Data<span className="surligne">Sheets</span></a>
+        <a className="logo" href="/sheets">Data<span className="surligne">Parl&apos;</span> Sheets</a>
         <nav aria-label="Navigation DataParl' Sheets">
           <a href="https://www.dataparl.fr/">DataParl&apos;</a>
           <a href="/search">Recherche Base de Données</a>
