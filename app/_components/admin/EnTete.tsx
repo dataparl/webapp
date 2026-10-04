@@ -38,8 +38,10 @@ const SECTIONS: Section[] = [
   { chemin: "/moi", libelle: "Mon espace", acces: ["admin", "editeur", "utilisateur"] },
 ];
 
+// Accès non défini (simple menu regroupant des sous-sections) : toujours visible,
+// le filtrage se fait sur les entrées.
 const visible = (acces: Acces | undefined, role: Role, modules: string[]) =>
-  typeof acces === "string" ? modules.includes(acces) : acces.includes(role);
+  !acces ? true : typeof acces === "string" ? modules.includes(acces) : acces.includes(role);
 
 export default function EnTete({ espace }: { espace: Espace }) {
   const { nom, email, role, modules, verrouiller } = useAdmin();
