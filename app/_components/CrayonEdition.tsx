@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { sessionActuelle } from "@/lib/supabaseBrowser";
 import { bioVersHtml } from "@/lib/htmlBio";
 
 // Crayon d'édition directe sur le site public (www.dataparl.fr) : visible
@@ -15,8 +15,7 @@ import { bioVersHtml } from "@/lib/htmlBio";
 type Etat = "cache" | "otp" | "pret" | "erreur";
 
 async function jeton(): Promise<string | null> {
-  const { data } = await authBrowser().auth.getSession();
-  return data.session?.access_token ?? null;
+  return (await sessionActuelle())?.access_token ?? null;
 }
 
 async function appel<T>(chemin: string, init?: RequestInit): Promise<{ status: number; json: T }> {
