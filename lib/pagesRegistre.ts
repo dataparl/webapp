@@ -32,6 +32,7 @@ export const PAGES: PageSite[] = [
   { chemin: "/faq", titre: "Questions fréquentes", sitemap: true },
   { chemin: "/contact", titre: "Contact", sitemap: true },
   { chemin: "/informations-legales", titre: "Informations légales", verrou: "Pages obligatoires", dynamique: "mentions, CGU, confidentialité, cookies, licences", sitemap: true },
+  { chemin: "/sitemap", titre: "Plan du site", sitemap: true },
   { chemin: "/connexion", titre: "Connexion", verrou: "Nécessaire aux comptes" },
   { chemin: "/mon-compte", titre: "Mon compte", verrou: "Nécessaire aux comptes" },
   { chemin: "/preferences", titre: "Préférences de communication", verrou: "Lien présent dans les emails" },

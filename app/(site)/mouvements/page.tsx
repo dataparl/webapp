@@ -20,7 +20,6 @@ export default async function Mouvements() {
         <>
           <div className="apercu-libre">
             <h2 style={{ margin: "0 0 8px" }}>Les 15 derniers mouvements</h2>
-            <span className="meta">Gratuit, sans compte — le reste de l&apos;historique est réservé aux comptes.</span>
           </div>
           <ListeMouvements mouvements={apercu} />
         </>

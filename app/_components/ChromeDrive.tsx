@@ -14,7 +14,7 @@ export function EnTeteDrive() {
         </nav>
         {/* Menu mobile : déroulant natif, sans JavaScript (même motif que l'en-tête www). */}
         <details className="menu-mobile">
-          <summary aria-label="Ouvrir le menu de navigation">Menu</summary>
+          <summary aria-label="Ouvrir le menu de navigation">☰</summary>
           <nav aria-label="Navigation DataParl' Sheets mobile">
             <a href="https://www.dataparl.fr/">DataParl&apos;</a>
             <a href="/search">Recherche Base de Données</a>

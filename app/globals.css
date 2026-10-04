@@ -479,15 +479,22 @@ header.site .nav-principal { display: flex; gap: 16px; font-size: .92rem; flex-w
 @media (max-width: 720px) {
   header.site .wrap { flex-wrap: nowrap; justify-content: space-between; }
   header.site .nav-principal { display: none; }
-  .menu-mobile { display: block; position: relative; flex: none; }
-  .menu-mobile summary { cursor: pointer; list-style: none; font-weight: 600; padding: 9px 14px; border: 1px solid var(--line); border-radius: var(--radius-btn); font-size: .92rem; color: var(--ink); }
+  .menu-mobile { display: block; position: relative; flex: none; order: -1; }
+  .menu-mobile summary { cursor: pointer; list-style: none; font-weight: 600; padding: 7px 12px; border: 1px solid var(--line); border-radius: var(--radius-btn); font-size: 1.05rem; line-height: 1; color: var(--ink); }
   .menu-mobile summary::-webkit-details-marker { display: none; }
-  .menu-mobile summary::after { content: " ▾"; color: var(--muted); }
+  .menu-mobile summary::after { content: ""; }
   .menu-mobile[open] summary { border-color: var(--bleu); color: var(--bleu); }
-  .menu-mobile nav { position: absolute; right: 0; top: calc(100% + 6px); display: grid; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px; min-width: 220px; z-index: 60; box-shadow: 0 10px 30px rgba(7, 26, 65, .15); }
+  .menu-mobile nav { position: absolute; left: 0; right: auto; top: calc(100% + 6px); display: grid; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px; min-width: 220px; z-index: 60; box-shadow: 0 10px 30px rgba(7, 26, 65, .15); }
   .menu-mobile nav a { padding: 10px 12px; text-decoration: none; color: var(--ink); border-radius: 8px; }
   .menu-mobile nav a:hover { background: color-mix(in srgb, var(--bleu) 10%, transparent); color: var(--bleu); }
 }
+
+/* Page /sitemap : plan du site lisible */
+.plan-site { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 24px; }
+.plan-site h2 { font-size: 1.05rem; margin: 0 0 10px; }
+.plan-site ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.plan-site a { color: var(--ink); text-decoration: none; }
+.plan-site a:hover { color: var(--bleu); text-decoration: underline; }
 
 /* Pied de page : plan du site complet */
 footer.site .pied-nav { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 12px; }

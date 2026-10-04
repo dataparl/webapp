@@ -23,9 +23,9 @@ export function EnTeteSite() {
             <a key={l.href} href={l.href}>{l.label}</a>
           ))}
         </nav>
-        {/* Menu mobile : déroulant natif, sans JavaScript. */}
+        {/* Menu mobile : déroulant natif, sans JavaScript, en haut à gauche. */}
         <details className="menu-mobile">
-          <summary aria-label="Ouvrir le menu de navigation">Menu</summary>
+          <summary aria-label="Ouvrir le menu de navigation">☰</summary>
           <nav aria-label="Navigation principale mobile">
             {liens.map((l) => (
               <a key={l.href} href={l.href}>{l.label}</a>
@@ -42,19 +42,12 @@ export function PiedDePage() {
     <footer className="site">
       <div className="wrap">
         <nav className="pied-nav" aria-label="Plan du site">
-          <a href="/mouvements">Mouvements</a>
-          <a href="/collab">Collaborateurs</a>
           <a href="/parlementaires">Parlementaires</a>
-          <a href="/groupe">Groupes</a>
-          <a href="/departement">Départements</a>
-          <a href="/senatoriales2026">Sénatoriales 2026</a>
           <a href="/vigiparl">VigiParl&apos;</a>
           <a href="/mixiparl">MixiParl&apos;</a>
-          <a href="/alertes">Alertes</a>
           <a href="/methode">Méthode</a>
-          <a href={API_URL}>API</a>
           <a href="/a-propos">À propos</a>
-          <a href="/presse">Presse</a>
+          <a href="/sitemap">Plan du site</a>
           <a href="/informations-legales">Informations légales</a>
         </nav>
         <span className="meta">© 2026 DataParl&apos; : le Parlement, pièce par pièce.</span>
