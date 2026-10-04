@@ -4,7 +4,7 @@ import type { Session } from "@supabase/supabase-js";
 import Photo from "@/app/_components/Photo";
 import { CHAMBRE_LONG } from "@/lib/format";
 import { libellePeriode } from "@/lib/periodes";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { sessionActuelle } from "@/lib/supabaseBrowser";
 import VideoDeblocage from "@/app/_components/VideoDeblocage";
 
 type Periode = {
@@ -20,7 +20,7 @@ export default function ParcoursCollab({ id, suite }: { id: string; suite: strin
   const [pub, setPub] = useState(false);
   const [essai, setEssai] = useState(0);
 
-  useEffect(() => { authBrowser().auth.getSession().then(({ data }) => setSession(data.session)); }, []);
+  useEffect(() => { sessionActuelle().then(setSession); }, []);
   useEffect(() => {
     if (!session) return;
     fetch(`/api/parcours/collab?id=${id}`, { headers: { Authorization: `Bearer ${session.access_token}` }, cache: "no-store" })
