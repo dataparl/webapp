@@ -489,12 +489,20 @@ header.site .nav-principal { display: flex; gap: 16px; font-size: .92rem; flex-w
   .menu-mobile nav a:hover { background: color-mix(in srgb, var(--bleu) 10%, transparent); color: var(--bleu); }
 }
 
+/* Bouton « revenir en haut » : flèche fixe sur le côté, après défilement */
+.retour-haut { position: fixed; right: 16px; bottom: 16px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); color: var(--bleu); font-size: 1.2rem; line-height: 1; cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(7, 26, 65, .18); z-index: 70; }
+.retour-haut[data-visible] { display: inline-flex; }
+.retour-haut:hover { background: var(--bleu); color: #fff; border-color: var(--bleu); }
+
 /* Page /sitemap : plan du site lisible */
 .plan-site { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 24px; }
 .plan-site h2 { font-size: 1.05rem; margin: 0 0 10px; }
 .plan-site ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.plan-site li { padding-left: 18px; position: relative; }
+.plan-site li::before { content: "•"; position: absolute; left: 0; top: 0; color: var(--bleu); font-weight: 700; }
 .plan-site a { color: var(--ink); text-decoration: none; }
 .plan-site a:hover { color: var(--bleu); text-decoration: underline; }
+.plan-site a strong { text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--jaune) 80%, transparent); text-underline-offset: 3px; }
 
 /* Pied de page : plan du site complet */
 footer.site .pied-nav { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 12px; }

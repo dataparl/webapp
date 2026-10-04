@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PiedDePage } from "@/app/_components/SiteChrome";
+import RetourHaut from "@/app/_components/RetourHaut";
 
 export const metadata: Metadata = {
   title: { default: "API DataParl'", template: "%s | API DataParl'" },
@@ -34,6 +35,7 @@ export default function ApiLayout({ children }: { children: React.ReactNode }) {
       </header>
       <main><div className="wrap">{children}</div></main>
       <PiedDePage />
+      <RetourHaut />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { EnTeteDrive, PiedDrive } from "@/app/_components/ChromeDrive";
+import RetourHaut from "@/app/_components/RetourHaut";
 
 export const metadata: Metadata = {
   title: "Recherche Base de Données",
@@ -12,6 +13,7 @@ export default function SearchLayout({ children }: { children: React.ReactNode }
       <EnTeteDrive />
       <main><div className="wrap large">{children}</div></main>
       <PiedDrive />
+      <RetourHaut />
     </div>
   );
 }

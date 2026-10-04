@@ -85,7 +85,7 @@ export default async function PlanDuSite() {
   return (
     <>
       <h1>Plan du <span className="surligne">site</span></h1>
-      <p className="lead">Toutes les pages de DataParl', sur un seul écran.</p>
+      <p className="lead">Toutes les pages de DataParl&apos;, sur <strong>un seul écran</strong>.</p>
       <div className="plan-site">
         {sections.map((s) => {
           const liens = s.liens.filter((l) => l.externe || actif(l.href));
@@ -94,11 +94,18 @@ export default async function PlanDuSite() {
             <section key={s.titre}>
               <h2>{s.titre}</h2>
               <ul>
-                {liens.map((l) => (
-                  <li key={l.href}>
-                    <a href={l.href}>{l.libelle}</a>
-                  </li>
-                ))}
+                {liens.map((l) => {
+                  // Le mot-clé de la page en gras, le descriptif à sa suite.
+                  const [principal, ...reste] = l.libelle.split(" — ");
+                  return (
+                    <li key={l.href}>
+                      <a href={l.href}>
+                        <strong>{principal}</strong>
+                        {reste.length > 0 ? ` — ${reste.join(" — ")}` : ""}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           );
