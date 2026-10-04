@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-// Chrome commun de drive.dataparl.fr (tableur DataParl' Sheets et recherche) :
-// un en-tête et un pied propres au domaine, les liens pointant vers www.
+// Chrome commun des pages du tableur DataParl' Sheets (/sheets, /search sur
+// www.dataparl.fr) : en-tête et pied propres à ces pages.
 
 export function EnTeteDrive() {
   return (
