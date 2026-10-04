@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { sessionActuelle } from "@/lib/supabaseBrowser";
 
 // DataParl' Sheets — tableur maison, sans serveur : la grille vit dans le
 // navigateur (sauvegarde automatique en localStorage), les données de base
@@ -283,11 +283,11 @@ export default function Tableur({ id, provenance, entetes, donnees, lectureSeule
     a.click();
     URL.revokeObjectURL(a.href);
     // Journal du téléchargement (compte + adresse IP), côté serveur.
-    authBrowser().auth.getSession().then(({ data }) => {
-      if (!data.session) return;
+    sessionActuelle().then((s) => {
+      if (!s) return;
       fetch("/api/sheets/telechargement", {
         method: "POST",
-        headers: { Authorization: `Bearer ${data.session.access_token}`, "Content-Type": "application/json" },
+        headers: { Authorization: `Bearer ${s.access_token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ feuille: id, lignes: grille.length }),
       }).catch(() => {});
     });
