@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import ListeMouvements from "@/app/_components/ListeMouvements";
 import type { MouvementAffiche } from "@/lib/format";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { sessionActuelle } from "@/lib/supabaseBrowser";
 
 const NOMS: Record<string, string> = { assemblee: "Assemblée nationale", senat: "Sénat", europarl: "Parlement européen" };
 
@@ -13,7 +13,7 @@ export default function SuiteDuJour({ date, reste }: { date: string; reste: numb
   const [tous, setTous] = useState<MouvementAffiche[] | null>(null);
   const [erreur, setErreur] = useState(false);
 
-  useEffect(() => { authBrowser().auth.getSession().then(({ data }) => setSession(data.session)); }, []);
+  useEffect(() => { sessionActuelle().then(setSession); }, []);
   useEffect(() => {
     if (!session) return;
     fetch(`/api/mouvements?depuis=${date}&jusqua=${date}&limit=500`, { headers: { Authorization: `Bearer ${session.access_token}` } })
