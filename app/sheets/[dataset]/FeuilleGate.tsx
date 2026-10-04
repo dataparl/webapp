@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import Tableur from "@/app/_components/Tableur";
 import VideoDeblocage from "@/app/_components/VideoDeblocage";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { sessionActuelle } from "@/lib/supabaseBrowser";
 
 // Accès à une feuille du tableur DataParl' Sheets : connexion DataParl'
 // requise, puis déblocage par une courte vidéo publicitaire (l'équipe passe
@@ -25,7 +25,7 @@ export default function FeuilleGate({ id, titre }: { id: string; titre: string }
   const [etat, setEtat] = useState<"chargement" | "verrouillee" | "erreur">("chargement");
 
   useEffect(() => {
-    authBrowser().auth.getSession().then(({ data }) => setSession(data.session));
+    sessionActuelle().then(setSession);
   }, []);
 
   const charger = useCallback(async () => {
