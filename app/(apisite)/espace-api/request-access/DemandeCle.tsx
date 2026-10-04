@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { sessionActuelle } from "@/lib/supabaseBrowser";
 
 const CGU = "https://www.dataparl.fr/informations-legales/cgu-api";
 
@@ -14,7 +14,7 @@ export default function DemandeCle() {
   const [cle, setCle] = useState<string | null>(null);
   const [erreur, setErreur] = useState("");
 
-  useEffect(() => { authBrowser().auth.getSession().then(({ data }) => setSession(data.session)); }, []);
+  useEffect(() => { sessionActuelle().then(setSession); }, []);
   useEffect(() => {
     if (!session) return;
     fetch("/api/cles", { headers: { Authorization: `Bearer ${session.access_token}` } })
