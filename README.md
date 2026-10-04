@@ -13,7 +13,7 @@ Site public, alertes par email, connexion, compte, administration et API de Data
 | `mail.dataparl.fr` | versions en ligne des emails (`/lire/<jeton>`) ; le reste redirige vers `www` (enregistrement A vers Vercel) |
 | `raw.dataparl.fr` | fichiers bruts publics : `/schemas/*.json` (schémas de données référencés sur data.gouv.fr) ; le reste redirige vers `www` |
 | `media.dataparl.fr` | photos des élus et des groupes (`/an/*`, `/senat/*`, `/pe/*`, `/groupes/*`) et le tableur DataParl' Sheets (`/sheets/*`, `/search`, `/connexion`) ; tout autre chemin affiche un interstitiel de 15 secondes puis bascule vers la même adresse sur `www` |
-| `drive.dataparl.fr` | ancien domaine du tableur : redirection 308 vers `media` (même chemin) |
+| `drive.dataparl.fr` | ancien domaine du tableur : redirection 308 vers `media` (même chemin, `/sheets/*` inclus) |
 
 `/connexion` est servie telle quelle sur chaque hôte : le flux OAuth (PKCE) doit rester sur l'origine qui l'a lancé. La session, elle, est stockée dans des cookies du domaine `.dataparl.fr` (`lib/domaine.ts`) (`lib/cookieStorage.ts`, découpés en morceaux de 3 Ko) : une seule connexion vaut pour `www`, `api` et `admin`.
 
