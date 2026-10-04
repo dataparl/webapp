@@ -71,7 +71,17 @@ export default function MonCompte() {
       provider,
       options: { redirectTo: `${window.location.origin}/mon-compte` },
     });
-    if (error) setMessage({ ok: false, texte: "L'association de comptes n'est pas disponible pour le moment." });
+    if (error) {
+      const m = error.message ?? "";
+      setMessage({
+        ok: false,
+        texte: /already|exists|linked|conflict/i.test(m)
+          ? "Ce compte est déjà relié à un autre compte DataParl'. Supprime d'abord l'autre compte (ou écris-nous via le formulaire de contact) pour pouvoir l'associer ici."
+          : /provider|unsupported|not enabled|disabled/i.test(m)
+            ? "Ce moyen de connexion n'est pas encore activé sur DataParl' — l'équipe travaille dessus. En attendant, connecte-toi par e-mail, Google ou GitHub."
+            : `L'association n'a pas abouti : ${m}. Réessaie, ou écris-nous via le formulaire de contact.`,
+      });
+    }
   }
 
   async function exporter() {

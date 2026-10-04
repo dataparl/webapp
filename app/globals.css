@@ -579,11 +579,20 @@ ul.reseaux a .meta { margin-left: auto; }
 .tableur-barre .formule { flex: 1 1 280px; margin: 0; }
 .tableur-barre button { margin: 0; padding: 9px 14px; }
 .grille-feuille { outline: none; }
+.tableur-zone { max-width: 100%; }
+.tableur-zone:fullscreen { background: var(--bg); padding: 20px 28px; overflow-y: auto; }
+.tableur-zone:fullscreen .grille-feuille { overflow: visible; }
+.tableur-barre .recherche-grille { flex: 0 1 220px; margin: 0; padding: 9px 12px; }
+.tableur-pages { display: flex; align-items: center; gap: 16px; margin-top: 10px; }
+.tableur-pages button[disabled] { opacity: .4; cursor: default; }
 table.feuille-grille { border-collapse: collapse; font-size: .9rem; }
 table.feuille-grille th, table.feuille-grille td { border: 1px solid var(--line); padding: 0; min-width: 96px; max-width: 280px; }
 table.feuille-grille thead th, table.feuille-grille tbody th { background: color-mix(in srgb, var(--bleu) 7%, var(--card)); color: var(--muted); font-weight: 700; font-size: .78rem; text-align: center; padding: 6px 8px; min-width: 42px; white-space: nowrap; }
 table.feuille-grille thead th.col-active, table.feuille-grille tbody th.row-active { background: var(--jaune); color: #071A41; }
 table.feuille-grille td { background: var(--card); cursor: cell; height: 32px; }
+/* Lignes zébrées : jaune tamisé sur les lignes paires (numéro pair). */
+table.feuille-grille tbody tr:nth-child(even) td:not(.cell-active):not(.cell-trouvee) { background: color-mix(in srgb, var(--jaune) 14%, var(--card)); }
+table.feuille-grille td.cell-trouvee { background: var(--jaune); }
 table.feuille-grille td.cell-active { border: 2px solid var(--bleu); background: var(--bg); }
 table.feuille-grille td > span { display: block; padding: 5px 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 table.feuille-grille td > strong { display: block; padding: 5px 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }

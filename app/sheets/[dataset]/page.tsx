@@ -22,7 +22,6 @@ export default async function PageFeuille({ params }: Props) {
   if (!f || !(await feuillesPubliees()).includes(id)) notFound();
   return (
     <>
-      <p className="meta"><a href="/sheets">DataParl&apos; Sheets</a></p>
       <h1>{f.titre}</h1>
       <p className="lead">{f.description}</p>
       <FeuilleGate id={f.id} titre={f.titre} />

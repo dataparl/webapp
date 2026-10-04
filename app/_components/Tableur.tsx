@@ -1,14 +1,19 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { authBrowser } from "@/lib/supabaseBrowser";
 
 // DataParl' Sheets — tableur maison, sans serveur : la grille vit dans le
 // navigateur (sauvegarde automatique en localStorage), les données de base
 // viennent de l'API DataParl'. Formules inspirées des tableurs classiques :
 // =SOMME(A2:A10), =MOYENNE(B2:B19), =MIN, =MAX, =NB, références et
 // arithmétique (+ - * / ^, parenthèses). Logiciel libre, style MIT.
+// Affichage : lignes zébrées, 25 lignes par page, bouton plein écran et
+// recherche dans la grille (Ctrl+F). L'export CSV porte la source
+// (dataparl.fr) et chaque téléchargement est journalisé (compte + IP).
 
 const LETTRES = (c: number): string => { let s = ""; c++; while (c > 0) { const m = (c - 1) % 26; s = String.fromCharCode(65 + m) + s; c = Math.floor((c - 1) / 26); } return s; };
 const INDICE = (l: string): number => { let n = 0; for (const ch of l.toUpperCase()) n = n * 26 + (ch.charCodeAt(0) - 64); return n - 1; };
+const PAR_PAGE = 25;
 
 // ── Évaluateur de formules (recursive descent) ────────────────────────────
 type Tok = { t: "num" | "ref" | "fn" | "op"; v: string };
@@ -16,7 +21,7 @@ type Tok = { t: "num" | "ref" | "fn" | "op"; v: string };
 const BS = String.fromCharCode(92);
 const RC = String.fromCharCode(13, 10);
 const BOM = String.fromCharCode(0xfeff);
-const RX_TOK = "=|" + BS + "d+(?:" + BS + "." + BS + "d+)?|[A-Za-z_]+[A-Za-z0-9_]*|[" + BS + "+" + BS + "-" + BS + "*/^();:]|" + BS + "s+";
+const RX_TOK = "=" + BS + "|" + BS + "d+(?:" + BS + "." + BS + "d+)?|[A-Za-z_]+[A-Za-z0-9_]*|[" + BS + "+" + BS + "-" + BS + "*/^();:]|" + BS + "s+";
 const RX_ESPACES = "^" + BS + "s+$";
 const RX_NUM = "^" + BS + "d";
 const RX_LETTRE = "^[A-Za-z_]";
@@ -173,6 +178,11 @@ export default function Tableur({ id, provenance, entetes, donnees, lectureSeule
   const [sel, setSel] = useState<{ r: number; c: number }>({ r: 1, c: 0 });
   const [edition, setEdition] = useState("");
   const [charge, setCharge] = useState(false);
+  const [page, setPage] = useState(0);
+  const [recherche, setRecherche] = useState("");
+  const [plein, setPlein] = useState(false);
+  const zone = useRef<HTMLDivElement>(null);
+  const champRecherche = useRef<HTMLInputElement>(null);
 
   // Restaurer les modifications sauvegardées (une seule fois, hors lecture seule).
   useEffect(() => {
@@ -189,10 +199,40 @@ export default function Tableur({ id, provenance, entetes, donnees, lectureSeule
   // Grille calculée (une passe, mémo par évaluation).
   const calculee = useMemo(() => grille.map((ligne, r) => ligne.map((_, c) => evaluer(grille, r, c, new Set()))), [grille]);
 
+  const pages = Math.max(1, Math.ceil(grille.length / PAR_PAGE));
+  useEffect(() => { if (page > pages - 1) setPage(0); }, [pages, page]);
+
+  // Ctrl+F (et Cmd+F) : la recherche du navigateur cède la place à la
+  // recherche dans la grille, champ dédié dans la barre du tableur.
+  useEffect(() => {
+    const surTouche = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        champRecherche.current?.focus();
+        champRecherche.current?.select();
+      }
+    };
+    window.addEventListener("keydown", surTouche);
+    return () => window.removeEventListener("keydown", surTouche);
+  }, []);
+
+  // État du plein écran (bouton + Échap pour sortir).
+  useEffect(() => {
+    const maj = () => setPlein(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", maj);
+    return () => document.removeEventListener("fullscreenchange", maj);
+  }, []);
+
+  function pleinEcran() {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else zone.current?.requestFullscreen?.().catch(() => {});
+  }
+
   const choisir = useCallback((r: number, c: number) => {
     if (!lectureSeule) setGrille((g) => { const n = [...g]; n[sel.r] = [...n[sel.r]]; n[sel.r][sel.c] = edition; return n; });
     setSel({ r, c });
     setEdition(grille[r]?.[c] ?? "");
+    setPage(Math.floor(r / PAR_PAGE));
   }, [grille, sel, edition, lectureSeule]);
 
   const deplacer = useCallback((dr: number, dc: number) => {
@@ -209,15 +249,48 @@ export default function Tableur({ id, provenance, entetes, donnees, lectureSeule
 
   // En lecture seule, aucune saisie ne peut partir : les touches d'édition sont sans effet.
 
+  // Recherche dans la grille : cellules dont la valeur affichée contient le
+  // texte (sans casse ni accents). Entrée : résultat suivant, en boucle.
+  const DIACRITIQUES = new RegExp("[" + String.fromCharCode(0x300) + "-" + String.fromCharCode(0x36f) + "]", "g");
+  const norm = (s: string) => s.normalize("NFD").replace(DIACRITIQUES, "").toLowerCase();
+  const resultats = useMemo(() => {
+    const q = norm(recherche.trim());
+    if (q.length < 2) return [] as { r: number; c: number }[];
+    const out: { r: number; c: number }[] = [];
+    calculee.forEach((ligne, r) => ligne.forEach((v, c) => {
+      if (norm(String(v)).includes(q)) out.push({ r, c });
+    }));
+    return out;
+  }, [recherche, calculee]);
+
+  const rechercheRef = useRef(-1);
+  function resultatSuivant() {
+    if (resultats.length === 0) return;
+    rechercheRef.current = resultats.findIndex((m) => m.r > sel.r || (m.r === sel.r && m.c > sel.c));
+    if (rechercheRef.current === -1) rechercheRef.current = 0;
+    const m = resultats[rechercheRef.current];
+    choisir(m.r, m.c);
+  }
+
   function exporterCsv() {
     const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const nombres = (v: number | string) => typeof v === "number" ? String(v).replace(".", ",") : esc(v);
     const csv = [grille.map((l, r) => l.map((_, c) => (r === 0 ? esc(String(calculee[r][c])) : nombres(calculee[r][c]))).join(";")).join(RC)].join(RC);
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([BOM + csv], { type: "text/csv;charset=utf-8" }));
-    a.download = `${id}.csv`;
+    // La source voyage avec le fichier : nom « dataparl.fr-<feuille>.csv ».
+    a.download = `dataparl.fr-${id}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
+    // Journal du téléchargement (compte + adresse IP), côté serveur.
+    authBrowser().auth.getSession().then(({ data }) => {
+      if (!data.session) return;
+      fetch("/api/sheets/telechargement", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${data.session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ feuille: id, lignes: grille.length }),
+      }).catch(() => {});
+    });
   }
 
   const aff = (v: number | string) => {
@@ -225,8 +298,11 @@ export default function Tableur({ id, provenance, entetes, donnees, lectureSeule
     return v;
   };
 
+  const premiere = page * PAR_PAGE;
+  const lignesVisibles = grille.slice(premiere, premiere + PAR_PAGE);
+
   return (
-    <>
+    <div className="tableur-zone" ref={zone}>
       <p className="meta">Données de base : {provenance}. Licence ODbL.</p>
 
       <div className="tableur-barre">
@@ -235,8 +311,14 @@ export default function Tableur({ id, provenance, entetes, donnees, lectureSeule
           placeholder="Valeur ou formule, ex. =SOMME(A2:A19)"
           onChange={(e) => { setEdition(e.target.value); poser(e.target.value); }}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); deplacer(1, 0); } }} />
+        <input ref={champRecherche} className="recherche-grille" type="search" value={recherche}
+          aria-label="Rechercher dans le tableau (Ctrl+F)" placeholder="Rechercher (Ctrl+F)…"
+          onChange={(e) => { setRecherche(e.target.value); rechercheRef.current = -1; }}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); resultatSuivant(); } }} />
+        {recherche.trim().length >= 2 && <span className="meta">{resultats.length} résultat(s)</span>}
         {!lectureSeule && <button className="secondaire" onClick={reinitialiser}>Réinitialiser</button>}
         <button className="secondaire" onClick={exporterCsv}>Exporter (CSV)</button>
+        <button className="secondaire" onClick={pleinEcran} aria-pressed={plein}>{plein ? "Quitter le plein écran" : "Plein écran"}</button>
       </div>
 
       <div className="defile grille-feuille" tabIndex={0}
@@ -254,38 +336,49 @@ export default function Tableur({ id, provenance, entetes, donnees, lectureSeule
             </tr>
           </thead>
           <tbody>
-            {grille.map((ligne, r) => (
-              <tr key={r}>
-                <th className={r === sel.r ? "row-active" : ""}>{r + 1}</th>
-                {ligne.map((_, c) => {
-                  const actif = r === sel.r && c === sel.c;
-                  const v = calculee[r][c];
-                  const saisie = actif && !lectureSeule;
-                  return (
-                    <td key={c} className={actif ? "cell-active" : ""} onClick={() => choisir(r, c)}>
-                      {saisie ? (
-                        <input type="text" autoFocus value={edition}
-                          onChange={(e) => { setEdition(e.target.value); poser(e.target.value); }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") { e.preventDefault(); (e.target as HTMLInputElement).blur(); deplacer(1, 0); }
-                            if (e.key === "Tab") { e.preventDefault(); (e.target as HTMLInputElement).blur(); deplacer(0, e.shiftKey ? -1 : 1); }
-                          }} />
-                      ) : (
-                        r === 0 ? <strong>{String(v)}</strong> : <span>{aff(v)}</span>
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+            {lignesVisibles.map((ligne, i) => {
+              const r = premiere + i;
+              return (
+                <tr key={r}>
+                  <th className={r === sel.r ? "row-active" : ""}>{r + 1}</th>
+                  {ligne.map((_, c) => {
+                    const actif = r === sel.r && c === sel.c;
+                    const v = calculee[r][c];
+                    const saisie = actif && !lectureSeule;
+                    const trouve = recherche.trim().length >= 2 && resultats.some((m) => m.r === r && m.c === c);
+                    return (
+                      <td key={c} className={actif ? "cell-active" : trouve ? "cell-trouvee" : ""} onClick={() => choisir(r, c)}>
+                        {saisie ? (
+                          <input type="text" autoFocus value={edition}
+                            onChange={(e) => { setEdition(e.target.value); poser(e.target.value); }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") { e.preventDefault(); (e.target as HTMLInputElement).blur(); deplacer(1, 0); }
+                              if (e.key === "Tab") { e.preventDefault(); (e.target as HTMLInputElement).blur(); deplacer(0, e.shiftKey ? -1 : 1); }
+                            }} />
+                        ) : (
+                          r === 0 ? <strong>{String(v)}</strong> : <span>{aff(v)}</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
+
+      <div className="tableur-pages" aria-label="Pagination de la feuille">
+        <button className="lien" disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>← Précédente</button>
+        <span className="meta">Page {page + 1} / {pages} · {grille.length} lignes</span>
+        <button className="lien" disabled={page >= pages - 1} onClick={() => setPage((p) => Math.min(pages - 1, p + 1))}>Suivante →</button>
+      </div>
+
       <p className="meta">
         {lectureSeule
-          ? "Feuille en lecture seule : seule l'équipe DataParl' peut modifier une grille. Les données peuvent être exportées en CSV."
+          ? "Feuille en lecture seule : seule l'équipe DataParl' peut modifier une grille. Les données peuvent être exportées en CSV (source dataparl.fr)."
           : "Formules : =SOMME(A2:A19), =MOYENNE(B2:B19), =MIN, =MAX, =NB, références (=B2*2), opérations + - * / ^. Ligne 1 : en-têtes. Les modifications sont conservées dans le navigateur de l'équipe."}
       </p>
-    </>
+    </div>
   );
 }
