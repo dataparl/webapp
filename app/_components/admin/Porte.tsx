@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { startAuthentication } from "@simplewebauthn/browser";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { authBrowser, sessionActuelle } from "@/lib/supabaseBrowser";
 
 // Porte d'entrée de l'admin et de la webmail. Connexion (compte d'équipe par
 // email + mot de passe, ou GitHub pour les admins), changement du mot de passe
@@ -26,8 +26,7 @@ type Etat =
   | ({ e: "mdp" } & Moi) | ({ e: "enrolement" } & Moi) | ({ e: "code"; passkey: boolean; totp: boolean } & Moi) | ({ e: "ok" } & Moi);
 
 async function jeton(): Promise<string | null> {
-  const { data } = await authBrowser().auth.getSession();
-  return data.session?.access_token ?? null;
+  return (await sessionActuelle())?.access_token ?? null;
 }
 
 export default function Porte({ titre, children }: { titre: string; children: React.ReactNode }) {
