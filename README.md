@@ -1,6 +1,6 @@
 # DataParl' : webapp
 
-Site public, alertes par email, connexion, compte, administration et API de DataParl' ([dataparl.fr](https://www.dataparl.fr)). Les anciens domaines (cavaparlement.eu, dataparl.com) redirigent en 308 vers la même adresse sur dataparl.fr ; seules `/api/*` et l'API `/v1` d'api.cavaparlement.eu y répondent encore directement, le temps de la transition. Un seul déploiement Next.js 16 (polices auto-hébergées via next/font) sert tous les sous-domaines ; le routage est dans `proxy.ts` (nouveau nom de `middleware.ts` depuis Next 16).
+Site public, alertes par email, connexion, compte, administration et API de DataParl' ([dataparl.fr](https://www.dataparl.fr)). Les anciens domaines (cavaparlement.eu, dataparl.com) redirigent en 308 vers la même adresse sur dataparl.fr ; seules `/api/*` et l'API `/v1` d'api.cavaparlement.eu y répondent encore directement, le temps de la transition. Un seul déploiement Next.js 16 (polices auto-hébergées via next/font, repli métrique — zéro CLS) sert tous les sous-domaines ; le routage est dans `proxy.ts` (nouveau nom de `middleware.ts` depuis Next 16).
 
 | Hôte | Rôle |
 |---|---|
