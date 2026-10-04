@@ -1,1 +1,36 @@
-{"path":"/home/user/work/w/lib/permissions.ts","content":"// Matrice de permissions de l'équipe : le rôle donne les accès par défaut,\n// une ligne de staff_permissions (autorisé / refusé) les affine module par\n// module. Les administrateurs ont toujours tout. Sans dépendance (testé).\nexport type Role = \"admin\" | \"editeur\" | \"utilisateur\";\n\nexport const MODULES = [\n  { cle: \"boites_communes\", libelle: \"Emails génériques\", detail: \"hello@, contact@, presse@, rgpd@… dans la messagerie\", defaut: [\"editeur\"] },\n  { cle: \"formulaires\", libelle: \"Formulaires\", detail: \"Messages de contact et oppositions\", defaut: [\"editeur\"] },\n  { cle: \"elus\", libelle: \"Élus\", detail: \"Biographies, mandats et fonctions des élus (édition manuelle)\", defaut: [\"editeur\"] },\n  { cle: \"jorf\", libelle: \"JORF\", detail: \"Balayage du Journal officiel : gouvernements et cabinets ministériels\", defaut: [\"editeur\"] },\n  { cle: \"comptes\", libelle: \"Comptes et abonnés\", detail: \"Liste des utilisateurs et des abonnés aux alertes\", defaut: [\"editeur\"] },\n  { cle: \"contenu_sitemap\", libelle: \"Plan du site\", detail: \"Activer, désactiver ou passer une page en brouillon\", defaut: [], reserve: true },\n  { cle: \"contenu_sheets\", libelle: \"DataParl' Sheets\", detail: \"Publier ou masquer une feuille du tableur media.dataparl.fr/sheets\", defaut: [], reserve: true },\n  { cle: \"contenu_liens\", libelle: \"Liens tracés\", detail: \"Créer des liens courts et lire leurs statistiques\", defaut: [\"editeur\"] },\n  { cle: \"communication\", libelle: \"Communication\", detail: \"Communiqués, carnet presse, mailing\", defaut: [\"editeur\"] },\n  { cle: \"cles_api\", libelle: \"Clés API\", detail: \"Demandes et clés d'accès à l'API\", defaut: [], reserve: true },\n  { cle: \"journal\", libelle: \"Journal\", detail: \"Journal d'activité de l'équipe\", defaut: [], reserve: true },\n] as const satisfies readonly { cle: string; libelle: string; detail: string; defaut: readonly Role[]; reserve?: boolean }[];\n\n// Modules réservés aux administrateurs (protégés par la double authentification) : la matrice ne peut pas les ouvrir.\nexport const reserve = (module: string) => MODULES.some((m) => m.cle === module && \"reserve\" in m && m.reserve);\n\nexport type Module = (typeof MODULES)[number][\"cle\"];\nexport const CLES_MODULES = MODULES.map((m) => m.cle) as Module[];\n\nexport function defaut(role: Role, module: Module): boolean {\n  if (role === \"admin\") return true;\n  return (MODULES.find((m) => m.cle === module)?.defaut as readonly Role[] | undefined)?.includes(role) ?? false;\n}\n\n// Modules ouverts à un compte, compte tenu de ses réglages particuliers.\nexport function modulesDe(role: Role, reglages: { module: string; autorise: boolean }[]): Module[] {\n  if (role === \"admin\") return [...CLES_MODULES];\n  const r = new Map(reglages.map((x) => [x.module, x.autorise]));\n  return CLES_MODULES.filter((m) => !reserve(m) && (r.get(m) ?? defaut(role, m)));\n}\n","file_size_bytes":2873,"returned_bytes":2873,"offset":0,"lines_read":36,"was_truncated":false}
+// Matrice de permissions de l'équipe : le rôle donne les accès par défaut,
+// une ligne de staff_permissions (autorisé / refusé) les affine module par
+// module. Les administrateurs ont toujours tout. Sans dépendance (testé).
+export type Role = "admin" | "editeur" | "utilisateur";
+
+export const MODULES = [
+  { cle: "boites_communes", libelle: "Emails génériques", detail: "hello@, contact@, presse@, rgpd@… dans la messagerie", defaut: ["editeur"] },
+  { cle: "formulaires", libelle: "Formulaires", detail: "Messages de contact et oppositions", defaut: ["editeur"] },
+  { cle: "elus", libelle: "Élus", detail: "Biographies, mandats et fonctions des élus (édition manuelle)", defaut: ["editeur"] },
+  { cle: "jorf", libelle: "JORF", detail: "Balayage du Journal officiel : gouvernements et cabinets ministériels", defaut: ["editeur"] },
+  { cle: "comptes", libelle: "Comptes et abonnés", detail: "Liste des utilisateurs et des abonnés aux alertes", defaut: ["editeur"] },
+  { cle: "contenu_sitemap", libelle: "Plan du site", detail: "Activer, désactiver ou passer une page en brouillon", defaut: [], reserve: true },
+  { cle: "contenu_sheets", libelle: "DataParl' Sheets", detail: "Publier ou masquer une feuille du tableur media.dataparl.fr/sheets", defaut: [], reserve: true },
+  { cle: "contenu_liens", libelle: "Liens tracés", detail: "Créer des liens courts et lire leurs statistiques", defaut: ["editeur"] },
+  { cle: "communication", libelle: "Communication", detail: "Communiqués, carnet presse, mailing", defaut: ["editeur"] },
+  { cle: "cles_api", libelle: "Clés API", detail: "Demandes et clés d'accès à l'API", defaut: [], reserve: true },
+  { cle: "journal", libelle: "Journal", detail: "Journal d'activité de l'équipe", defaut: [], reserve: true },
+] as const satisfies readonly { cle: string; libelle: string; detail: string; defaut: readonly Role[]; reserve?: boolean }[];
+
+// Modules réservés aux administrateurs (protégés par la double authentification) : la matrice ne peut pas les ouvrir.
+export const reserve = (module: string) => MODULES.some((m) => m.cle === module && "reserve" in m && m.reserve);
+
+export type Module = (typeof MODULES)[number]["cle"];
+export const CLES_MODULES = MODULES.map((m) => m.cle) as Module[];
+
+export function defaut(role: Role, module: Module): boolean {
+  if (role === "admin") return true;
+  return (MODULES.find((m) => m.cle === module)?.defaut as readonly Role[] | undefined)?.includes(role) ?? false;
+}
+
+// Modules ouverts à un compte, compte tenu de ses réglages particuliers.
+export function modulesDe(role: Role, reglages: { module: string; autorise: boolean }[]): Module[] {
+  if (role === "admin") return [...CLES_MODULES];
+  const r = new Map(reglages.map((x) => [x.module, x.autorise]));
+  return CLES_MODULES.filter((m) => !reserve(m) && (r.get(m) ?? defaut(role, m)));
+}

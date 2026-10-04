@@ -1,1 +1,51 @@
-{"path":"/home/user/work/w/app/(admin)/admin/content/sheets/page.tsx","content":"\"use client\";\nimport { useState } from \"react\";\nimport { useAdmin } from \"@/app/_components/admin/Porte\";\nimport { dateHeure, useRessource } from \"@/app/_components/admin/utils\";\n\ntype Feuille = { id: string; titre: string; description: string; publie: boolean; maj_le: string | null };\n\nexport default function FeuillesSheets() {\n  const { api } = useAdmin();\n  const { data, err, recharger } = useRessource<{ feuilles: Feuille[] }>(\"/api/admin/content/sheets\");\n  const [message, setMessage] = useState<string | null>(null);\n  if (err) return <p className=\"erreur\">{err}</p>;\n  if (!data) return <p className=\"meta\">Chargement…</p>;\n\n  async function changer(f: Feuille, publie: boolean) {\n    const texte = publie\n      ? `Publier « ${f.titre} » en libre accès sur media.dataparl.fr/sheets ?`\n      : `Masquer « ${f.titre} » ? La feuille répondra 404 (l'accès direct redirige vers la liste des feuilles).`;\n    if (!confirm(texte)) return;\n    try { await api(\"/api/admin/content/sheets\", { method: \"PATCH\", body: { id: f.id, publie } }); setMessage(null); await recharger(); }\n    catch (e) { setMessage((e as Error).message); }\n  }\n\n  return (\n    <>\n      <h1>DataParl&apos; Sheets</h1>\n      <p className=\"meta\">\n        Feuilles du tableur (media.dataparl.fr/sheets). Une feuille publiée est en libre accès (connexion + vidéo\n        publicitaire pour la consulter) ; une feuille masquée répond 404. Le changement est effectif en une\n        minute environ.\n      </p>\n      {message && <p className=\"erreur\">{message}</p>}\n      <div className=\"defile\">\n        <table className=\"stats\">\n          <thead><tr><th>Feuille</th><th>Adresse</th><th>État</th><th>Modifiée</th><th></th></tr></thead>\n          <tbody>{data.feuilles.map((f) => (\n            <tr key={f.id}>\n              <td><strong>{f.titre}</strong><span className=\"meta\"> · {f.description}</span></td>\n              <td><a className=\"mono\" href={`https://media.dataparl.fr/sheets/${f.id}`} target=\"_blank\" rel=\"noreferrer\">/sheets/{f.id}</a></td>\n              <td>{f.publie ? <span className=\"ok\">Publiée</span> : <span className=\"meta\">Masquée</span>}</td>\n              <td className=\"meta\">{dateHeure(f.maj_le)}</td>\n              <td>\n                <button onClick={() => changer(f, !f.publie)}>{f.publie ? \"Masquer\" : \"Publier\"}</button>\n              </td>\n            </tr>\n          ))}</tbody>\n        </table>\n      </div>\n    </>\n  );\n}\n","file_size_bytes":2442,"returned_bytes":2442,"offset":0,"lines_read":51,"was_truncated":false}
+"use client";
+import { useState } from "react";
+import { useAdmin } from "@/app/_components/admin/Porte";
+import { dateHeure, useRessource } from "@/app/_components/admin/utils";
+
+type Feuille = { id: string; titre: string; description: string; publie: boolean; maj_le: string | null };
+
+export default function FeuillesSheets() {
+  const { api } = useAdmin();
+  const { data, err, recharger } = useRessource<{ feuilles: Feuille[] }>("/api/admin/content/sheets");
+  const [message, setMessage] = useState<string | null>(null);
+  if (err) return <p className="erreur">{err}</p>;
+  if (!data) return <p className="meta">Chargement…</p>;
+
+  async function changer(f: Feuille, publie: boolean) {
+    const texte = publie
+      ? `Publier « ${f.titre} » en libre accès sur media.dataparl.fr/sheets ?`
+      : `Masquer « ${f.titre} » ? La feuille répondra 404 (l'accès direct redirige vers la liste des feuilles).`;
+    if (!confirm(texte)) return;
+    try { await api("/api/admin/content/sheets", { method: "PATCH", body: { id: f.id, publie } }); setMessage(null); await recharger(); }
+    catch (e) { setMessage((e as Error).message); }
+  }
+
+  return (
+    <>
+      <h1>DataParl&apos; Sheets</h1>
+      <p className="meta">
+        Feuilles du tableur (media.dataparl.fr/sheets). Une feuille publiée est en libre accès (connexion + vidéo
+        publicitaire pour la consulter) ; une feuille masquée répond 404. Le changement est effectif en une
+        minute environ.
+      </p>
+      {message && <p className="erreur">{message}</p>}
+      <div className="defile">
+        <table className="stats">
+          <thead><tr><th>Feuille</th><th>Adresse</th><th>État</th><th>Modifiée</th><th></th></tr></thead>
+          <tbody>{data.feuilles.map((f) => (
+            <tr key={f.id}>
+              <td><strong>{f.titre}</strong><span className="meta"> · {f.description}</span></td>
+              <td><a className="mono" href={`https://media.dataparl.fr/sheets/${f.id}`} target="_blank" rel="noreferrer">/sheets/{f.id}</a></td>
+              <td>{f.publie ? <span className="ok">Publiée</span> : <span className="meta">Masquée</span>}</td>
+              <td className="meta">{dateHeure(f.maj_le)}</td>
+              <td>
+                <button onClick={() => changer(f, !f.publie)}>{f.publie ? "Masquer" : "Publier"}</button>
+              </td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </>
+  );
+}

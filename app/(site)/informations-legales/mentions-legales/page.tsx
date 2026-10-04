@@ -1,1 +1,92 @@
-{"path":"/home/user/work/w/app/(site)/informations-legales/mentions-legales/page.tsx","content":"import type { Metadata } from \"next\";\nimport { CONTACT_URL, MISE_A_JOUR } from \"../maj\";\n\nexport const metadata: Metadata = { title: \"Mentions légales\" };\n\nexport default function MentionsLegales() {\n  return (\n    <>\n      <h1>Mentions <span className=\"surligne\">légales</span></h1>\n      <p className=\"meta\">Dernière mise à jour : {MISE_A_JOUR}</p>\n\n      <h2>Éditeur</h2>\n      <p>\n        DataParl&apos; est édité par une personne physique, à titre personnel et non professionnel. Conformément à\n        l&apos;article 6, III, 2 de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l&apos;économie numérique\n        (LCEN), l&apos;éditeur a choisi de ne pas rendre publique son identité ; celle-ci a été communiquée à\n        l&apos;hébergeur, qui peut la transmettre sur réquisition judiciaire.\n      </p>\n      <p>Directeur de la publication : l&apos;éditeur.</p>\n      <p>Contact : <a href={CONTACT_URL}>formulaire de contact</a>.</p>\n\n      <h2>Hébergement</h2>\n      <p>\n        Site : Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis (vercel.com).\n      </p>\n      <p>\n        Bases de données et comptes : Supabase Inc. (supabase.com), serveurs situés dans l&apos;Union européenne\n        (Irlande).\n      </p>\n\n      <h2>Nom de domaine</h2>\n      <p>\n        Le site est accessible à l&apos;adresse dataparl.fr, enregistrée auprès d&apos;IONOS SE, Elgendorfer Straße 57, 56410 Montabaur, Allemagne.\n      </p>\n      <p>\n        Plusieurs sous-domaines organisent le service : <strong>www.dataparl.fr</strong> (le site public),\n        <strong> media.dataparl.fr/sheets</strong> (DataParl&apos; Sheets, le tableur et la recherche dans les bases de\n        données), <strong>api.dataparl.fr</strong> (l&apos;API publique et sa documentation),\n        <strong> admin.dataparl.fr</strong> (l&apos;espace équipe, réservé aux personnes habilitées) et{\" \"}\n        <strong>webmail.dataparl.fr</strong> (la messagerie interne de l&apos;équipe). S&apos;y ajoutent des\n        sous-domaines techniques : <strong>mail.dataparl.fr</strong> (versions en ligne des emails),\n        <strong> link.dataparl.fr</strong> (liens courts tracés) et <strong>media.dataparl.fr</strong> (les\n        photos des élus, voir ci-dessous). Tous sont hébergés dans les conditions décrites ci-dessus.\n      </p>\n\n      <h2>Propriété intellectuelle</h2>\n      <p>\n        Les textes, la charte graphique, le logotype et les visualisations de DataParl&apos; sont protégés par le droit\n        de la propriété intellectuelle. Leur reproduction est soumise à autorisation préalable, sauf courte citation\n        mentionnant la source.\n      </p>\n      <p>\n        Les données, elles, sont ouvertes : leurs conditions de réutilisation sont décrites sur la page{\" \"}\n        <a href=\"/informations-legales/licences\">Licences et réutilisation</a>.\n      </p>\n\n      <h2 id=\"photos\">Photos des élus</h2>\n      <p>\n        Les portraits des parlementaires sont les photos officielles publiées par les assemblées : © Assemblée nationale pour\n        les députés, © Sénat pour les sénateurs, © Union européenne (source : Parlement européen) pour les députés européens.\n      </p>\n      <p>\n        Ils illustrent les fiches à titre d&apos;information et ne sont ni modifiés (hors redimensionnement) ni utilisés à des\n        fins publicitaires.\n      </p>\n      <p>\n        Pour faciliter l&apos;accès à ces portraits de manière centralisée, les photos sont regroupées et servies depuis le\n        sous-domaine dédié <span className=\"mono\">media.dataparl.fr</span>.\n      </p>\n      <p>\n        Ces images ne sont pas la propriété de DataParl&apos; et restent la propriété exclusive des institutions émettrices.\n        Le segment <span className=\"mono\">_crédit_</span> du nom de fichier indique l&apos;institution détentrice de chaque\n        photo : <span className=\"mono\">an</span> (Assemblée nationale), <span className=\"mono\">senat</span> (Sénat),{\" \"}\n        <span className=\"mono\">pe</span> (Parlement européen).\n      </p>\n\n      <h2>Sources et indépendance</h2>\n      <p>\n        Les informations publiées proviennent des publications officielles de l&apos;Assemblée nationale, du Sénat et\n        du Parlement européen, et de leurs archives. DataParl&apos; n&apos;est affilié à\n        aucune de ces institutions, ni à aucun parti, groupe politique ou représentant d&apos;intérêts.\n      </p>\n\n      <h2>Signaler une erreur ou un contenu</h2>\n      <p>\n        Une information inexacte, un contenu illicite ou une demande relative à des données personnelles : l'utilisateur peut passer par le{\" \"}\n        <a href={CONTACT_URL}>formulaire de contact</a>. Voir aussi la page{\" \"}\n        <a href=\"/informations-legales/confidentialite\">Données personnelles</a>.\n      </p>\n    </>\n  );\n}\n","file_size_bytes":4900,"returned_bytes":4900,"offset":0,"lines_read":92,"was_truncated":false}
+import type { Metadata } from "next";
+import { CONTACT_URL, MISE_A_JOUR } from "../maj";
+
+export const metadata: Metadata = { title: "Mentions légales" };
+
+export default function MentionsLegales() {
+  return (
+    <>
+      <h1>Mentions <span className="surligne">légales</span></h1>
+      <p className="meta">Dernière mise à jour : {MISE_A_JOUR}</p>
+
+      <h2>Éditeur</h2>
+      <p>
+        DataParl&apos; est édité par une personne physique, à titre personnel et non professionnel. Conformément à
+        l&apos;article 6, III, 2 de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l&apos;économie numérique
+        (LCEN), l&apos;éditeur a choisi de ne pas rendre publique son identité ; celle-ci a été communiquée à
+        l&apos;hébergeur, qui peut la transmettre sur réquisition judiciaire.
+      </p>
+      <p>Directeur de la publication : l&apos;éditeur.</p>
+      <p>Contact : <a href={CONTACT_URL}>formulaire de contact</a>.</p>
+
+      <h2>Hébergement</h2>
+      <p>
+        Site : Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis (vercel.com).
+      </p>
+      <p>
+        Bases de données et comptes : Supabase Inc. (supabase.com), serveurs situés dans l&apos;Union européenne
+        (Irlande).
+      </p>
+
+      <h2>Nom de domaine</h2>
+      <p>
+        Le site est accessible à l&apos;adresse dataparl.fr, enregistrée auprès d&apos;IONOS SE, Elgendorfer Straße 57, 56410 Montabaur, Allemagne.
+      </p>
+      <p>
+        Plusieurs sous-domaines organisent le service : <strong>www.dataparl.fr</strong> (le site public),
+        <strong> media.dataparl.fr/sheets</strong> (DataParl&apos; Sheets, le tableur et la recherche dans les bases de
+        données), <strong>api.dataparl.fr</strong> (l&apos;API publique et sa documentation),
+        <strong> admin.dataparl.fr</strong> (l&apos;espace équipe, réservé aux personnes habilitées) et{" "}
+        <strong>webmail.dataparl.fr</strong> (la messagerie interne de l&apos;équipe). S&apos;y ajoutent des
+        sous-domaines techniques : <strong>mail.dataparl.fr</strong> (versions en ligne des emails),
+        <strong> link.dataparl.fr</strong> (liens courts tracés) et <strong>media.dataparl.fr</strong> (les
+        photos des élus, voir ci-dessous). Tous sont hébergés dans les conditions décrites ci-dessus.
+      </p>
+
+      <h2>Propriété intellectuelle</h2>
+      <p>
+        Les textes, la charte graphique, le logotype et les visualisations de DataParl&apos; sont protégés par le droit
+        de la propriété intellectuelle. Leur reproduction est soumise à autorisation préalable, sauf courte citation
+        mentionnant la source.
+      </p>
+      <p>
+        Les données, elles, sont ouvertes : leurs conditions de réutilisation sont décrites sur la page{" "}
+        <a href="/informations-legales/licences">Licences et réutilisation</a>.
+      </p>
+
+      <h2 id="photos">Photos des élus</h2>
+      <p>
+        Les portraits des parlementaires sont les photos officielles publiées par les assemblées : © Assemblée nationale pour
+        les députés, © Sénat pour les sénateurs, © Union européenne (source : Parlement européen) pour les députés européens.
+      </p>
+      <p>
+        Ils illustrent les fiches à titre d&apos;information et ne sont ni modifiés (hors redimensionnement) ni utilisés à des
+        fins publicitaires.
+      </p>
+      <p>
+        Pour faciliter l&apos;accès à ces portraits de manière centralisée, les photos sont regroupées et servies depuis le
+        sous-domaine dédié <span className="mono">media.dataparl.fr</span>.
+      </p>
+      <p>
+        Ces images ne sont pas la propriété de DataParl&apos; et restent la propriété exclusive des institutions émettrices.
+        Le segment <span className="mono">_crédit_</span> du nom de fichier indique l&apos;institution détentrice de chaque
+        photo : <span className="mono">an</span> (Assemblée nationale), <span className="mono">senat</span> (Sénat),{" "}
+        <span className="mono">pe</span> (Parlement européen).
+      </p>
+
+      <h2>Sources et indépendance</h2>
+      <p>
+        Les informations publiées proviennent des publications officielles de l&apos;Assemblée nationale, du Sénat et
+        du Parlement européen, et de leurs archives. DataParl&apos; n&apos;est affilié à
+        aucune de ces institutions, ni à aucun parti, groupe politique ou représentant d&apos;intérêts.
+      </p>
+
+      <h2>Signaler une erreur ou un contenu</h2>
+      <p>
+        Une information inexacte, un contenu illicite ou une demande relative à des données personnelles : l'utilisateur peut passer par le{" "}
+        <a href={CONTACT_URL}>formulaire de contact</a>. Voir aussi la page{" "}
+        <a href="/informations-legales/confidentialite">Données personnelles</a>.
+      </p>
+    </>
+  );
+}

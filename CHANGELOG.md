@@ -1,1 +1,35 @@
-{"path":"/home/user/work/w/CHANGELOG.md","content":"# Changelog\n\nTous les changements notables de ce projet sont documentés ici. Le format\nsuit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et la\nversionnement [SemVer](https://semver.org/lang/fr/).\n\n## [Non publié]\n\n### Ajouté\n\n- Schémas Table Schema des jeux de données data.gouv.fr (membres des\n  gouvernements, turnover annuel, mixité annuelle, parlementaires) : dossier\n  `public/schemas/`, servis sur `raw.dataparl.fr/schemas/…`.\n- Feuille « Parlementaires (2017 → aujourd'hui) » dans DataParl' Sheets.\n- Fichiers de gouvernance du dépôt : `LICENSE` (MIT), `SECURITY.md`,\n  `CHANGELOG.md`.\n\n### Modifié\n\n- Le tableur DataParl' Sheets vit désormais sur `media.dataparl.fr/sheets`\n  (et `/search`) ; `www.dataparl.fr/sheets` et l'ancien domaine\n  `drive.dataparl.fr` redirigent en 308 vers `media`.\n- Interstitiel sur `media.dataparl.fr` : tout chemin autre que les photos\n  et le tableur affiche un message pendant 15 secondes avant la bascule\n  automatique vers la même adresse sur `www.dataparl.fr`.\n- En-tête www : logo à gauche, recherche au centre, menu déroulant à droite\n  sur toutes les tailles d'écran.\n- Session : rafraîchissement explicite du jeton avant chaque action —\n  fin des « non connecté » après une inactivité (onglet en arrière-plan).\n- Cron Vercel `/api/cron/jorf` retiré (DILA injoignable depuis les IP Vercel).\n\n## 2026 — précédents\n\nLe projet a démarré sans journal de versions : l'historique git fait foi\n(site, alertes, compte, administration, webmail, API v1, DataParl' Sheets).\n","file_size_bytes":1559,"returned_bytes":1559,"offset":0,"lines_read":35,"was_truncated":false}
+# Changelog
+
+Tous les changements notables de ce projet sont documentés ici. Le format
+suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et la
+versionnement [SemVer](https://semver.org/lang/fr/).
+
+## [Non publié]
+
+### Ajouté
+
+- Schémas Table Schema des jeux de données data.gouv.fr (membres des
+  gouvernements, turnover annuel, mixité annuelle, parlementaires) : dossier
+  `public/schemas/`, servis sur `raw.dataparl.fr/schemas/…`.
+- Feuille « Parlementaires (2017 → aujourd'hui) » dans DataParl' Sheets.
+- Fichiers de gouvernance du dépôt : `LICENSE` (MIT), `SECURITY.md`,
+  `CHANGELOG.md`.
+
+### Modifié
+
+- Le tableur DataParl' Sheets vit désormais sur `media.dataparl.fr/sheets`
+  (et `/search`) ; `www.dataparl.fr/sheets` et l'ancien domaine
+  `drive.dataparl.fr` redirigent en 308 vers `media`.
+- Interstitiel sur `media.dataparl.fr` : tout chemin autre que les photos
+  et le tableur affiche un message pendant 15 secondes avant la bascule
+  automatique vers la même adresse sur `www.dataparl.fr`.
+- En-tête www : logo à gauche, recherche au centre, menu déroulant à droite
+  sur toutes les tailles d'écran.
+- Session : rafraîchissement explicite du jeton avant chaque action —
+  fin des « non connecté » après une inactivité (onglet en arrière-plan).
+- Cron Vercel `/api/cron/jorf` retiré (DILA injoignable depuis les IP Vercel).
+
+## 2026 — précédents
+
+Le projet a démarré sans journal de versions : l'historique git fait foi
+(site, alertes, compte, administration, webmail, API v1, DataParl' Sheets).

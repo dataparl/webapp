@@ -1,1 +1,39 @@
-{"path":"/home/user/work/w/app/api/admin/content/sheets/route.ts","content":"import { z } from \"zod\";\nimport { audit } from \"@/lib/adminAuth\";\nimport { avecAdmin, corps, erreur } from \"@/lib/adminRoute\";\nimport { oublierCacheFeuilles } from \"@/lib/sheetsPublication\";\nimport { FEUILLES } from \"@/lib/sheets\";\nimport { authAdmin } from \"@/lib/supabaseAdmin\";\n\nexport const dynamic = \"force-dynamic\";\n\n// DataParl' Sheets (media.dataparl.fr/sheets) : quelles feuilles sont publiées en\n// libre accès. Une feuille absente de la table (ou publie=false) répond 404.\nexport async function GET(req: Request) {\n  return avecAdmin(req, async () => {\n    const { data } = await authAdmin().from(\"sheets_publication\").select(\"id, publie, maj_le\");\n    const etat = new Map((data ?? []).map((x) => [x.id as string, x]));\n    return {\n      feuilles: FEUILLES.map((f) => ({\n        id: f.id,\n        titre: f.titre,\n        description: f.description,\n        publie: etat.get(f.id)?.publie === true,\n        maj_le: (etat.get(f.id)?.maj_le as string | null) ?? null,\n      })),\n    };\n  }, \"contenu_sheets\");\n}\n\nconst Maj = z.object({ id: z.string().max(60), publie: z.boolean() });\n\nexport async function PATCH(req: Request) {\n  return avecAdmin(req, async (a) => {\n    const p = Maj.safeParse(await corps(req));\n    if (!p.success || !FEUILLES.some((f) => f.id === p.data.id)) return erreur(400, \"feuille inconnue\");\n    await authAdmin().from(\"sheets_publication\").upsert({ id: p.data.id, publie: p.data.publie, maj_le: new Date().toISOString(), maj_par: a.userId });\n    oublierCacheFeuilles();\n    await audit(a, \"contenu.sheets\", p.data.id, { publie: p.data.publie });\n    return { ok: true };\n  }, \"contenu_sheets\");\n}\n","file_size_bytes":1640,"returned_bytes":1640,"offset":0,"lines_read":39,"was_truncated":false}
+import { z } from "zod";
+import { audit } from "@/lib/adminAuth";
+import { avecAdmin, corps, erreur } from "@/lib/adminRoute";
+import { oublierCacheFeuilles } from "@/lib/sheetsPublication";
+import { FEUILLES } from "@/lib/sheets";
+import { authAdmin } from "@/lib/supabaseAdmin";
+
+export const dynamic = "force-dynamic";
+
+// DataParl' Sheets (media.dataparl.fr/sheets) : quelles feuilles sont publiées en
+// libre accès. Une feuille absente de la table (ou publie=false) répond 404.
+export async function GET(req: Request) {
+  return avecAdmin(req, async () => {
+    const { data } = await authAdmin().from("sheets_publication").select("id, publie, maj_le");
+    const etat = new Map((data ?? []).map((x) => [x.id as string, x]));
+    return {
+      feuilles: FEUILLES.map((f) => ({
+        id: f.id,
+        titre: f.titre,
+        description: f.description,
+        publie: etat.get(f.id)?.publie === true,
+        maj_le: (etat.get(f.id)?.maj_le as string | null) ?? null,
+      })),
+    };
+  }, "contenu_sheets");
+}
+
+const Maj = z.object({ id: z.string().max(60), publie: z.boolean() });
+
+export async function PATCH(req: Request) {
+  return avecAdmin(req, async (a) => {
+    const p = Maj.safeParse(await corps(req));
+    if (!p.success || !FEUILLES.some((f) => f.id === p.data.id)) return erreur(400, "feuille inconnue");
+    await authAdmin().from("sheets_publication").upsert({ id: p.data.id, publie: p.data.publie, maj_le: new Date().toISOString(), maj_par: a.userId });
+    oublierCacheFeuilles();
+    await audit(a, "contenu.sheets", p.data.id, { publie: p.data.publie });
+    return { ok: true };
+  }, "contenu_sheets");
+}

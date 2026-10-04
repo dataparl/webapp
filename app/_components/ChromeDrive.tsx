@@ -1,1 +1,41 @@
-{"path":"/home/user/work/w/app/_components/ChromeDrive.tsx","content":"import Link from \"next/link\";\n\n// Chrome commun des pages du tableur DataParl' Sheets (/sheets, /search sur\n// media.dataparl.fr) : en-tête et pied propres à ces pages.\n\nexport function EnTeteDrive() {\n  return (\n    <header className=\"site\">\n      <div className=\"wrap\">\n        <a className=\"logo\" href=\"/sheets\">Data<span className=\"surligne\">Parl&apos;</span> Sheets</a>\n        <nav className=\"nav-principal\" aria-label=\"Navigation DataParl' Sheets\">\n          <a href=\"https://www.dataparl.fr/\">DataParl&apos;</a>\n          <a href=\"/search\">Recherche Base de Données</a>\n        </nav>\n        {/* Menu mobile : déroulant natif, sans JavaScript (même motif que l'en-tête www). */}\n        <details className=\"menu-mobile\">\n          <summary aria-label=\"Ouvrir le menu de navigation\">☰</summary>\n          <nav aria-label=\"Navigation DataParl' Sheets mobile\">\n            <a href=\"https://www.dataparl.fr/\">DataParl&apos;</a>\n            <a href=\"/search\">Recherche Base de Données</a>\n          </nav>\n        </details>\n      </div>\n    </header>\n  );\n}\n\nexport function PiedDrive() {\n  return (\n    <footer className=\"site\">\n      <div className=\"wrap pied\">\n        <span>© 2026 DataParl&apos; Sheets</span>\n        <nav aria-label=\"Liens de pied de page\">\n          <a href=\"https://www.dataparl.fr/\">DataParl&apos;</a>\n          <Link href=\"/informations-legales\">Informations légales</Link>\n          <a href=\"https://www.dataparl.fr/informations-legales/cgu-dataparl-sheets\">CGU DataParl&apos; Sheets</a>\n        </nav>\n      </div>\n    </footer>\n  );\n}\n","file_size_bytes":1580,"returned_bytes":1580,"offset":0,"lines_read":41,"was_truncated":false}
+import Link from "next/link";
+
+// Chrome commun des pages du tableur DataParl' Sheets (/sheets, /search sur
+// media.dataparl.fr) : en-tête et pied propres à ces pages.
+
+export function EnTeteDrive() {
+  return (
+    <header className="site">
+      <div className="wrap">
+        <a className="logo" href="/sheets">Data<span className="surligne">Parl&apos;</span> Sheets</a>
+        <nav className="nav-principal" aria-label="Navigation DataParl' Sheets">
+          <a href="https://www.dataparl.fr/">DataParl&apos;</a>
+          <a href="/search">Recherche Base de Données</a>
+        </nav>
+        {/* Menu mobile : déroulant natif, sans JavaScript (même motif que l'en-tête www). */}
+        <details className="menu-mobile">
+          <summary aria-label="Ouvrir le menu de navigation">☰</summary>
+          <nav aria-label="Navigation DataParl' Sheets mobile">
+            <a href="https://www.dataparl.fr/">DataParl&apos;</a>
+            <a href="/search">Recherche Base de Données</a>
+          </nav>
+        </details>
+      </div>
+    </header>
+  );
+}
+
+export function PiedDrive() {
+  return (
+    <footer className="site">
+      <div className="wrap pied">
+        <span>© 2026 DataParl&apos; Sheets</span>
+        <nav aria-label="Liens de pied de page">
+          <a href="https://www.dataparl.fr/">DataParl&apos;</a>
+          <Link href="/informations-legales">Informations légales</Link>
+          <a href="https://www.dataparl.fr/informations-legales/cgu-dataparl-sheets">CGU DataParl&apos; Sheets</a>
+        </nav>
+      </div>
+    </footer>
+  );
+}
