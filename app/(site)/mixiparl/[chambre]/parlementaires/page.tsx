@@ -35,7 +35,6 @@ export default async function Page({ params, searchParams }: Props) {
   const base = `/mixiparl/${seg}/parlementaires`;
   return (
     <>
-      <p className="meta"><a href="/mixiparl">MixiParl&apos;</a></p>
       <h1>{CHAMBRE_LONG[c]} : la mixité <span className="surligne-mixi">élu par élu</span></h1>
       <p className="lead">{croissant ? "De l'équipe la moins mixte à la plus mixte." : "De l'équipe la plus mixte à la moins mixte."} À taux égal, la plus grande équipe passe devant. Équipes de 2 personnes ou plus, toutes de genre déterminé. <a href="/mixiparl/methode#taux-de-mixite">Définition</a></p>
       <ClassementElus base={base} page={Number(q.page) || 1} filtre={filtre}

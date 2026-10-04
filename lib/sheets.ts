@@ -121,7 +121,66 @@ export const FEUILLES: FeuilleDef[] = [
       }));
     },
   },
+  {
+    id: "mixiparl-elus-an",
+    titre: "Mixité des équipes · Assemblée nationale, élu par élu",
+    description: "Le classement MixiParl' des députés : part de femmes et taux de mixité de l'équipe de chacun, de la plus mixte à la moins mixte.",
+    provenance: "Vue stats_turnover_elus (API DataParl'/Supabase) · méthode MixiParl'",
+    colonnes: [
+      { cle: "rang", label: "Rang", genre: "entier" },
+      { cle: "elu", label: "Élu", genre: "texte" },
+      { cle: "groupe", label: "Groupe", genre: "texte" },
+      { cle: "equipe", label: "Équipe", genre: "entier" },
+      { cle: "femmes", label: "Femmes", genre: "entier" },
+      { cle: "hommes", label: "Hommes", genre: "entier" },
+      { cle: "part_femmes", label: "Part de femmes", genre: "pourcent" },
+      { cle: "taux", label: "Taux de mixité", genre: "pourcent" },
+    ],
+    charger: async () => classementMixite("assemblee"),
+  },
+  {
+    id: "mixiparl-elus-senat",
+    titre: "Mixité des équipes · Sénat, élu par élu",
+    description: "Le classement MixiParl' des sénateurs : part de femmes et taux de mixité de l'équipe de chacun, de la plus mixte à la moins mixte.",
+    provenance: "Vue stats_turnover_elus (API DataParl'/Supabase) · méthode MixiParl'",
+    colonnes: [
+      { cle: "rang", label: "Rang", genre: "entier" },
+      { cle: "elu", label: "Élu", genre: "texte" },
+      { cle: "groupe", label: "Groupe", genre: "texte" },
+      { cle: "equipe", label: "Équipe", genre: "entier" },
+      { cle: "femmes", label: "Femmes", genre: "entier" },
+      { cle: "hommes", label: "Hommes", genre: "entier" },
+      { cle: "part_femmes", label: "Part de femmes", genre: "pourcent" },
+      { cle: "taux", label: "Taux de mixité", genre: "pourcent" },
+    ],
+    charger: async () => classementMixite("senat"),
+  },
 ];
+
+// Classement MixiParl' d'une chambre (mixité par élu), partagé par les
+// feuilles « mixiparl-elus-an » et « mixiparl-elus-senat ».
+async function classementMixite(chambre: "assemblee" | "senat") {
+  const { rows } = await dataQuery<{
+    chambre: string; elu_nom: string; elu_groupe: string;
+    femmes: number; hommes: number; indetermines: number;
+  }>("stats_turnover_elus", new URLSearchParams({ select: "chambre,elu_nom,elu_groupe,femmes,hommes,indetermines", chambre: `eq.${chambre}` }), 3600);
+  const eligibles = rows.filter((r) => r.femmes + r.hommes + r.indetermines >= 2 && r.indetermines === 0)
+    .sort((a, b) => {
+      const ta = a.femmes + a.hommes > 0 ? 1 - Math.abs((2 * a.femmes) / (a.femmes + a.hommes) - 1) : 0;
+      const tb = b.femmes + b.hommes > 0 ? 1 - Math.abs((2 * b.femmes) / (b.femmes + b.hommes) - 1) : 0;
+      return tb - ta || b.femmes + b.hommes - (a.femmes + a.hommes) || a.elu_nom.localeCompare(b.elu_nom, "fr");
+    });
+  return eligibles.map((r, i) => ({
+    rang: i + 1,
+    elu: r.elu_nom,
+    groupe: r.elu_groupe ?? "",
+    equipe: r.femmes + r.hommes,
+    femmes: r.femmes,
+    hommes: r.hommes,
+    part_femmes: r.femmes + r.hommes > 0 ? Math.round((r.femmes / (r.femmes + r.hommes)) * 1000) / 1000 : null,
+    taux: 1 - Math.abs((2 * r.femmes) / (r.femmes + r.hommes) - 1),
+  }));
+}
 
 export function feuille(id: string): FeuilleDef | undefined {
   return FEUILLES.find((f) => f.id === id);

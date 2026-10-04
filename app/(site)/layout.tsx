@@ -1,5 +1,6 @@
 import { EnTeteSite, PiedDePage } from "../_components/SiteChrome";
 import RetourHaut from "../_components/RetourHaut";
+import CrayonPage from "../_components/CrayonPage";
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,6 +9,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <main><div className="wrap">{children}</div></main>
       <PiedDePage />
       <RetourHaut />
+      <CrayonPage />
     </div>
   );
 }
