@@ -31,6 +31,11 @@ export const EXPEDITEURS = ["hello@dataparl.fr", "contact@dataparl.fr", "presse@
 
 // Publicité vidéo récompensée (AppLixir) : active seulement si la clé publique
 // et le secret de rappel serveur sont configurés.
+// Publicité display Google AdSense : le script est chargé dans le layout
+// (app/layout.tsx) ; un bloc ne s'affiche que si son identifiant est configuré.
+export const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? "ca-pub-6168263680630864";
+export const ADSENSE_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT ?? "";
+
 export const APPLIXIR_API_KEY = process.env.NEXT_PUBLIC_APPLIXIR_API_KEY ?? "";
 export const APPLIXIR_SDK = "https://cdn.applixir.com/applixir.app.v6.1.0.js";
 export const DUREE_DEBLOCAGE_H = 24;

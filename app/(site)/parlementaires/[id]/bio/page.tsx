@@ -10,6 +10,7 @@ import { assainirHtml, estHtml } from "@/lib/htmlBio";
 import { editionsManuelles } from "@/lib/editionsManuelles";
 import { pubActive } from "@/lib/deblocage";
 import BioComplete from "./BioComplete";
+import PubGoogle from "@/app/_components/PubGoogle";
 
 export const revalidate = 3600;
 type Props = { params: Promise<{ id: string }> };
@@ -238,6 +239,7 @@ export default async function Bio({ params }: Props) {
         <a className="btn" href={ficheUrl}>Voir l&apos;équipe de {nom}</a>{" "}
         <a className="btn secondaire" href={`${ficheUrl}/historique`}>Historique des collaborateurs</a>
       </p>
+      <PubGoogle />
       {f.url_officielle && (
         <p className="meta">Sources officielles : <a href={f.url_officielle}>fiche institutionnelle</a> · données DataParl&apos; mises à jour chaque jour.</p>
       )}

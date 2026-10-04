@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import ListeMouvements from "@/app/_components/ListeMouvements";
 import Partage from "@/app/_components/Partage";
 import Photo from "@/app/_components/Photo";
+import PubGoogle from "@/app/_components/PubGoogle";
 import { eluDepuisFiche, eluDepuisId, equipe, lienOfficiel, mouvementsElu, statsElu } from "@/lib/elus";
 import { familleDe } from "@/lib/familles";
 import { photoAbsolue } from "@/lib/media";
@@ -271,6 +272,7 @@ export default async function Parlementaire({ params }: Props) {
       <h2>Derniers mouvements</h2>
       {mouvements.length === 0 ? <p className="meta">Aucun mouvement enregistré.</p> : <ListeMouvements mouvements={mouvements} />}
       <p><a href={`/parlementaires/${encodeURIComponent(f.slug)}/historique`}>Tout l&apos;historique (compte gratuit)</a></p>
+      <PubGoogle />
     </>
   );
 }

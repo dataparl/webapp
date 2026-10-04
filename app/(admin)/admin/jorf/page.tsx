@@ -53,6 +53,9 @@ export default function PageJORF() {
         Le Journal officiel est balayé chaque matin (tâche planifiée) : nominations et cessations de fonctions
         des ministres et des membres de leurs cabinets alimentent les fiches. Cette page rattrape
         l&apos;historique depuis 2017 — un clic suffit, le balayage reprend là où il s&apos;était arrêté.
+        Le même pipeline existe en bot autonome (GitHub Actions, chaque matin à 6h30) :
+        <a href="https://github.com/dataparl/jorf-bot" target="_blank" rel="noreferrer">github.com/dataparl/jorf-bot</a> —
+        il écrit dans les mêmes tables, sans doublons.
       </p>
       {statut && (
         <p className="meta">
