@@ -98,6 +98,32 @@ export const FEUILLES: FeuilleDef[] = [
     },
   },
   {
+    id: "parlementaires",
+    titre: "Parlementaires (2017 → aujourd'hui)",
+    description: "Députés, sénateurs et eurodéputés français : identité, circonscription, groupe et premier mandat — une ligne par parlementaire.",
+    provenance: "Table parlementaires (API DataParl'/Supabase) · données ouvertes AN, Sénat, Parlement européen",
+    colonnes: [
+      { cle: "chambre", label: "Chambre", genre: "texte" },
+      { cle: "civilite", label: "Civ.", genre: "texte" },
+      { cle: "prenom", label: "Prénom", genre: "texte" },
+      { cle: "nom", label: "Nom", genre: "texte" },
+      { cle: "circonscription", label: "Circonscription", genre: "texte" },
+      { cle: "groupe_libelle", label: "Groupe", genre: "texte" },
+      { cle: "premier_mandat", label: "Premier mandat", genre: "texte" },
+      { cle: "actif", label: "En exercice", genre: "texte" },
+    ],
+    charger: async () => {
+      const rows = await dataQueryTout<{ chambre: string; civilite: string; prenom: string; nom: string; circonscription: string | null; groupe_libelle: string | null; premier_mandat: string | null; actif: boolean }>(
+        "parlementaires", new URLSearchParams({ select: "chambre,civilite,prenom,nom,circonscription,groupe_libelle,premier_mandat,actif", order: "chambre,nom.asc" }),
+      );
+      return rows.map((r) => ({
+        ...r, chambre: CHAMBRE_LONG[r.chambre] ?? r.chambre,
+        circonscription: r.circonscription ?? "", groupe_libelle: r.groupe_libelle ?? "",
+        premier_mandat: r.premier_mandat ?? "", actif: r.actif ? "oui" : "non",
+      }));
+    },
+  },
+  {
     id: "mouvements-recents",
     titre: "Derniers mouvements",
     description: `Les ${n(2000)} mouvements les plus récents : arrivées, départs et transferts de collaborateurs parlementaires.`,
