@@ -46,9 +46,10 @@ type Props = {
   onChoix?: (o: Option | null) => void; // null : saisie effacée
   navigation?: boolean; // ouvrir la fiche au choix (recherche globale)
   ariaLabel?: string;
+  outil?: string; // « vigiparl » | « mixiparl » : les élus pointent vers leur page d'indicateurs
 };
 
-export default function Autocompletion({ id, source, chambre, placeholder, valeurInitiale = "", onChoix, navigation, ariaLabel }: Props) {
+export default function Autocompletion({ id, source, chambre, placeholder, valeurInitiale = "", onChoix, navigation, ariaLabel, outil }: Props) {
   const auto = useId();
   const idListe = `${id ?? auto}-liste`;
   const [saisie, setSaisie] = useState(valeurInitiale);
@@ -74,9 +75,15 @@ export default function Autocompletion({ id, source, chambre, placeholder, valeu
     minuteur.current = setTimeout(async () => {
       const r = await fetch(`/api/search?q=${encodeURIComponent(saisie)}&limit=8`).catch(() => null);
       const d = r?.ok ? await r.json() : { resultats: [] };
-      setOptions(d.resultats ?? []);
+      // Sur les pages d'indicateurs (VigiParl'/MixiParl'), un élu proposé
+      // ouvre sa page d'indicateurs, pas sa fiche.
+      setOptions(((d.resultats ?? []) as Option[]).map((o) =>
+        outil && typeof o.href === "string" && o.href.startsWith("/parlementaires/")
+          ? { ...o, href: `/${outil}/${o.href.slice("/parlementaires/".length)}`, detail: [o.detail, "indicateurs"].filter(Boolean).join(" · ") }
+          : o,
+      ));
     }, 200);
-  }, [locales, saisie]);
+  }, [locales, saisie, outil]);
 
   function choisir(o: Option) {
     setSaisie(source === "groupes" ? o.valeur : o.libelle);
