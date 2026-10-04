@@ -4,7 +4,7 @@ import type { Session } from "@supabase/supabase-js";
 import Autocompletion from "@/app/_components/Autocompletion";
 import ListeMouvements from "@/app/_components/ListeMouvements";
 import type { MouvementAffiche } from "@/lib/format";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { sessionActuelle } from "@/lib/supabaseBrowser";
 
 const PAGE = 50;
 
@@ -16,7 +16,7 @@ export default function Recherche({ chambre }: { chambre?: "assemblee" | "senat"
   const [total, setTotal] = useState<number | null>(null);
   const [etat, setEtat] = useState<"idle" | "chargement" | "erreur">("idle");
 
-  useEffect(() => { authBrowser().auth.getSession().then(({ data }) => setSession(data.session)); }, []);
+  useEffect(() => { sessionActuelle().then(setSession); }, []);
   // Lien direct depuis la recherche de l'accueil : /mouvements/parlement?groupe=ECO
   useEffect(() => {
     const g = new URLSearchParams(window.location.search).get("groupe");
