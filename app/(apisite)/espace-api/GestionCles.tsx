@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { sessionActuelle } from "@/lib/supabaseBrowser";
 
 type Cle = { id: string; nom: string; prefixe: string; quota_jour: number; created_at: string; last_used_at: string | null; requetes_aujourdhui: number };
 
@@ -18,7 +18,7 @@ export default function GestionCles() {
   }, []);
 
   useEffect(() => {
-    authBrowser().auth.getSession().then(({ data }) => { setSession(data.session); if (data.session) charger(data.session); });
+    sessionActuelle().then((s) => { setSession(s); if (s) charger(s); });
   }, [charger]);
 
   if (session === undefined) return <p className="meta">Chargement…</p>;
