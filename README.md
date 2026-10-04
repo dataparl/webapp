@@ -4,13 +4,15 @@ Site public, alertes par email, connexion, compte, administration et API de Data
 
 | Hôte | Rôle |
 |---|---|
-| `www.dataparl.fr` | site : accueil, mouvements, collaborateurs, parlementaires, alertes, compte, contact, presse, FAQ, pages légales ; `/api` redirige vers l'API |
+| `www.dataparl.fr` | site : accueil, mouvements, collaborateurs, parlementaires, alertes, compte, contact, presse, FAQ, pages légales, tableur DataParl' Sheets (`/sheets/*`) et sa recherche (`/search`) ; `/api` redirige vers l'API |
 | `dataparl.fr` | redirection 308 vers `www` |
 | `cavaparlement.eu`, `dataparl.com` et leurs sous-domaines | redirection 308 vers l'équivalent sur dataparl.fr |
 | `api.dataparl.fr` | site de l'API (`/`, `/docs/*`, `/request-access`, `/mon-espace-api`, réécrits vers `/espace-api/*`) et API elle-même (`/v1/*`, réécrit vers `/api/v1/*`) |
 | `admin.dataparl.fr` | administration, réécrite vers `/admin/*` |
 | `webmail.dataparl.fr` | webmail de l'équipe, réécrite vers `/webmail/*` |
 | `mail.dataparl.fr` | versions en ligne des emails (`/lire/<jeton>`) ; le reste redirige vers `www` (enregistrement A vers Vercel) |
+| `raw.dataparl.fr` | fichiers bruts publics : `/schemas/*.json` (schémas de données référencés sur data.gouv.fr) ; le reste redirige vers `www` |
+| `drive.dataparl.fr` | ancien domaine du tableur : redirection 308 vers `www` (même chemin) |
 
 `/connexion` est servie telle quelle sur chaque hôte : le flux OAuth (PKCE) doit rester sur l'origine qui l'a lancé. La session, elle, est stockée dans des cookies du domaine `.dataparl.fr` (`lib/domaine.ts`) (`lib/cookieStorage.ts`, découpés en morceaux de 3 Ko) : une seule connexion vaut pour `www`, `api` et `admin`.
 
