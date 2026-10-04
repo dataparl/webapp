@@ -29,6 +29,8 @@ versionnement [SemVer](https://semver.org/lang/fr/).
   et Informations légales (CGU API sur www, avec retour vers l'API).
 - Polices DM Sans et Spectral auto-hébergées via next/font (préchargées,
   police de repli aux métriques ajustées) : fin du reflow au chargement des
+  polices Google (CLS 0,27 → ~0 sur l'accueil, mesuré PageSpeed). DM Sans pour
+  le corps de texte, Spectral pour les titres — visuel inchangé.
   polices Google (CLS 0,27 → ~0 sur l'accueil).
 - En-tête www : logo à gauche, recherche au centre, menu déroulant à droite
   sur toutes les tailles d'écran.
