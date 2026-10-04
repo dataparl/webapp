@@ -9,7 +9,7 @@ const RUBRIQUES = [
       { href: "/informations-legales/mentions-legales", nom: "Mentions légales", desc: "Éditeur, hébergement, propriété intellectuelle" },
       { href: "/informations-legales/cgu", nom: "Conditions d'utilisation", desc: "Règles générales d'usage du service" },
       { href: "/informations-legales/cgu-api", nom: "Conditions d'utilisation de l'API", desc: "Clé, quotas, réutilisation des données" },
-      { href: "/informations-legales/cgu-dataparl-sheets", nom: "CGU DataParl' Sheets", desc: "Conditions propres au tableur drive.dataparl.fr" },
+      { href: "/informations-legales/cgu-dataparl-sheets", nom: "CGU DataParl' Sheets", desc: "Conditions propres au tableur (www.dataparl.fr/sheets)" },
     ],
   },
   {
