@@ -1,4 +1,5 @@
 import LogoSite from "./LogoSite";
+import BarreRechercheHeader from "./BarreRechercheHeader";
 
 export const API_URL = "https://api.dataparl.fr";
 
@@ -23,6 +24,8 @@ export function EnTeteSite() {
             <a key={l.href} href={l.href}>{l.label}</a>
           ))}
         </nav>
+        {/* Recherche élus / collaborateurs, présente sur presque toutes les pages. */}
+        <BarreRechercheHeader />
         {/* Menu mobile : déroulant natif, sans JavaScript, en haut à gauche. */}
         <details className="menu-mobile">
           <summary aria-label="Ouvrir le menu de navigation">☰</summary>
@@ -40,17 +43,14 @@ export function EnTeteSite() {
 export function PiedDePage() {
   return (
     <footer className="site">
-      <div className="wrap">
-        <nav className="pied-nav" aria-label="Plan du site">
-          <a href="/parlementaires">Parlementaires</a>
-          <a href="/vigiparl">VigiParl&apos;</a>
-          <a href="/mixiparl">MixiParl&apos;</a>
+      <div className="wrap pied-une-ligne">
+        <span className="meta">© 2026 DataParl&apos; : le Parlement, pièce par pièce.</span>
+        <nav aria-label="Plan du site">
           <a href="/methode">Méthode</a>
           <a href="/a-propos">À propos</a>
           <a href="/sitemap">Plan du site</a>
           <a href="/informations-legales">Informations légales</a>
         </nav>
-        <span className="meta">© 2026 DataParl&apos; : le Parlement, pièce par pièce.</span>
       </div>
     </footer>
   );

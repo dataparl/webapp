@@ -3,11 +3,13 @@ import { useEffect } from "react";
 import Autocompletion from "./Autocompletion";
 
 // Recherche globale : élus, collaborateurs, groupes et pages. La touche « / »
-// place le curseur dans le champ (hors saisie en cours ailleurs).
+// ou « Ctrl+K / Cmd+K » place le curseur dans le champ (hors saisie en cours
+// ailleurs).
 export default function RechercheGlobale({ placeholder = "Un élu ou un collaborateur…", id = "recherche-globale" }: { placeholder?: string; id?: string }) {
   useEffect(() => {
     const surTouche = (e: KeyboardEvent) => {
-      if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
+      const raccourci = (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey) || ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === "k");
+      if (!raccourci) return;
       const t = e.target as HTMLElement | null;
       if (t && (t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName))) return;
       const champ = document.getElementById(id) as HTMLInputElement | null;
