@@ -70,7 +70,6 @@ export default function Licences() {
 
       <h2>Accéder aux données</h2>
       <ul>
-        <li>Fichiers CSV complets et historique des versions : <a href="https://github.com/dataparl/collaborateurs">github.com/dataparl/collaborateurs</a> ;</li>
         <li>API avec clé gratuite : <a href="https://api.dataparl.fr">api.dataparl.fr</a> et ses <a href="/informations-legales/cgu-api">conditions d&apos;utilisation</a>.</li>
       </ul>
 
