@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { sessionActuelle } from "@/lib/supabaseBrowser";
 
 // Crayon « tout éditer » du site public : visible pour l'équipe connectée,
 // sur toutes les pages www sauf /mon-compte. L'édition porte sur le contenu
@@ -17,8 +17,7 @@ type Etat = "cache" | "otp" | "pret" | "erreur";
 const HORS_EDITION = ["/mon-compte"];
 
 async function jeton(): Promise<string | null> {
-  const { data } = await authBrowser().auth.getSession();
-  return data.session?.access_token ?? null;
+  return (await sessionActuelle())?.access_token ?? null;
 }
 
 async function appel<T>(chemin: string, init?: RequestInit): Promise<{ status: number; json: T }> {
