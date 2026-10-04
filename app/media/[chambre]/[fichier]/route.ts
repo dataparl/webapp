@@ -1,6 +1,6 @@
 import sharp from "sharp";
 import { analyserFichier, CHAMBRE_DE_CODE, CREDIT, sourceAutorisee } from "@/lib/media";
-import { parlementaireDepuisId, personne } from "@/lib/referentiel";
+import { parlementaireDepuisId, personne, type Parlementaire } from "@/lib/referentiel";
 
 // Photo officielle d'un élu, redimensionnée et servie par DataParl' :
 // /media/<chambre>/<id>_<credit>_<taille>.png (media.dataparl.fr/<chambre>/…).
@@ -21,9 +21,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ chambre
   // l'URL /media/an/… doit pourtant servir sa photo AN historique. On cherche
   // donc la fiche de la chambre demandée chez la même personne, pas seulement
   // la fiche active.
-  let cible = elu;
+  let cible: Parlementaire | null = elu;
   if (elu.chambre !== chambre) {
-    const { fiches } = await personne(elu.personne_id).catch(() => ({ fiches: [] }));
+    const { fiches } = await personne(elu.personne_id).catch(() => ({ fiches: [] as Parlementaire[] }));
     cible = fiches.find((x) => x.chambre === chambre) ?? null;
   }
   if (!cible || !cible.photo_url || !sourceAutorisee(cible.photo_url)) return absente();
