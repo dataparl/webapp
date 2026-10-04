@@ -7,7 +7,7 @@ type Props = { searchParams: Promise<{ q?: string }> };
 
 const MAX_PAR_FEUILLE = 50;
 
-// Recherche dans les feuilles publiées du tableur (drive.dataparl.fr/search) :
+// Recherche dans les feuilles publiées du tableur (www.dataparl.fr/search) :
 // un champ unique, des résultats ligne par ligne, chaque résultat pointe vers
 // la feuille. Aucune donnée n'est envoyée à un tiers : la recherche tourne sur
 // le serveur, dans les données déjà publiées.
