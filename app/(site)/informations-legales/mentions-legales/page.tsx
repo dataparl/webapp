@@ -73,7 +73,7 @@ export default function MentionsLegales() {
 
       <h2>Signaler une erreur ou un contenu</h2>
       <p>
-        Une information inexacte, un contenu illicite ou une demande relative à des données personnelles : passe par le{" "
+        Une information inexacte, un contenu illicite ou une demande relative à des données personnelles : passe par le{" "}
         <a href={CONTACT_URL}>formulaire de contact</a>. Voir aussi la page{" "}
         <a href="/informations-legales/confidentialite">Données personnelles</a>.
       </p>
