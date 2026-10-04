@@ -5,7 +5,7 @@ import Photo from "@/app/_components/Photo";
 import { eluDepuisFiche, eluDepuisId, mouvementsElu } from "@/lib/elus";
 import { CHAMBRE_LONG, nomAffiche, prenomNom } from "@/lib/format";
 import { chevauche, libellePeriode, moisAnnee } from "@/lib/periodes";
-import { collaborateurDeLaPersonne, parlementaireDepuisId, personne, type Appartenance, type Mandat, type Parlementaire } from "@/lib/referentiel";
+import { collaborateurDeLaPersonne, fonctionsGouvernement, parlementaireDepuisId, personne, type Appartenance, type Mandat, type Ministre, type Parlementaire } from "@/lib/referentiel";
 import { assainirHtml, estHtml } from "@/lib/htmlBio";
 import { editionsManuelles } from "@/lib/editionsManuelles";
 import { pubActive } from "@/lib/deblocage";
@@ -82,9 +82,10 @@ export default async function Bio({ params }: Props) {
   }
   const { fiches, mandats, appartenances } = await personne(f.personne_id);
   const e = eluDepuisFiche(f);
-  const [mouvements, commeCollab] = await Promise.all([
+  const [mouvements, commeCollab, gouvernement] = await Promise.all([
     mouvementsElu(e, 5).catch(() => []),
     collaborateurDeLaPersonne(f.personne_id).catch(() => null),
+    fonctionsGouvernement(f.personne_id).catch(() => []),
   ]);
   const nom = prenomNom(f.prenom, f.nom);
   const ficheUrl = `/parlementaires/${encodeURIComponent(f.slug)}`;
@@ -103,7 +104,16 @@ export default async function Bio({ params }: Props) {
     libelle: m.libelle, circonscription: m.circonscription, legislature: "",
     debut: m.debut, fin: m.fin, cause_fin: m.cause_fin,
   }) as Mandat);
-  const parcours = [...mandats, ...mandatsManuels].sort((a, b) => (b.debut || "").localeCompare(a.debut || ""));
+  // Parcours chronologique unique : mandats parlementaires (référentiel et
+  // éditions manuelles) et fonctions gouvernementales, du plus récent au plus ancien.
+  // Fonctions gouvernementales représentées comme des mandats (« chambre »
+  // virtuelle « gouvernement ») pour figurer dans le parcours chronologique.
+  const mandatsGouv = gouvernement.map((g: Ministre) => ({
+    chambre: "gouvernement", elu_id: "", personne_id: f.personne_id,
+    libelle: g.fonction, circonscription: g.portefeuille || "", legislature: "",
+    debut: g.debut, fin: g.fin, cause_fin: "",
+  }) as unknown as Mandat);
+  const parcours = [...mandats, ...mandatsManuels, ...mandatsGouv].sort((a, b) => (b.debut || "").localeCompare(a.debut || ""));
 
   const phrases: string[] = [];
   const elu = f.civilite === "Mme" ? "élue" : "élu";
@@ -187,11 +197,23 @@ export default async function Bio({ params }: Props) {
           Né{f.civilite === "Mme" ? "e" : ""} {f.date_naissance.length === 4 ? `en ${f.date_naissance}` : `le ${f.date_naissance.split("-").reverse().join("/")}`}.
         </p>
       )}
-      <h2>Mandats et parcours</h2>
+      <h2>Parcours parlementaire et gouvernemental</h2>
       <ol className="parcours">
         {parcours.map((m, i) => {
           const g = m.chambre === f.chambre ? groupes(m).map((a) => a.sigle || a.libelle).filter(Boolean) : [];
           const manuelItem = mandatsManuels.includes(m);
+          if (m.chambre === "gouvernement") {
+            return (
+              <li key={`gouv-${m.debut}-${i}`}>
+                <p className="parcours-titre">
+                  <strong>{m.libelle}</strong>
+                  {m.circonscription ? ` · ${m.circonscription}` : ""}
+                  <span className="meta"> · {libellePeriode({ debut: m.debut, debut_connu: !!m.debut, fin: m.fin, fin_connue: !!m.fin, en_cours: !m.fin })}</span>
+                  <span className="puce">gouvernement</span>
+                </p>
+              </li>
+            );
+          }
           return (
             <li key={`${m.chambre}-${m.debut}-${i}`}>
               <p className="parcours-titre">

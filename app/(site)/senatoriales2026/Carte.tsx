@@ -15,8 +15,11 @@ export type DonneesDep = { n: number; s: number };
 const VIEW_TOTAL = { x: 0, y: 0, l: 1000, h: 1400 };
 const FACTEUR = 1.35;
 const MIN = 90; // zoom max ~11x
-const MAX = VIEW_TOTAL.l * 1.05; // dézoom léger au-delà de la vue initiale
-const INITIAL = VIEW_TOTAL;
+// Vue initiale : métropole + outre-mer entiers avec une marge confortable
+// (la vue « plein cadre » était trop zoomée à l'arrivée sur la page).
+const MARGE = 90;
+const INITIAL = { x: -MARGE, y: -MARGE, l: VIEW_TOTAL.l + 2 * MARGE, h: VIEW_TOTAL.h + 2 * MARGE };
+const MAX = INITIAL.l * 1.1; // dézoom léger au-delà de la vue initiale
 
 function zoomer(v: { x: number; y: number; l: number; h: number }, sens: 1 | -1) {
   const l = sens > 0 ? Math.max(MIN, v.l / FACTEUR) : Math.min(MAX, v.l * FACTEUR);
@@ -93,17 +96,23 @@ export default function Carte({ parSlug, om }: { parSlug: Record<string, Donnees
       {om.length > 0 && (
         <figcaption>
           <p className="meta" style={{ margin: "8px 0 4px" }}>Outre-mer et Français de l&apos;étranger :</p>
-          <div className="doms">
+          <ul className="doms">
             {om.map((o) => (
-              o.n > 0 ? (
-                <a key={o.slug} className="dom" href={`/senatoriales2026/${o.slug}`}>
-                  {o.nom} <span className="meta">· {o.n} nouveau{o.n > 1 ? "x" : ""}</span>
-                </a>
-              ) : (
-                <span key={o.slug} className="dom inactif">{o.nom}</span>
-              )
+              <li key={o.slug} className="dom">
+                {o.n > 0 ? (
+                  <a href={`/senatoriales2026/${o.slug}`}>
+                    <span className="dom-nom">{o.nom}</span>
+                    <span className="dom-badge">{o.n} nouveau{o.n > 1 ? "x" : ""} sénateur{o.n > 1 ? "s" : ""}</span>
+                  </a>
+                ) : (
+                  <>
+                    <span className="dom-nom">{o.nom}</span>
+                    <span className="dom-badge dom-zero">pas de renouvellement en 2026</span>
+                  </>
+                )}
+              </li>
             ))}
-          </div>
+          </ul>
         </figcaption>
       )}
     </figure>

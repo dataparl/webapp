@@ -96,6 +96,13 @@ export default async function Parlementaire({ params }: Props) {
   // — ex. député devenu sénateur — est déjà résumée par ses mandats ci-dessous,
   // et son URL renvoie vers la fiche active).
   const autres = fiches.filter((x) => x.chambre !== f.chambre && x.actif);
+  // Parcours chronologique unique : mandats parlementaires et fonctions
+  // gouvernementales, du plus récent au plus ancien.
+  type Etape = { mandat: Mandat | null; gouvern: Ministre | null };
+  const chrono: Etape[] = [
+    ...mandats.map((m) => ({ mandat: m, gouvern: null })),
+    ...gouvernement.map((g) => ({ mandat: null, gouvern: g })),
+  ].sort((a, b) => (b.mandat?.debut ?? b.gouvern!.debut ?? "").localeCompare(a.mandat?.debut ?? a.gouvern!.debut ?? ""));
 
   const jsonLd = {
     "@context": "https://schema.org", "@type": "Person", name: nom, givenName: f.prenom, familyName: f.nom,
@@ -217,12 +224,12 @@ export default async function Parlementaire({ params }: Props) {
         </p>
       )}
 
-      {gouvernement.length > 0 && (
-        <>
-          <h2>Au gouvernement</h2>
-          <ol className="parcours">
-            {gouvernement.map((g, i) => (
-              <li key={`${g.gouvernement}-${g.debut}-${i}`}>
+      <h2>Parcours parlementaire et gouvernemental</h2>
+      <ol className="parcours">
+        {chrono.map(({ mandat: m, gouvern: g }, i) => {
+          if (g) {
+            return (
+              <li key={`gouv-${g.debut}-${i}`}>
                 <p className="parcours-titre">
                   <strong>{g.fonction}</strong>
                   <span className="meta">
@@ -231,14 +238,9 @@ export default async function Parlementaire({ params }: Props) {
                 </p>
                 {g.portefeuille && <p className="meta" style={{ margin: "2px 0" }}>{g.portefeuille}</p>}
               </li>
-            ))}
-          </ol>
-        </>
-      )}
-
-      <h2>Parcours parlementaire</h2>
-      <ol className="parcours">
-        {mandats.map((m, i) => {
+            );
+          }
+          if (!m) return null;
           const pendant = appartenances.filter((a) => a.chambre === m.chambre && chevauche(a, m, 7) && (!m.elu_id || a.elu_id === m.elu_id));
           const groupes = successifs(pendant.filter((a) => a.type === "groupe"));
           // Hors mandat en cours, on écarte les passages de moins de 15 jours (suppléances).

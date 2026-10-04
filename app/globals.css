@@ -441,11 +441,14 @@ h1.marque { font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .carte-fr path.dep.renouvele { fill: var(--bleu); }
 .carte-fr a:hover path.dep, .carte-fr a:focus-visible path.dep { fill: var(--corail); }
 .carte-fr figcaption { padding: 0 6px 4px; }
-.doms { display: flex; flex-wrap: wrap; gap: 8px; }
-.doms a.dom { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: .85rem; background: var(--bg); }
-.doms a.dom:hover { border-color: var(--bleu); }
+.doms { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 6px 18px; list-style: none; padding: 0; margin: 0; }
+.doms li.dom { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--line); font-size: .9rem; }
+.doms li.dom a { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex: 1; text-decoration: none; }
+.doms li.dom a:hover .dom-nom { text-decoration: underline; }
+.dom-nom { font-weight: 600; }
+.dom-badge { color: var(--bleu); font-size: .78rem; white-space: nowrap; }
+.dom-badge.dom-zero { color: var(--muted); font-weight: 400; }
 .carte-fr text.om-label { fill: var(--muted); font-size: 8.5px; font-family: inherit; }
-.carte-fr .doms span.dom.inactif { opacity: .55; cursor: default; }
 .liste-deps { list-style: none; padding: 0; margin: 0; columns: 3 220px; gap: 24px; }
 .liste-deps li { break-inside: avoid; padding: 4px 0; border-bottom: 1px solid var(--line); }
 .grille-senateurs { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin: 12px 0 20px; }
