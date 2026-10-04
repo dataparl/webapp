@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { authBrowser } from "@/lib/supabaseBrowser";
+import { authBrowser, sessionActuelle } from "@/lib/supabaseBrowser";
 
 // DataParl' Auth : connexion ou création de compte. Servie sur www., drive. et
 // admin. pour que le flux OAuth (PKCE) reste sur l'origine qui l'a lancé.
@@ -94,8 +94,8 @@ export default function Connexion() {
 
   useEffect(() => {
     const sb = authBrowser();
-    sb.auth.getSession().then(({ data }) => {
-      if (data.session) apresConnexion(data.session.access_token);
+    sessionActuelle().then((s) => {
+      if (s) apresConnexion(s.access_token);
     });
     const { data: sub } = sb.auth.onAuthStateChange((evt, session) => {
       if (evt === "SIGNED_IN" && session) apresConnexion(session.access_token);
