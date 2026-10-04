@@ -11,6 +11,7 @@ import { editionsManuelles } from "@/lib/editionsManuelles";
 import { pubActive } from "@/lib/deblocage";
 import BioComplete from "./BioComplete";
 import PubGoogle from "@/app/_components/PubGoogle";
+import CrayonEdition from "@/app/_components/CrayonEdition";
 
 export const revalidate = 3600;
 type Props = { params: Promise<{ id: string }> };
@@ -158,6 +159,7 @@ export default async function Bio({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(fil).replace(/</g, "\\u003c") }} />
       <p className="meta" style={{ marginTop: 0 }}><a href={ficheUrl}>← Fiche de {nom}</a></p>
+      <CrayonEdition personneId={f.personne_id} nom={nom} />
       <div className="entete-elu">
         <Photo chambre={f.chambre} slug={f.slug} src={f.photo_url} nom={nom} />
         <div>
