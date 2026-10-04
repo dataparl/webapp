@@ -20,6 +20,7 @@ const SECTIONS: Section[] = [
       { chemin: "/content/sitemap", libelle: "Plan du site", acces: "contenu_sitemap" },
       { chemin: "/content/links", libelle: "Liens courts", acces: "contenu_liens" },
       { chemin: "/elus", libelle: "Fiches élus", acces: "elus" },
+      { chemin: "/elus/edit", libelle: "Éditeur de bios", acces: "elus" },
       { chemin: "/oppositions", libelle: "Suppressions de fiches", acces: "formulaires" },
     ],
   },
@@ -57,10 +58,10 @@ export default function EnTete({ espace }: { espace: Espace }) {
       </div>
       <nav className="wrap large onglets-admin">
         {espace === "admin" ? sections.map((s) => {
-          const ouvert = actif === s.chemin || (s.chemin !== "/" && actif.startsWith(`${s.chemin}/`));
+          const actifSous = (c: string) => actif === c || (c !== "/" && actif.startsWith(`${c}/`));
+          const ouvert = actifSous(s.chemin) || (s.entrees ?? []).some((e) => actifSous(e.chemin));
           if (!s.entrees) {
-            const aria = actif === s.chemin || (s.chemin !== "/" && actif.startsWith(`${s.chemin}/`)) ? "page" : undefined;
-            return <a key={s.chemin} href={lien("admin", s.chemin)} aria-current={aria}>{s.libelle}</a>;
+            return <a key={s.chemin} href={lien("admin", s.chemin)} aria-current={actifSous(s.chemin) ? "page" : undefined}>{s.libelle}</a>;
           }
           const entrees = s.entrees.filter((e) => visible(e.acces, role, modules));
           return (
@@ -68,7 +69,7 @@ export default function EnTete({ espace }: { espace: Espace }) {
               <summary aria-current={ouvert ? "page" : undefined}>{s.libelle}</summary>
               <div className="menu-admin-panneau">
                 {entrees.map((e) => (
-                  <a key={e.chemin} href={lien("admin", e.chemin)} aria-current={actif === e.chemin || (e.chemin !== "/" && actif.startsWith(`${e.chemin}/`)) ? "page" : undefined}>{e.libelle}</a>
+                  <a key={e.chemin} href={lien("admin", e.chemin)} aria-current={actif === e.chemin ? "page" : undefined}>{e.libelle}</a>
                 ))}
               </div>
             </details>

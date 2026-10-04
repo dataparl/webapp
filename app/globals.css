@@ -256,6 +256,21 @@ header.site.admin .qui { display: flex; align-items: center; gap: 12px; font-siz
 .onglets-admin a { padding: 10px 12px; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; white-space: nowrap; font-size: .95rem; }
 .onglets-admin a[aria-current=page] { color: var(--ink); border-bottom-color: var(--bleu); font-weight: 600; }
 header.site.admin { padding-top: 6px; }
+/* Éditeur « traitement de texte » des bios (admin /elus/edit). */
+.barre-outils-bio { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; border: 1px solid var(--line); border-bottom: 0; border-radius: var(--radius-card) var(--radius-card) 0 0; padding: 6px; background: var(--card); }
+.barre-outils-bio button { border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 5px 10px; cursor: pointer; font-size: .9rem; }
+.barre-outils-bio button:hover { border-color: var(--bleu); }
+.sep-outil { width: 1px; height: 20px; background: var(--line); margin: 0 4px; }
+.zone-edition-bio { border: 1px solid var(--line); border-radius: 0 0 var(--radius-card) var(--radius-card); min-height: 340px; padding: 18px 22px; background: var(--card); font-size: 1.02rem; line-height: 1.65; outline: none; }
+.zone-edition-bio:focus { border-color: var(--bleu); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bleu) 15%, transparent); }
+.zone-edition-bio h3 { margin: 18px 0 6px; }
+.zone-edition-bio ul { padding-left: 22px; }
+.zone-edition-bio:empty::before { content: "Écris ici la biographie… (gras, italique, souligné, liens, sources)"; color: var(--muted); }
+/* Rendu public des bios HTML. */
+.bio-html p { margin: 10px 0; }
+.bio-html h3 { margin: 20px 0 6px; }
+.bio-html ul { padding-left: 22px; margin: 10px 0; }
+.bio-html li { margin: 4px 0; }
 /* Menus déroulants de la navigation admin (sans JS, <details>/<summary>). */
 .onglets-admin details.menu-admin { position: relative; }
 .onglets-admin details.menu-admin > summary { padding: 10px 12px; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; font-size: .95rem; cursor: pointer; list-style: none; user-select: none; }

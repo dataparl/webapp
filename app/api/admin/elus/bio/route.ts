@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { audit } from "@/lib/adminAuth";
 import { avecAdmin, corps, erreur } from "@/lib/adminRoute";
+import { assainirHtml } from "@/lib/htmlBio";
 import { dataAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
@@ -19,8 +20,11 @@ export async function PUT(req: Request) {
   return avecAdmin(req, async (a) => {
     const p = Bio.safeParse(await corps(req));
     if (!p.success) return erreur(400, "bio invalide (texte requis, 20 000 caractères maximum)");
+    // L'éditeur de l'admin enregistre du HTML : assaini ici puis au rendu public,
+    // liste blanche stricte (p, titres, gras, italique, souligné, listes, liens).
+    const texte = assainirHtml(p.data.texte);
     const { data, error } = await dataAdmin().from("bios").upsert(
-      { ...p.data, maj_par: a.github },
+      { ...p.data, texte, maj_par: a.github },
       { onConflict: "personne_id" },
     ).select("id").single();
     if (error) throw error;

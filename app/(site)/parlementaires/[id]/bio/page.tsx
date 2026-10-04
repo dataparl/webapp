@@ -6,7 +6,7 @@ import { eluDepuisFiche, eluDepuisId, mouvementsElu } from "@/lib/elus";
 import { CHAMBRE_LONG, nomAffiche, prenomNom } from "@/lib/format";
 import { chevauche, libellePeriode, moisAnnee } from "@/lib/periodes";
 import { collaborateurDeLaPersonne, parlementaireDepuisId, personne, type Appartenance, type Mandat, type Parlementaire } from "@/lib/referentiel";
-import { resumeWikipedia } from "@/lib/wikipedia";
+import { assainirHtml, estHtml } from "@/lib/htmlBio";
 import { editionsManuelles } from "@/lib/editionsManuelles";
 
 export const revalidate = 3600;
@@ -76,7 +76,6 @@ export default async function Bio({ params }: Props) {
     appartenances.filter((a) => a.chambre === m.chambre && a.type === "groupe" && chevauche(a, m, 7) && (!m.elu_id || a.elu_id === m.elu_id));
   const dernier = ici[ici.length - 1];
   const commissions = appartenances.filter((a) => a.chambre === f.chambre && a.type !== "groupe" && (!a.fin || f.actif));
-  const wiki = await resumeWikipedia(f.prenom, f.nom).catch(() => null);
   // Éditions manuelles (admin.dataparl.fr/elus) : bio, mandats et fonctions.
   const manuel = await editionsManuelles(f.personne_id).catch(() => ({ bio: null, mandats: [], fonctions: [] }));
   const mandatsManuels = manuel.mandats.map((m) => ({
@@ -109,7 +108,7 @@ export default async function Bio({ params }: Props) {
     birthDate: f.date_naissance || undefined,
     url: `https://www.dataparl.fr/parlementaires/${f.slug}/bio`,
     jobTitle: f.actif ? role(f) : undefined,
-    description: [phrases.join(" "), wiki?.extrait].filter(Boolean).join(" "),
+    description: phrases.join(" "),
     sameAs: f.url_officielle ? [f.url_officielle] : undefined,
     memberOf: f.actif ? { "@type": "GovernmentOrganization", name: CHAMBRE_LONG[f.chambre] } : undefined,
   };
@@ -143,7 +142,9 @@ export default async function Bio({ params }: Props) {
       {manuel.bio && (
         <>
           <h2>Biographie</h2>
-          {manuel.bio.texte.split(/\n\s*\n/).map((p, i) => <ParagrapheBio key={i} texte={p.trim()} i={i} />)}
+          {estHtml(manuel.bio.texte)
+            ? <div className="bio-html" dangerouslySetInnerHTML={{ __html: assainirHtml(manuel.bio.texte) }} />
+            : manuel.bio.texte.split(/\n\s*\n/).map((p, i) => <ParagrapheBio key={i} texte={p.trim()} i={i} />)}
           {manuel.bio.source && (
             <p className="meta">Source : {manuel.bio.source} · biographie éditée par l&apos;équipe DataParl&apos;.</p>
           )}
@@ -157,19 +158,6 @@ export default async function Bio({ params }: Props) {
           Né{f.civilite === "Mme" ? "e" : ""} {f.date_naissance.length === 4 ? `en ${f.date_naissance}` : `le ${f.date_naissance.split("-").reverse().join("/")}`}.
         </p>
       )}
-      {wiki && (
-        <>
-          <h2 id="wikipedia">Sur Wikipédia</h2>
-          <p>{wiki.extrait}</p>
-          <p className="meta">
-            Extrait de l&apos;article «&nbsp;<a href={wiki.url} target="_blank" rel="noopener noreferrer">{wiki.titre}</a>&nbsp;»
-            de Wikipédia, publié sous licence CC BY-SA 4.0 — l&apos;encyclopédie libre est co-écrite par ses lecteurs.
-            DataParl&apos; complète ce portrait avec les données officielles du Parlement : mandats, groupes, commissions
-            et équipe de collaborateurs.
-          </p>
-        </>
-      )}
-
       <h2>Mandats et parcours</h2>
       <ol className="parcours">
         {parcours.map((m, i) => {
