@@ -29,11 +29,12 @@ const SECTIONS: Section[] = [
   },
   { chemin: "/presse", libelle: "Presse", acces: "communication" },
   { chemin: "/jorf", libelle: "JORF", acces: "jorf" },
-  { chemin: "/jobs", libelle: "Jobs", acces: ["admin", "editeur"] },
+  { chemin: "/adminv2/jobs", libelle: "Jobs", acces: ["admin", "editeur"] },
   {
     chemin: "/users", libelle: "Utilisateurs", acces: "comptes", entrees: [
       { chemin: "/users", libelle: "Comptes", acces: "comptes" },
-      { chemin: "/users/abonnes", libelle: "Abonnés aux alertes", acces: "comptes" },
+      { chemin: "/users/abonnes", libelle: "Abonnés aux alertes", acces: "co
+mptes" },
       { chemin: "/users/api-keys", libelle: "Clés API", acces: "cles_api" },
       { chemin: "/telechargements", libelle: "Téléchargements Sheets", acces: "comptes" },
     ],
@@ -65,7 +66,8 @@ export default function EnTete({ espace }: { espace: Espace }) {
         </div>
       </div>
       <nav className="wrap large onglets-admin">
-        {espace === "admin" ? sections.map((s) => {
+        {espace === "admin" ? sections.map((s) =
+> {
           const actifSous = (c: string) => actif === c || (c !== "/" && actif.startsWith(`${c}/`));
           const ouvert = actifSous(s.chemin) || (s.entrees ?? []).some((e) => actifSous(e.chemin));
           if (!s.entrees) {
