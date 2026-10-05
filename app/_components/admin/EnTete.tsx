@@ -29,6 +29,7 @@ const SECTIONS: Section[] = [
   },
   { chemin: "/presse", libelle: "Presse", acces: "communication" },
   { chemin: "/jorf", libelle: "JORF", acces: "jorf" },
+  { chemin: "/jobs", libelle: "Jobs", acces: ["admin", "editeur"] },
   {
     chemin: "/users", libelle: "Utilisateurs", acces: "comptes", entrees: [
       { chemin: "/users", libelle: "Comptes", acces: "comptes" },
