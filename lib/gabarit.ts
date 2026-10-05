@@ -49,10 +49,10 @@ export function gabarit({ titre, corpsHtml, lireUrl, pied, edition, adressage }:
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F4EC"><tr><td align="center" style="padding:20px 16px 40px">
 ${lireUrl ? `<p style="margin:0 0 24px;font-size:13px;line-height:1.5;color:${GRIS}">Si cet email ne s'affiche pas correctement, <a href="${esc(lireUrl)}" style="color:${BLEU}">consulte-le en ligne</a>.</p>` : ""}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border:1px solid ${LIGNE};border-radius:16px;border-collapse:separate">
-${edition ? `<tr><td style="padding:26px 32px 22px;background:#14224E;border-radius:15px 15px 0 0">
-<span style="font-family:Georgia,'Times New Roman',serif;font-weight:bold;font-size:26px;color:#ffffff">Data<span style="background:#FFD23F;color:#071A41;padding:0 3px 0 1px">Parl'</span> <span style="font-style:italic;font-weight:normal">${edition}</span></span>
-</td></tr>
-<tr><td style="height:6px;line-height:6px;font-size:0;background:#FFD23F;border-bottom:3px solid #164DFF">&nbsp;</td></tr>` : `<tr><td style="padding:26px 32px;border-bottom:1px solid ${LIGNE}">
+${edition ? `<tr><td style="padding:26px 32px 20px;border-bottom:3px solid #FFD23F">
+<span style="font-family:Georgia,'Times New Roman',serif;font-weight:bold;font-size:24px;color:${ENCRE}">Data<span style="background:#FFD23F;padding:0 3px 0 1px">Parl'</span></span>
+<span style="font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:normal;font-size:20px;color:${GRIS}">&nbsp;${edition}</span>
+</td></tr>` : `<tr><td style="padding:26px 32px;border-bottom:1px solid ${LIGNE}">
 <span style="font-family:Georgia,'Times New Roman',serif;font-weight:bold;font-size:24px;color:${ENCRE}">Data<span style="background:#FFD23F;padding:0 3px 0 1px">Parl'</span></span>
 </td></tr>`}
 ${adressage ? `<tr><td style="padding:18px 32px 0;font-size:14px;line-height:1.5;color:${GRIS}">${esc(dateAdressage(adressage.date))}${adressage.pour ? `<br><span style="color:${ENCRE}">${esc(attention(adressage.pour))}</span>` : ""}</td></tr>` : ""}
@@ -60,8 +60,8 @@ ${adressage ? `<tr><td style="padding:18px 32px 0;font-size:14px;line-height:1.5
 <h1 style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:1.25;color:${ENCRE}">${esc(titre)}</h1>
 ${corpsHtml}
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid ${LIGNE};background:#FBFAF5;border-radius:0 0 16px 16px;font-size:14px">
-${lien(`${SITE}/mon-compte`, "Gérer mon compte")} <span style="color:${GRIS}">·</span> ${lien(`${SITE}/informations-legales`, "Informations légales")} <span style="color:${GRIS}">·</span> ${lien(`${SITE}/contact`, "Nous contacter")}
+<tr><td style="padding:18px 32px;border-top:1px solid ${LIGNE};background:#FBFAF5;border-radius:0 0 16px 16px;font-size:13px;text-align:center">
+<span style="color:${GRIS}">DataParl&apos; ·</span> ${lien(`${SITE}/`, "www.dataparl.fr")}
 </td></tr>
 </table>
 ${pied ? `<p style="max-width:600px;margin:16px auto 0;font-size:12px;line-height:1.5;color:${GRIS}">${pied}</p>` : ""}

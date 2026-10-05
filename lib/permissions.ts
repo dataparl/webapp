@@ -12,6 +12,7 @@ export const MODULES = [
   { cle: "contenu_sitemap", libelle: "Plan du site", detail: "Activer, désactiver ou passer une page en brouillon", defaut: [], reserve: true },
   { cle: "contenu_sheets", libelle: "DataParl' Sheets", detail: "Publier ou masquer une feuille du tableur media.dataparl.fr/sheets", defaut: [], reserve: true },
   { cle: "contenu_liens", libelle: "Liens tracés", detail: "Créer des liens courts et lire leurs statistiques", defaut: ["editeur"] },
+  { cle: "contenu_enquete", libelle: "Enquête utilisateurs", detail: "Réponses au questionnaire survey.dataparl.fr : qui, quand, notes", defaut: [], reserve: true },
   { cle: "communication", libelle: "Communication", detail: "Communiqués, carnet presse, mailing", defaut: ["editeur"] },
   { cle: "cles_api", libelle: "Clés API", detail: "Demandes et clés d'accès à l'API", defaut: [], reserve: true },
   { cle: "journal", libelle: "Journal", detail: "Journal d'activité de l'équipe", defaut: [], reserve: true },

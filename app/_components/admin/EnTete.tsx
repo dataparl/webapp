@@ -21,6 +21,7 @@ const SECTIONS: Section[] = [
       { chemin: "/content/sitemap", libelle: "Plan du site", acces: "contenu_sitemap" },
       { chemin: "/content/sheets", libelle: "DataParl' Sheets", acces: "contenu_sheets" },
       { chemin: "/content/links", libelle: "Liens courts", acces: "contenu_liens" },
+      { chemin: "/content/survey", libelle: "Enquête utilisateurs", acces: "contenu_enquete" },
       { chemin: "/elus", libelle: "Fiches élus", acces: "elus" },
       { chemin: "/elus/edit", libelle: "Éditeur de bios", acces: "elus" },
       { chemin: "/oppositions", libelle: "Suppressions de fiches", acces: "formulaires" },

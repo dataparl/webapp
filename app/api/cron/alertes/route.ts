@@ -96,8 +96,14 @@ export async function GET(req: Request) {
     try {
       const msg = messageAlerte(choisis, s.frequence, jour);
       const jeton = await nouveauJetonPreferences(s.email);
+      const hebdo = s.frequence === "hebdomadaire";
       const r = await expedier({
         to: [s.email], subject: msg.sujet, titre: msg.titre, corpsHtml: msg.html, text: msg.texte, type: "alerte",
+        // Expéditeurs dédiés (à valider dans Resend, domaine dataparl.fr) :
+        // dataparl-daily@ et dataparl-weekly@ — délivrabilité et filtres
+        // indépendants des autres envois du site.
+        from: hebdo ? "dataparl-weekly@dataparl.fr" : "dataparl-daily@dataparl.fr",
+        nomExpediteur: hebdo ? "DataParl' Weekly" : "DataParl' Daily",
         edition: msg.edition, adressage: { date: jour, pour: await destinataire(s).catch(() => undefined) },
         pied: piedOptIn(`${SITE}/preferences?id=${jeton}`, `${SITE}/desinscription?id=${jeton}`),
         unsubscribeUrl: `${SITE}/api/desinscription?id=${jeton}`,

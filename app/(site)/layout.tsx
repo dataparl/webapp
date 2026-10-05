@@ -1,6 +1,7 @@
 import { EnTeteSite, PiedDePage } from "../_components/SiteChrome";
 import RetourHaut from "../_components/RetourHaut";
 import CrayonPage from "../_components/CrayonPage";
+import EnqueteInvite from "../_components/EnqueteInvite";
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -10,6 +11,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <PiedDePage />
       <RetourHaut />
       <CrayonPage />
+      <EnqueteInvite />
     </div>
   );
 }

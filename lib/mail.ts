@@ -92,5 +92,5 @@ export function piedObligatoire(): string {
 }
 
 export function piedOptIn(prefsUrl: string, unsubUrl: string): string {
-  return `Tu reçois ce message parce que tu es abonné(e) aux alertes DataParl'. <a href="${prefsUrl}" style="color:#4A5670">Régler mes préférences</a> · <a href="${unsubUrl}" style="color:#4A5670">Me désinscrire</a>`;
+  return `<a href="${unsubUrl}" style="color:#4A5670">Me désinscrire des alertes</a> · <a href="${prefsUrl}" style="color:#4A5670">Mes préférences</a>`;
 }

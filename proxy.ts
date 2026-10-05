@@ -17,6 +17,7 @@ import { estInactif } from "./lib/pagesRegistre";
 //                           DataParl' Sheets (/sheets/*, /search) ; tout autre
 //                           chemin : message de 15 s puis bascule vers www
 //   raw.dataparl.fr        /schemas/*.json (schémas de données bruts) ; le reste -> www
+//   survey.dataparl.fr     / -> /enquete (questionnaire d'avis, jeton ?j=) ; le reste -> www
 //   drive.dataparl.fr      ancien domaine du tableur -> media (308)
 // Sur www : une page désactivée dans l'admin (Plan du site) répond 404.
 // Anciens domaines (cavaparlement.eu, dataparl.com) : redirection 308 vers la
@@ -170,6 +171,20 @@ export async function proxy(req: NextRequest) {
   // drive.dataparl.fr : ancien domaine du tableur. Tout revient vers
   // media.dataparl.fr (le tableur vit sur media.dataparl.fr/sheets).
   if (host === `drive.${DOMAINE}`) return vers(req, `media.${DOMAINE}`, path, 308);
+
+  // survey.dataparl.fr : le questionnaire d'avis ouvert depuis le site
+  // (invitation après quelques minutes, jeton ?j=…). Une seule page ; le
+  // reste du domaine revient vers www. Jamais indexé.
+  if (host === `survey.${DOMAINE}`) {
+    if (path === "/" || path === "") {
+      const url = req.nextUrl.clone();
+      url.pathname = "/enquete";
+      const res = protege(NextResponse.rewrite(url));
+      res.headers.set("X-Robots-Tag", "noindex");
+      return res;
+    }
+    return vers(req, `www.${DOMAINE}`, "/", 308);
+  }
 
   for (const espace of ["admin", "webmail"] as const) {
     if (host !== `${espace}.${DOMAINE}`) continue;
