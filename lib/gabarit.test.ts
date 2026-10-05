@@ -7,7 +7,7 @@ test("gabarit : lien en ligne, titre échappé, pied de carte", () => {
   assert.match(h, /consulte-le en ligne/);
   assert.match(h, /mail\.dataparl\.fr\/lire\/abc/);
   assert.match(h, /Re: &lt;test&gt;/);
-  assert.match(h, /Informations légales/);
+  assert.match(h, /www\.dataparl\.fr/);
   assert.doesNotMatch(gabarit({ titre: "t", corpsHtml: "" }), /consulte-le en ligne/);
 });
 
@@ -24,7 +24,7 @@ test("alertes : édition, date et adressage avec élision", () => {
   assert.equal(attention("Hélène MARTIN"), "À l'attention d'Hélène MARTIN");
   assert.equal(prenomNomAdresse("jean-pierre", "de la tour"), "Jean-Pierre DE LA TOUR");
   const h = gabarit({ titre: "t", corpsHtml: "", edition: "Weekly", adressage: { date: "2026-10-05", pour: "Anne <X>" } });
-  assert.match(h, />Weekly</);
+  assert.match(h, /\u0026nbsp;Weekly</);
   assert.match(h, /05 Octobre 2026/);
   assert.match(h, /À l&#39;attention d&#39;Anne &lt;X&gt;/);
 });

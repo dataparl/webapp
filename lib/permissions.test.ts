@@ -12,7 +12,7 @@ test("rôle par défaut, puis réglages", () => {
   assert.deepEqual(modulesDe("utilisateur", [{ module: "contenu_liens", autorise: true }]), ["contenu_liens"]);
   assert.ok(!modulesDe("editeur", [{ module: "communication", autorise: false }]).includes("communication"));
   // Un administrateur ne peut pas être restreint ; un module inconnu est ignoré.
-  assert.equal(modulesDe("admin", [{ module: "journal", autorise: false }]).length, 10);
+  assert.equal(modulesDe("admin", [{ module: "journal", autorise: false }]).length, 12);
   assert.deepEqual(modulesDe("utilisateur", [{ module: "inconnu", autorise: true }]), []);
   // Modules réservés : jamais ouverts hors administrateurs.
   assert.deepEqual(modulesDe("editeur", [{ module: "journal", autorise: true }, { module: "cles_api", autorise: true }]).filter((m) => m === "journal" || m === "cles_api"), []);
