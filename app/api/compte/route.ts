@@ -24,7 +24,7 @@ export async function GET(req: Request) {
     fournisseurs: fournisseurs(user),
     alertes: {
       actives: !!prefs?.alertes_enabled && !!sub?.active,
-      frequences: (sub?.frequences ?? []).length ? sub.frequences : [sub?.frequence ?? "quotidienne"],
+      frequences: sub && (sub.frequences ?? []).length ? sub.frequences : [sub?.frequence ?? "quotidienne"],
       chambres: sub?.chambres ?? ["assemblee", "senat"],
       types: sub?.types ?? ["arrivee", "depart", "transfert"],
       groupes: sub?.groupes ?? [],
