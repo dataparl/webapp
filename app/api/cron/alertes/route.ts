@@ -24,11 +24,10 @@ function autorise(req: Request): boolean {
   return !!s && recu.length === attendu.length && timingSafeEqual(Buffer.from(recu), Buffer.from(attendu));
 }
 
-type Sub = Abonnement & { email: string; user_id: string | null; prenom: string | null; nom: string | null };
+type Sub = Abonnement & { email: string; user_id: string | null; frequence: "quotidienne" | "hebdomadaire"; frequences: ("quotidienne" | "hebdomadaire")[] };
 
-// « Prénom NOM » : saisi dans les alertes, sinon le nom du compte (connexion Google, GitHub…).
+// « Prénom NOM » : les infos du compte (metadata de l'auth), plus rien à saisir.
 async function destinataire(s: Sub): Promise<string | undefined> {
-  if (s.prenom || s.nom) return prenomNomAdresse(s.prenom ?? "", s.nom ?? "");
   if (!s.user_id) return undefined;
   const { data } = await authAdmin().auth.admin.getUserById(s.user_id);
   const meta = data.user?.user_metadata ?? {};
@@ -46,7 +45,7 @@ export async function GET(req: Request) {
   const db = authAdmin();
 
   const [{ data: subs, error }, { data: refus }] = await Promise.all([
-    db.from("alert_subscriptions").select("email, user_id, prenom, nom, frequence, chambres, types, groupes, elus").eq("active", true),
+    db.from("alert_subscriptions").select("email, user_id, frequence, frequences, chambres, types, groupes, elus").eq("active", true),
     db.from("communication_preferences").select("email").eq("alertes_enabled", false),
   ]);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -80,23 +79,24 @@ export async function GET(req: Request) {
   for (const s of abonnes) {
     const ids = await idsDe(s.elus ?? []);
     const a: Abonnement = { ...s, chambres: s.chambres ?? [], types: s.types ?? [], groupes: s.groupes ?? [], elus: s.elus ?? [] };
+    // Fréquences cumulables : Daily ET Weekly. Anciens réglages repris
+    // automatiquement (colonne frequences vide = l'ancienne frequence).
+    const freqs = s.frequences?.length ? s.frequences : [s.frequence];
     let choisis: MvtAlerte[] = [];
     let nouvelles: string[] = [];
-    if (s.frequence === "hebdomadaire") {
-      if (!lundi || envoye.has(`${s.email}|hebdomadaire:${jour}`)) continue;
-      choisis = mvts.filter((m) => m.date_event < jour && m.date_event >= decaler(jour, -7) && correspond(m, a, ids));
-      nouvelles = [`hebdomadaire:${jour}`];
-    } else {
-      const dates = [decaler(jour, -1), jour].filter((d) => !envoye.has(`${s.email}|quotidienne:${d}`));
-      choisis = mvts.filter((m) => dates.includes(m.date_event) && correspond(m, a, ids));
-      // Une date n'est marquée envoyée que si elle avait des mouvements.
-      nouvelles = [...new Set(choisis.map((m) => `quotidienne:${m.date_event}`))];
-    }
-    if (!choisis.length) continue;
+    for (const freq of freqs) {
+    const hebdo = freq === "hebdomadaire";
     try {
-      const msg = messageAlerte(choisis, s.frequence, jour);
+      if (hebdo) {
+        if (!lundi || envoye.has(`${s.email}|hebdomadaire:${jour}`)) continue;
+        choisis = mvts.filter((m) => m.date_event < jour && m.date_event >= decaler(jour, -7) && correspond(m, a, ids));
+      } else {
+        const dates = [decaler(jour, -1), jour].filter((d) => !envoye.has(`${s.email}|quotidienne:${d}`));
+        choisis = mvts.filter((m) => dates.includes(m.date_event) && correspond(m, a, ids));
+      }
+      if (!choisis.length) continue;
+      const msg = messageAlerte(choisis, freq, jour);
       const jeton = await nouveauJetonPreferences(s.email);
-      const hebdo = s.frequence === "hebdomadaire";
       const r = await expedier({
         to: [s.email], subject: msg.sujet, titre: msg.titre, corpsHtml: msg.html, text: msg.texte, type: "alerte",
         // Expéditeurs dédiés (à valider dans Resend, domaine dataparl.fr) :
@@ -109,10 +109,14 @@ export async function GET(req: Request) {
         unsubscribeUrl: `${SITE}/api/desinscription?id=${jeton}`,
       });
       if (!r.ok) { erreurs.push(r.error); continue; }
+      nouvelles = hebdo
+        ? [`hebdomadaire:${jour}`]
+        : [...new Set(choisis.map((m) => `quotidienne:${m.date_event}`))];
       await db.from("alert_sends").insert(nouvelles.map((periode) => ({ email: s.email, periode, message_id: r.resendId, n_mouvements: choisis.length })));
       envoyes += 1;
     } catch (e) {
       erreurs.push(e instanceof Error ? e.message : String(e));
+    }
     }
   }
   // Ménage quotidien : les ouvertures de liens tracés sont gardées 13 mois.

@@ -50,6 +50,11 @@ versionnement [SemVer](https://semver.org/lang/fr/).
   DataParl' Daily/Weekly), pied de page réduit à une ligne, et expéditeurs
   dédiés `dataparl-daily@dataparl.fr` / `dataparl-weekly@dataparl.fr`
   (à valider dans Resend).
+- Alertes : fréquences cumulables (Daily ET Weekly, cases à cocher ;
+  scripts/alertes-frequences.sql), champs Prénom/Nom retirés du réglage (la
+  ligne « À l'attention de » prend les infos du compte), filtres Parti et
+  Commission en attente retirés de la page, lien « Mon compte » dans le pied
+  des emails.
 - En-tête www : logo à gauche, recherche au centre, menu déroulant à droite
   sur toutes les tailles d'écran.
 - Session : rafraîchissement explicite du jeton avant chaque action —

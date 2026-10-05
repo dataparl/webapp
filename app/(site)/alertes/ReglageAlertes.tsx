@@ -9,7 +9,7 @@ import { sessionActuelle } from "@/lib/supabaseBrowser";
 type Elu = { chambre: string; cle: string; nom: string; groupe: string };
 type EluCompact = { s: string; p: string; n: string; c: string };
 type Reglage = {
-  actives: boolean; frequence: "quotidienne" | "hebdomadaire"; chambres: string[]; types: string[];
+  actives: boolean; frequences: ("quotidienne" | "hebdomadaire")[]; chambres: string[]; types: string[];
   groupes: string[]; elus: string[]; partis: string[]; commissions: string[]; prenom?: string; nom?: string;
 };
 
@@ -70,7 +70,7 @@ export default function ReglageAlertes() {
     if (!r[k].includes(v)) setR({ ...r, [k]: [...r[k], v] });
     setRaz((n) => n + 1);
   };
-  const pret = cgu && consent && r.chambres.length > 0 && r.types.length > 0;
+  const pret = cgu && consent && r.chambres.length > 0 && r.types.length > 0 && r.frequences.length > 0;
 
   async function enregistrer(actives: boolean) {
     if (!session || !r) return;
@@ -127,30 +127,9 @@ export default function ReglageAlertes() {
         ))}
       </div>
 
-      <div className="grille-filtres">
-        <div>
-          <label htmlFor="parti-a">Parti</label>
-          <select id="parti-a" disabled><option>Bientôt disponible</option></select>
-        </div>
-        <div>
-          <label htmlFor="commission-a">Commission</label>
-          <select id="commission-a" disabled><option>Bientôt disponible</option></select>
-        </div>
-        <div>
-          <label htmlFor="frequence">Fréquence</label>
-          <select id="frequence" value={r.frequence} onChange={(e) => setR({ ...r, frequence: e.target.value as Reglage["frequence"] })}>
-            <option value="quotidienne">DataParl&apos; Daily : chaque jour où ça bouge</option>
-            <option value="hebdomadaire">DataParl&apos; Weekly : le récapitulatif du lundi</option>
-          </select>
-        </div>
-      </div>
-      <div className="grille-2">
-        <div><label htmlFor="a-prenom">Prénom <span className="meta">(facultatif)</span></label>
-          <input id="a-prenom" type="text" maxLength={60} value={r.prenom ?? ""} onChange={(e) => setR({ ...r, prenom: e.target.value })} autoComplete="given-name" /></div>
-        <div><label htmlFor="a-nom">Nom <span className="meta">(facultatif)</span></label>
-          <input id="a-nom" type="text" maxLength={60} value={r.nom ?? ""} onChange={(e) => setR({ ...r, nom: e.target.value })} autoComplete="family-name" /></div>
-      </div>
-      <p className="meta" style={{ marginTop: 4 }}>Pour la ligne « À l&apos;attention de… » en tête de tes alertes.</p>
+      <label>Fréquence <span className="meta">(les deux si tu veux)</span></label>
+      <label className="check"><input type="checkbox" checked={r.frequences.includes("quotidienne")} onChange={() => setR({ ...r, frequences: r.frequences.includes("quotidienne") ? r.frequences.filter((f) => f !== "quotidienne") : [...r.frequences, "quotidienne"] })} /> DataParl&apos; Daily : chaque jour où ça bouge</label>
+      <label className="check"><input type="checkbox" checked={r.frequences.includes("hebdomadaire")} onChange={() => setR({ ...r, frequences: r.frequences.includes("hebdomadaire") ? r.frequences.filter((f) => f !== "hebdomadaire") : [...r.frequences, "hebdomadaire"] })} /> DataParl&apos; Weekly : le récapitulatif du lundi</label>
 
       <label className="check" style={{ marginTop: 22 }}>
         <input type="checkbox" checked={cgu} onChange={(e) => setCgu(e.target.checked)} />
