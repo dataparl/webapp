@@ -87,7 +87,7 @@ function Actions({ id, fait, supprimerSeul }: { id: string; fait: (s: string) =>
           <button type="button" disabled={occupe} onClick={() => statut("expiree")}>Expirée</button>{" "}
         </>
       )}
-      <button type="button" disabled={occupe} onClick={() => { if (confirm("Supprimer définitivement cette offre ? (irréversible)")) supprimer(); }}>Supprimer</button>
+      <button type="button" disabled={occupe} onClick={() => { if (confirm('Supprimer définitivement cette offre ? (irréversible)')) supprimer(); }}>Supprimer</button>
     </>
   );
 }
@@ -126,7 +126,7 @@ function Nouvelle({ onCree, setInfo }: { onCree: () => void; setInfo: (s: string
         <label>Type de poste<input {...maj("type_poste")} maxLength={100} /></label>
         <label>Localisation<input {...maj("localisation")} maxLength={100} /></label>
         <label>Groupe / parti<input {...maj("groupe_politique")} maxLength={100} /></label>
-        <label>Élu / équipe (clé du répertoire)<input {...maj("parlementaire_slug")} maxLength={200} placeholder="ex : bourcier_corinie21046e" /></label>
+        <label>Élu / équipe (clé du répertoire)<input {...maj("parlementaire_slug")} maxLength={200} placeholder="ex : bourcier_corinne21046e" /></label>
         <label>Publiée le<input type="date" {...maj("publie_le")} /></label>
         <button type="submit">Mettre en file de revue</button>
       </form>
