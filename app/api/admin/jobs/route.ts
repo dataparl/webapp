@@ -38,7 +38,8 @@ const Soumission = z.object({
 const v = (s: string | undefined) => (!s || !s.trim() ? null : s.trim());
 
 // Empreinte stable : deux fois la même offre (même titre, même source) ne crée
-// jamais de doublon, quel que soit le canal d'entrée.
+// jamais de doublon, quel que soit le canal d'entrée
+
 export async function POST(req: Request) {
   return avecAdmin(req, async (a) => {
     const p = Soumission.safeParse(await corps(req));
@@ -63,7 +64,7 @@ export async function POST(req: Request) {
       if (error.code === "23505") return erreur(409, "offre déjà enregistrée (doublon)");
       throw error;
     }
-    await audit(a, "jobs.soumission", null, { titre: d.titre, source: d.source_connector });
+    await audit(a, "jobs.soumission", undefined, { titre: d.titre, source: d.source_connector });
     return { ok: true };
   }, EDITION);
 }
