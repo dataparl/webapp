@@ -39,20 +39,14 @@ export default async function Jobs() {
   return (
     <>
       <h1>
-        <span className="surligne">Offres d'emploi</span> parlementaires
+        <span className="surligne">Offres d&apos;emploi</span> parlementaires
       </h1>
       <p className="lead">
         Les postes de collaborateur parlementaire publiés dans les équipes, collectés depuis les sources officielles et vérifiés à la main.
       </p>
       <p style={{ marginTop: "16px" }}>
-        <Link
-          href="/jobs/proposer"
-          className="btn"
-          style={{ display: "inline-block", background: "#000091", color: "#fff", borderRadius: 10, padding: "10px 18px", fontWeight: 600, textDecoration: "none" }}
-        >
-          Proposer une offre
-        </Link>{" "}
-        <span style={{ color: "#6b7280", fontSize: "0.85rem" }}>réservé aux adresses parlementaires</span>
+        <a className="btn" href="/jobs/proposer">Proposer une offre</a>{" "}
+        <span className="meta">réservé aux adresses parlementaires</span>
       </p>
       {offres.length === 0 ? (
         <p style={{ marginTop: "32px" }}>
