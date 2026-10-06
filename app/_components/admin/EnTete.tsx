@@ -33,9 +33,7 @@ const SECTIONS: Section[] = [
   {
     chemin: "/users", libelle: "Utilisateurs", acces: "comptes", entrees: [
       { chemin: "/users", libelle: "Comptes", acces: "comptes" },
-      { chemin: "/users/abonnes", libelle: "Abonnés aux alertes", ac
-ces: "co
-mptes" },
+      { chemin: "/users/abonnes", libelle: "Abonnés aux alertes", acces: "comptes" },
       { chemin: "/users/api-keys", libelle: "Clés API", acces: "cles_api" },
       { chemin: "/telechargements", libelle: "Téléchargements Sheets", acces: "comptes" },
     ],
@@ -68,6 +66,7 @@ export default function EnTete({ espace }: { espace: Espace }) {
       </div>
       <nav className="wrap large onglets-admin">
         {espace === "admin" ? sections.
+
 map((s) =
 > {
           const actifSous = (c: string) => actif === c || (c !== "/" && actif.startsWith(`${c}/`));
