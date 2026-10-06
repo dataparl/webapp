@@ -34,7 +34,7 @@ export default function Gestion() {
       {data && data.offres.length === 0 && <p className="meta">Aucune offre.</p>}
       {data && data.offres.length > 0 && (
         <table className="stats">
-          <thead><tr><th>Titre</th><th>Équipe</th><th>Publication</th><th>Source</th>{vue === "actives" ? <th>Actions</th> : <th>Statut</th>}</tr></thead>
+          <thead><tr><th>Titre</th><th>Équipe</th><th>Publication</th><th>Source</th><th>Actions</th></tr></thead>
           <tbody>
             {data.offres.map((o) => (
               <tr key={o.id}>
@@ -42,11 +42,16 @@ export default function Gestion() {
                 <td className="meta">{o.groupe_politique ?? "—"}{o.parlementaire_slug ? " · " + o.parlementaire_slug : ""}</td>
                 <td className="meta">{dateHeure(o.publie_le)}</td>
                 <td><a href={o.source_url} target="_blank" rel="noopener noreferrer">lien</a></td>
-                {vue === "actives" ? (
-                  <td><Actions id={o.id} fait={(s) => { setInfo(s); recharger(); }} /></td>
-                ) : (
-                  <td className="meta">{o.statut} · {dateHeure(o.updated_at)}</td>
-                )}
+                <td>
+                  {vue === "actives" ? (
+                    <Actions id={o.id} fait={(s) => { setInfo(s); recharger(); }} />
+                  ) : (
+                    <>
+                      <span className="meta">{o.statut} · {dateHeure(o.updated_at)}{" · "}</span>
+                      <Actions id={o.id} fait={(s) => { setInfo(s); recharger(); }} supprimerSeul />
+                    </>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -56,7 +61,7 @@ export default function Gestion() {
   );
 }
 
-function Actions({ id, fait }: { id: string; fait: (s: string) => void }) {
+function Actions({ id, fait, supprimerSeul }: { id: string; fait: (s: string) => void; supprimerSeul?: boolean }) {
   const { api } = useAdmin();
   const [occupe, setOccupe] = useState(false);
   async function statut(s: "pourvue" | "expiree") {
@@ -65,10 +70,21 @@ function Actions({ id, fait }: { id: string; fait: (s: string) => void }) {
     catch (e) { fait((e as Error).message); }
     setOccupe(false);
   }
+  async function supprimer() {
+    setOccupe(true);
+    try { await api("/api/admin/jobs/" + id, { method: "DELETE" }); fait("Offre supprimée définitivement."); }
+    catch (e) { fait((e as Error).message); }
+    setOccupe(false);
+  }
   return (
     <>
-      <button type="button" disabled={occupe} onClick={() => statut("pourvue")}>Pourvue</button>{" "}
-      <button type="button" disabled={occupe} onClick={() => statut("expiree")}>Expirée</button>
+      {!supprimerSeul && (
+        <>
+          <button type="button" disabled={occupe} onClick={() => statut("pourvue")}>Pourvue</button>{" "}
+          <button type="button" disabled={occupe} onClick={() => statut("expiree")}>Expirée</button>{" "}
+        </>
+      )}
+      <button type="button" disabled={occupe} onClick={() => { if (confirm("Supprimer définitivement cette offre ? (irréversible)")) supprimer(); }}>Supprimer</button>
     </>
   );
 }
