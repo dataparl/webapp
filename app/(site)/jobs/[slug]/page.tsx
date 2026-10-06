@@ -66,7 +66,7 @@ export default async function OffrePage({ params }: { params: Promise<{ slug: st
       <>
         <h1>Offre introuvable</h1>
         <p style={{ marginTop: "24px" }}>
-          Cette offre n'existe pas, n'est plus active ou a été retirée.{" "}
+          Cette offre n&apos;existe pas, n&apos;est plus active ou a été retirée.{" "}
           <Link href="/jobs">Voir toutes les offres →</Link>
         </p>
       </>
@@ -77,26 +77,26 @@ export default async function OffrePage({ params }: { params: Promise<{ slug: st
 
   return (
     <>
-      <p style={{ marginBottom: "8px" }}>
+      <p className="meta" style={{ marginBottom: "8px" }}>
         <Link href="/jobs">← Toutes les offres</Link>
       </p>
       <h1>{titreStandard(o)}</h1>
 
-      {/* ——— Encadré informations clés ——— */}
-      <div style={{ border: "1px solid #e5e7eb", borderRadius: 12, padding: "16px 20px", margin: "24px 0", display: "grid", gap: 8 }}>
+      {/* ——— Informations clés ——— */}
+      <div className="card" style={{ margin: "24px 0", display: "grid", gap: 10 }}>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {o.chambre && (
-            <span style={{ background: "#eef2ff", color: "#000091", borderRadius: 999, padding: "4px 12px", fontSize: "0.82rem", fontWeight: 500 }}>
+            <span style={{ background: "var(--jaune)", color: "#071A41", borderRadius: 999, padding: "4px 12px", fontSize: "0.82rem", fontWeight: 600 }}>
               {SIGLE[o.chambre as Chambre] ?? o.chambre}
             </span>
           )}
           {[o.type_poste, o.departement, o.localisation, o.groupe_politique].filter(Boolean).map((m) => (
-            <span key={m} style={{ background: "#f3f4f6", color: "#374151", borderRadius: 999, padding: "4px 12px", fontSize: "0.82rem" }}>
+            <span key={m} style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 999, padding: "4px 12px", fontSize: "0.82rem" }}>
               {m}
             </span>
           ))}
         </div>
-        <p style={{ margin: 0, color: "#6b7280", fontSize: "0.88rem" }}>
+        <p className="meta" style={{ margin: 0 }}>
           {nomElu && <>Équipe de {nomElu} · </>}
           {o.publie_le ? "Publiée le " + dateFr(o.publie_le) : "Publication en cours"}
           {o.expire_le ? " · Candidatures jusqu'au " + dateFr(o.expire_le) : ""}
@@ -108,7 +108,7 @@ export default async function OffrePage({ params }: { params: Promise<{ slug: st
       {o.description ? (
         <div style={{ whiteSpace: "pre-line", lineHeight: 1.7 }}>{o.description}</div>
       ) : (
-        <p style={{ color: "#6b7280" }}>La description complète de cette offre est en cours d'enrichissement.</p>
+        <p className="meta">La description complète de cette offre est en cours d&apos;enrichissement.</p>
       )}
 
       <p style={{ marginTop: "32px" }}>
