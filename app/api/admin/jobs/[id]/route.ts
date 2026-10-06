@@ -13,6 +13,10 @@ const Maj = z.object({
   localisation: z.string().max(100).optional(),
   groupe_politique: z.string().max(100).optional(),
   parlementaire_slug: z.string().max(200).optional(),
+  chambre: z.enum(["an", "senat", "pe"]).optional(),
+  departement: z.string().max(100).optional(),
+  elu_prenom: z.string().max(100).optional(),
+  elu_nom: z.string().max(100).optional(),
   publie_le: z.string().max(10).optional(),
   expire_le: z.string().max(10).optional(),
   statut: z.enum(["active", "expiree", "pourvue", "rejetee"]).optional(),
@@ -32,9 +36,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const champs: Record<string, unknown> = {};
     if (d.titre !== undefined) champs.titre = d.titre;
     if (d.description !== undefined) champs.description = d.description;
-    for (const k of ["type_poste", "localisation", "groupe_politique", "parlementaire_slug", "publie_le", "expire_le", "review_note"] as const) {
+    for (const k of ["type_poste", "localisation", "groupe_politique", "parlementaire_slug", "departement", "elu_prenom", "elu_nom", "publie_le", "expire_le", "review_note"] as const) {
       if (d[k] !== undefined) champs[k] = v(d[k]);
     }
+    if (d.chambre !== undefined) champs.chambre = d.chambre;
     if (d.statut !== undefined) champs.statut = d.statut;
     if (d.decision === "valider") { champs.review_status = "approved"; champs.statut = "active"; }
     if (d.decision === "rejeter") { champs.review_status = "rejected"; champs.statut = "rejetee"; }
