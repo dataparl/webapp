@@ -14,7 +14,8 @@ type Offre = {
 };
 
 // File de revue : chaque offre collectée ou soumise passe par une validation
-// humaine — on publie, on corrige avant de publier, ou on rejette avec un motif.
+// humaine — on publie, on corrige avant de publier, on rejette avec un motif,
+// ou on supprime définitivement (offre de test, spam, doublon bancal).
 export default function Revue() {
   const { data, err, recharger } = useRessource<{ offres: Offre[] }>("/api/admin/jobs?vue=revue");
   const [info, setInfo] = useState<string | null>(null);
@@ -62,6 +63,16 @@ function Carte({ offre: o, onDone, setInfo }: { offre: Offre; onDone: () => void
     setOccupe(false);
   }
 
+  async function supprimer() {
+    setOccupe(true); setInfo(null);
+    try {
+      await api("/api/admin/jobs/" + o.id, { method: "DELETE" });
+      setInfo("Offre supprimée définitivement : " + o.titre);
+      onDone();
+    } catch (e) { setInfo((e as Error).message); }
+    setOccupe(false);
+  }
+
   return (
     <details className="carte-revue" open>
       <summary><strong>{o.titre}</strong> <span className="meta">— collectée le {dateHeure(o.created_at)} · source : {o.source_connector}</span></summary>
@@ -77,8 +88,9 @@ function Carte({ offre: o, onDone, setInfo }: { offre: Offre; onDone: () => void
         <label>Publiée le<input type="date" {...maj("publie_le")} /></label>
         <label>Expire le<input type="date" {...maj("expire_le")} /></label>
         <label>Note interne<input {...maj("review_note")} maxLength={2000} /></label>
-        <button type="submit" disabled={occupe}>Publier</button>
-        <button type="button" disabled={occupe} onClick={() => { if (f.review_note.trim() || confirm("Rejeter sans motif ?")) decider("rejeter"); }}>Rejeter</button>
+        <button type="submit" disabled={occupe}>Publier</button>{" "}
+        <button type="button" disabled={occupe} onClick={() => { if (f.review_note.trim() || confirm("Rejeter sans motif ?")) decider("rejeter"); }}>Rejeter</button>{" "}
+        <button type="button" disabled={occupe} onClick={() => { if (confirm("Supprimer définitivement cette offre ? (irréversible — elle pourra être recollectée si elle reparaît en source)") supprimer(); }}>Supprimer</button>
       </form>
     </details>
   );
