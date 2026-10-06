@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { authAdmin } from "@/lib/supabaseAdmin";
 import { SIGLE, idDepuisSlug, slugOffre, titreStandard, type Chambre } from "@/lib/jobs";
+import { PastilleProvenance } from "../_components/ListeOffres";
 
-// Détail d'une offre — hébergé sur DataParl' (jamais de redirection vers un
-// autre site : le contenu vit ici, la source n'est citée qu'en référence).
-// Seules les offres approuvées, actives et non expirées sont visibles.
+// Détail d'une offre — hébergé sur DataParl' (jamais de redirection).
+// Pastille de provenance : déposée par l'élu ou collectée sur une source publique.
 
 export const revalidate = 300;
 export const dynamic = "force-dynamic";
@@ -84,7 +84,8 @@ export default async function OffrePage({ params }: { params: Promise<{ slug: st
 
       {/* ——— Informations clés ——— */}
       <div className="card" style={{ margin: "24px 0", display: "grid", gap: 10 }}>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+          <PastilleProvenance connector={o.source_connector} avecLibelle />
           {o.chambre && (
             <span style={{ background: "var(--jaune)", color: "#071A41", borderRadius: 999, padding: "4px 12px", fontSize: "0.82rem", fontWeight: 600 }}>
               {SIGLE[o.chambre as Chambre] ?? o.chambre}
@@ -100,7 +101,6 @@ export default async function OffrePage({ params }: { params: Promise<{ slug: st
           {nomElu && <>Équipe de {nomElu} · </>}
           {o.publie_le ? "Publiée le " + dateFr(o.publie_le) : "Publication en cours"}
           {o.expire_le ? " · Candidatures jusqu'au " + dateFr(o.expire_le) : ""}
-          {" · Source : " + o.source_connector}
         </p>
       </div>
 
