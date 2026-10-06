@@ -25,6 +25,23 @@ const uniques = (xs: (string | null | undefined)[]) =>
 const dateFr = (iso: string | null) =>
   iso ? new Date(iso + "T12:00:00Z").toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : null;
 
+// Pastille de provenance : une offre déposée directement par l'élu (via le
+// formulaire, adresse parlementaire vérifiée) se distingue d'une offre
+// collectée automatiquement sur une source publique.
+export function PastilleProvenance({ connector, avecLibelle }: { connector: string; avecLibelle?: boolean }) {
+  const parElu = connector === "proposition";
+  if (!parElu && !avecLibelle) return null;
+  return (
+    <span
+      style={parElu
+        ? { background: "var(--jaune)", color: "#071A41", borderRadius: 999, padding: "3px 10px", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.02em" }
+        : { border: "1px solid var(--line)", color: "var(--muted)", borderRadius: 999, padding: "3px 10px", fontSize: "0.75rem" }}
+    >
+      {parElu ? "★ Offre déposée par l'élu" : "Collectée"}
+    </span>
+  );
+}
+
 // Liste publique des offres avec filtres : chambre, élu, groupe, département + recherche libre.
 export default function ListeOffres({ offres }: { offres: OffreListe[] }) {
   const [chambre, setChambre] = useState("");
@@ -32,6 +49,7 @@ export default function ListeOffres({ offres }: { offres: OffreListe[] }) {
   const [groupe, setGroupe] = useState("");
   const [departement, setDepartement] = useState("");
   const [q, setQ] = useState("");
+  const [parLElu, setParLElu] = useState(false);
 
   const elus = useMemo(
     () => uniques(offres.map((o) => [o.elu_prenom, o.elu_nom].filter(Boolean).join(" "))),
@@ -47,6 +65,7 @@ export default function ListeOffres({ offres }: { offres: OffreListe[] }) {
     if (elu && nomElu(o) !== elu) return false;
     if (groupe && (o.groupe_politique ?? "") !== groupe) return false;
     if (departement && (o.departement ?? "") !== departement) return false;
+    if (parLElu && o.source_connector !== "proposition") return false;
     if (q) {
       const t = (titreStandard(o) + " " + o.description).toLowerCase();
       if (!t.includes(q.toLowerCase())) return false;
@@ -54,7 +73,8 @@ export default function ListeOffres({ offres }: { offres: OffreListe[] }) {
     return true;
   });
 
-  const reset = () => { setChambre(""); setElu(""); setGroupe(""); setDepartement(""); setQ(""); };
+  const reset = () => { setChambre(""); setElu(""); setGroupe(""); setDepartement(""); setQ(""); setParLElu(false); };
+  const unFiltre = !!(chambre || elu || groupe || departement || q || parLElu);
 
   return (
     <>
@@ -87,9 +107,14 @@ export default function ListeOffres({ offres }: { offres: OffreListe[] }) {
         <input type="text" placeholder="Rechercher un poste…" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
       <p className="meta" style={{ margin: "0 0 24px" }}>
+        <label style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+          <input type="checkbox" checked={parLElu} onChange={(e) => setParLElu(e.target.checked)} />
+          Uniquement les offres déposées par les élus
+        </label>
+        {" — "}
         {visibles.length} offre{visibles.length > 1 ? "s" : ""}
         {visibles.length !== offres.length ? " (filtrée" + (visibles.length > 1 ? "s" : "") + " sur " + offres.length + ")" : ""}
-        {(chambre || elu || groupe || departement || q) && (
+        {unFiltre && (
           <>
             {" — "}
             <button type="button" onClick={reset} style={{ background: "none", border: "none", padding: 0, color: "inherit", textDecoration: "underline", cursor: "pointer", font: "inherit" }}>
@@ -106,6 +131,9 @@ export default function ListeOffres({ offres }: { offres: OffreListe[] }) {
         <div style={{ display: "grid", gap: 16 }}>
           {visibles.map((o) => (
             <article key={o.id} className="card">
+              <p style={{ margin: "0 0 8px" }}>
+                <PastilleProvenance connector={o.source_connector} avecLibelle />
+              </p>
               <h2 style={{ margin: "0 0 8px", fontSize: "1.08rem" }}>
                 <Link href={"/jobs/" + slugOffre(o)}>{titreStandard(o)}</Link>
               </h2>
