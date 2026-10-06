@@ -39,8 +39,7 @@ export default function Revue() {
 
 function Carte({ offre: o, onDone, setInfo }: { offre: Offre; onDone: () => void; setInfo: (s: string | null) => void }) {
   const { api } = useAdmin();
-  const [f, setF] = us
-eState({
+  const [f, setF] = useState({
     titre: o.titre,
     description: o.description,
     type_poste: o.type_poste ?? "",
@@ -86,8 +85,7 @@ eState({
       <summary><strong>{o.titre}</strong> <span className="meta">— collectée le {dateHeure(o.created_at)} · source : {o.source_connector}</span></summary>
       <p><a href={o.source_url} target="_blank" rel="noopener noreferrer">{o.source_url}</a>{o.match_confidence != null && <span className="meta"> · confiance rattachement : {Math.round(o.match_confidence * 100)} %</span>}</p>
       {o.source_raw && <details><summary className="meta">Texte brut collecté</summary><pre>{o.source_raw}</pre></details>}
-     
- <form onSubmit={(e) => { e.preventDefault(); decider("valider"); }}>
+      <form onSubmit={(e) => { e.preventDefault(); decider("valider"); }}>
         <label>Chambre
           <select {...maj("chambre")}>
             <option value="">—</option>
@@ -107,7 +105,7 @@ eState({
         <label>Expire le<input type="date" {...maj("expire_le")} /></label>
         <label>Note interne<input {...maj("review_note")} maxLength={2000} /></label>
         <button type="submit" disabled={occupe}>Publier</button>{" "}
-        <button type="button" disabled={occupe} onClick={() => { if (f.review_note.trim() || confirm('Rejeter sans motif ?')) decider('rejeter'); }}>Rejeter</button>{" "}
+        <button type="button" disabled={occupe} onClick={() => { if (f.review_note.trim() || confirm('Rejeter sans motif ?')) decider("rejeter"); }}>Rejeter</button>{" "}
         <button type="button" disabled={occupe} onClick={() => { if (confirm('Supprimer définitivement cette offre ? (irréversible — elle pourra être recollectée si elle reparaît en source)')) supprimer(); }}>Supprimer</button>
       </form>
     </details>
