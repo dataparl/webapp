@@ -9,6 +9,17 @@ const securityHeaders = [
 
 const config: NextConfig = {
   poweredByHeader: false,
+  // /jobs : porte d'entrée publique vers l'espace Emplois de l'admin.
+  // Réécriture interne : la page servie est /admin/emplois, donc protégée
+  // par la Porte (session d'équipe + TOTP) — seule l'équipe DataParl'
+  // y accède. La page est noindex par le layout de l'espace protégé.
+  async rewrites() {
+    return {
+      beforeFiles: [
+        { source: "/jobs", destination: "/admin/emplois" },
+      ],
+    };
+  },
   async redirects() {
     return [
       { source: "/collabs", destination: "/collab", permanent: true },
