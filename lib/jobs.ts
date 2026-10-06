@@ -1,4 +1,14 @@
-// Helpers DataParl' Jobs — titre standard, slug et chambres.
+// Helpers DataParl' Jobs — titre standard, slug, chambres et domaines parlementaires.
+
+export type Chambre = "an" | "senat" | "pe";
+
+export const CHAMBRES: { valeur: Chambre; libelle: string }[] = [
+  { valeur: "an", libelle: "Assemblée nationale" },
+  { valeur: "senat", libelle: "Sénat" },
+  { valeur: "pe", libelle: "Parlement européen" },
+];
+
+export const SIGLE: Record<Chambre, string> = { an: "An", senat: "Sénat", pe: "PE" };
 
 // Domaines de messagerie parlementaires : seuls ces domaines peuvent
 // proposer une offre sur /jobs/proposer (connexion DataParl' obligatoire).
@@ -16,16 +26,6 @@ export const domaineAutorise = (email: string) => {
   const d = email.split("@")[1]?.toLowerCase() ?? "";
   return DOMAINES_PARLEMENT.some((x) => d === x || d.endsWith("." + x));
 };
-
-export type Chambre = "an" | "senat" | "pe";
-
-export const CHAMBRES: { valeur: Chambre; libelle: string }[] = [
-  { valeur: "an", libelle: "Assemblée nationale" },
-  { valeur: "senat", libelle: "Sénat" },
-  { valeur: "pe", libelle: "Parlement européen" },
-];
-
-export const SIGLE: Record<Chambre, string> = { an: "An", senat: "Sénat", pe: "PE" };
 
 export type OffreBase = {
   id: string;
