@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { dataAdmin } from "@/lib/supabaseAdmin";
+import { authAdmin } from "@/lib/supabaseAdmin";
 
 // Offres d'emploi des équipes parlementaires — page publique.
-// Côté serveur uniquement (dataAdmin, clé service jamais exposée) :
+// Côté serveur uniquement (authAdmin, clé service jamais exposée) :
 // seules les offres approuvées et actives sont affichées ; les offres
 // en revue, rejetées, expirées ou pourvues restent invisibles.
 
@@ -32,17 +32,23 @@ const dateFr = (iso: string | null) =>
   iso ? new Date(iso + "T12:00:00Z").toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : null;
 
 export default async function Jobs() {
-  const { data, error } = await dataAdmin()
-    .from("job_offers")
-    .select("id,titre,description,type_poste,localisation,groupe_politique,parlementaire_slug,source_url,publie_le,expire_le")
-    .eq("review_status", "approved")
-    .eq("statut", "active")
-    .order("publie_le", { ascending: false, nullsFirst: false })
-    .limit(100);
-  if (error) throw error;
-  const offres: Offre[] = data ?? [];
-  const aujourdhui = new Date().toISOString().slice(0, 10);
-  const visibles = offres.filter((o) => !o.expire_le || o.expire_le >= aujourdhui);
+  // job_offers vit dans la base auth (même client que la route admin),
+  // lue ici côté serveur avec la clé service : rien n'est exposé au navigateur.
+  let visibles: Offre[] = [];
+  try {
+    const { data, error } = await authAdmin()
+      .from("job_offers")
+      .select("id,titre,description,type_poste,localisation,groupe_politique,parlementaire_slug,source_url,publie_le,expire_le")
+      .eq("review_status", "approved")
+      .eq("statut", "active")
+      .order("publie_le", { ascending: false, nullsFirst: false })
+      .limit(100);
+    if (error) throw error;
+    const aujourdhui = new Date().toISOString().slice(0, 10);
+    visibles = (data ?? []).filter((o) => !o.expire_le || o.expire_le >= aujourdhui);
+  } catch {
+    visibles = [];
+  }
 
   return (
     <>
@@ -56,11 +62,11 @@ export default async function Jobs() {
           Aucune offre active pour le moment — les nouvelles publications apparaissent ici dès leur validation.
         </p>
       ) : (
-        <ul className="liste-offres" style={{ listStyle: "none", padding: 0, display: "grid", gap: "16px", marginTop: "32px" }}>
+        <ul style={{ listStyle: "none", padding: 0, display: "grid", gap: "16px", marginTop: "32px" }}>
           {visibles.map((o) => (
-            <li key={o.id} style={{ border: "1px solid var(--bordure, #e5e7eb)", borderRadius: "12px", padding: "20px" }}>
+            <li key={o.id} style={{ border: "1px solid #e5e7eb", borderRadius: "12px", padding: "20px" }}>
               <h2 style={{ margin: "0 0 8px", fontSize: "1.15rem" }}>{o.titre}</h2>
-              <p style={{ margin: "0 0 12px", color: "var(--secondaire, #6b7280)", fontSize: "0.9rem" }}>
+              <p style={{ margin: "0 0 12px", color: "#6b7280", fontSize: "0.9rem" }}>
                 {[o.type_poste, o.localisation, o.groupe_politique].filter(Boolean).join(" · ")}
                 {o.publie_le ? ` · publiée le ${dateFr(o.publie_le)}` : ""}
               </p>
