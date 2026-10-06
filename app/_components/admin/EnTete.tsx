@@ -65,10 +65,7 @@ export default function EnTete({ espace }: { espace: Espace }) {
         </div>
       </div>
       <nav className="wrap large onglets-admin">
-        {espace === "admin" ? sections.
-
-map((s) =
-> {
+       {espace === "admin" ? sections.map((s) => {
           const actifSous = (c: string) => actif === c || (c !== "/" && actif.startsWith(`${c}/`));
           const ouvert = actifSous(s.chemin) || (s.entrees ?? []).some((e) => actifSous(e.chemin));
           if (!s.entrees) {
