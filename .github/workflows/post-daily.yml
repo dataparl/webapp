@@ -1,7 +1,5 @@
 name: Daily → réseaux sociaux
 on:
-  schedule:
-    - cron: "0 6 * * *"   # 08:00 à Paris (heure d'été) — après la mise à jour des listes
   workflow_dispatch:
 permissions:
   contents: read
@@ -10,12 +8,4 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 22 }
-      - run: node scripts/post-daily.mjs
-        env:
-          DAILY_BASE: https://www.dataparl.fr/daily
-          LIENS_BASE: https://www.dataparl.fr/l
-          BSKY_IDENTIFIER: ${{ secrets.BSKY_IDENTIFIER }}
-          BSKY_APP_PASSWORD: ${{ secrets.BSKY_APP_PASSWORD }}
+      - run: echo "Publication via Buffer (compte hello@cavaparlement.eu) — ce workflow ne publie plus automatiquement."
