@@ -46,3 +46,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return { ok: true };
   }, EDITION);
 }
+
+// Suppression définitive d'une offre (revue, publiée ou archivée).
+// Irréversible : le fingerprint est libéré, donc une annonce supprimée peut
+// être recollectée plus tard (c'est voulu — supprimer ≠ rejeter : rejeter
+// empêche la republication, supprimer efface la trace).
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  return avecAdmin(req, async (a) => {
+    const { id } = await params;
+    const { data, error } = await authAdmin().from("job_offers").select("titre").eq("id", id).maybeSingle();
+    if (error) throw error;
+    if (!data) return erreur(404, "offre introuvable");
+    const del = await authAdmin().from("job_offers").delete().eq("id", id);
+    if (del.error) throw del.error;
+    await audit(a, "jobs.suppression", id, { titre: data.titre });
+    return { ok: true };
+  }, EDITION);
+}
