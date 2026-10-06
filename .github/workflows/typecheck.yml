@@ -2,9 +2,10 @@ name: Typecheck
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 jobs:
   tsc:
     runs-on: ubuntu-latest
@@ -15,12 +16,11 @@ jobs:
         with: { node-version: 22 }
       - run: npm ci --no-audit --no-fund
       - name: Contrôle des types
-        run: npx tsc --noEmit > typecheck.log 2>&1 || echo "ECHEC_TSC" >> typecheck.log
-      - name: Publier le journal sur la branche logs
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git switch -c logs
-          git add typecheck.log
-          git commit -m "journal du contrôle de types"
-          git push origin logs --force
+        run: npx tsc --noEmit 2>&1 | tee typecheck.log
+      - name: Journal (artefact, 30 jours)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: typecheck-log
+          path: typecheck.log
+          if-no-files-found: ignore
