@@ -6,13 +6,15 @@ import { authAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
 
-const COLONNES = "id,titre,description,type_poste,localisation,groupe_politique,parlementaire_slug,source_url,source_connector,source_raw,publie_le,expire_le,statut,review_status,review_note,match_confidence,created_at,updated_at";
+const COLONNES =
+  "id,titre,description,type_poste,localisation,groupe_politique,parlementaire_slug,chambre,departement,elu_prenom,elu_nom,source_url,source_connector,source_raw,publie_le,expire_le,statut,review_status,review_note,match_confidence,created_at,updated_at";
 
 export async function GET(req: Request) {
   return avecAdmin(req, async () => {
     const vue = new URL(req.url).searchParams.get("vue") ?? "revue";
     let q = authAdmin().from("job_offers").select(COLONNES);
-    if (vue === "actives") q = q.eq("review_status", "approved").eq("statut", "active").order("publie_le", { ascending: false, nullsFirst: false }).limit(200);
+    if (vue === "actives")
+      q = q.eq("review_status", "approved").eq("statut", "active").order("publie_le", { ascending: false, nullsFirst: false }).limit(200);
     else if (vue === "archivees") q = q.in("statut", ["expiree", "pourvue", "rejetee"]).order("updated_at", { ascending: false }).limit(100);
     else q = q.eq("review_status", "pending").order("created_at", { ascending: true }).limit(200);
     const { data, error } = await q;
@@ -29,6 +31,10 @@ const Soumission = z.object({
   localisation: z.string().max(100).optional(),
   groupe_politique: z.string().max(100).optional(),
   parlementaire_slug: z.string().max(200).optional(),
+  chambre: z.enum(["an", "senat", "pe"]).optional(),
+  departement: z.string().max(100).optional(),
+  elu_prenom: z.string().max(100).optional(),
+  elu_nom: z.string().max(100).optional(),
   publie_le: z.string().max(10).optional(),
   expire_le: z.string().max(10).optional(),
   source_connector: z.string().max(50).default("manuel"),
@@ -38,7 +44,7 @@ const Soumission = z.object({
 const v = (s: string | undefined) => (!s || !s.trim() ? null : s.trim());
 
 // Empreinte stable : deux fois la même offre (même titre, même source) ne crée
-// jamais de doublon, quel que soit le canal d'entrée
+// jamais de doublon, quel que soit le canal d'entrée.
 
 export async function POST(req: Request) {
   return avecAdmin(req, async (a) => {
@@ -55,6 +61,10 @@ export async function POST(req: Request) {
       localisation: v(d.localisation),
       groupe_politique: v(d.groupe_politique),
       parlementaire_slug: v(d.parlementaire_slug),
+      chambre: d.chambre ?? null,
+      departement: v(d.departement),
+      elu_prenom: v(d.elu_prenom),
+      elu_nom: v(d.elu_nom),
       publie_le: v(d.publie_le),
       expire_le: v(d.expire_le),
       source_connector: d.source_connector,
