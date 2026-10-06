@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { authBrowser, sessionActuelle, type Session } from "@/lib/supabaseBrowser";
+import { sessionActuelle } from "@/lib/supabaseBrowser";
 import { CHAMBRES, DOMAINES_PARLEMENT, domaineAutorise } from "@/lib/jobs";
 
 // Proposer une offre — connexion DataParl' obligatoire, et l'email du compte
@@ -9,7 +9,8 @@ import { CHAMBRES, DOMAINES_PARLEMENT, domaineAutorise } from "@/lib/jobs";
 // en file de revue : rien n'est publié sans validation humaine.
 
 export default function Proposer() {
-  const [session, setSession] = useState<Session | null | undefined>(undefined);
+  type SessionDP = NonNullable<Awaited<ReturnType<typeof sessionActuelle>>>;
+  const [session, setSession] = useState<SessionDP | null | undefined>(undefined);
 
   useEffect(() => {
     sessionActuelle().then((s) => setSession(s));
@@ -41,7 +42,8 @@ export default function Proposer() {
             pas à un domaine parlementaire, donc il ne peut pas proposer d'offre.
           </p>
           <p style={{ color: "#6b7280", fontSize: "0.88rem", marginBottom: 0 }}>
-            Domaines acceptés : {DOMAINES_PARLEMENT.join(", ")}. Les sous-domaines de ces domaines sont également acceptés.
+ 
+           Domaines acceptés : {DOMAINES_PARLEMENT.join(", ")}. Les sous-domaines de ces domaines sont également acceptés.
           </p>
         </div>
       ) : (
@@ -51,7 +53,7 @@ export default function Proposer() {
   );
 }
 
-function Formulaire({ session }: { session: Session }) {
+function Formulaire({ session }: { session: SessionDP }) {
   const [f, setF] = useState({
     titre: "", description: "", source_url: "", type_poste: "", localisation: "",
     groupe_politique: "", chambre: "", departement: "", elu_prenom: "", elu_nom: "",
@@ -89,7 +91,8 @@ function Formulaire({ session }: { session: Session }) {
       <label>Chambre
         <select {...maj("chambre")}>
           <option value="">—</option>
-          {CHAMBRES.map((c) => <option key={c.valeur} value={c.valeur}>{c.libelle}</option>)}
+          {CHAMBRES.map((c) => <option key={c.valeu
+r} value={c.valeur}>{c.libelle}</option>)}
         </select>
       </label>
       <label>Département (ex : Meurthe-et-Moselle)<input {...maj("departement")} maxLength={100} /></label>
