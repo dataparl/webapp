@@ -1,5 +1,22 @@
 // Helpers DataParl' Jobs — titre standard, slug et chambres.
 
+// Domaines de messagerie parlementaires : seuls ces domaines peuvent
+// proposer une offre sur /jobs/proposer (connexion DataParl' obligatoire).
+export const DOMAINES_PARLEMENT = [
+  "assemblee-nationale.fr", // députés et services de l'Assemblée
+  "clb-an.fr",              // collaborateurs parlementaires des députés
+  "senat.fr",               // sénateurs et administration du Sénat
+  "clb-senat.fr",           // collaborateurs parlementaires des sénateurs
+  "europarl.europa.eu",     // députés européens (MPE/MEP)
+  "ep.europa.eu",           // personnel interne et assistants accrédités
+  "europa.eu",              // domaine institutionnel de l'Union européenne
+];
+
+export const domaineAutorise = (email: string) => {
+  const d = email.split("@")[1]?.toLowerCase() ?? "";
+  return DOMAINES_PARLEMENT.some((x) => d === x || d.endsWith("." + x));
+};
+
 export type Chambre = "an" | "senat" | "pe";
 
 export const CHAMBRES: { valeur: Chambre; libelle: string }[] = [
