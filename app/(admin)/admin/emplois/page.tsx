@@ -3,19 +3,22 @@ import { useState } from "react";
 import { useAdmin } from "@/app/_components/admin/Porte";
 import { lien } from "@/app/_components/admin/liens";
 import { dateHeure, useRessource } from "@/app/_components/admin/utils";
+import { CHAMBRES } from "@/lib/jobs";
 
 type Offre = {
   id: string; titre: string; description: string;
   type_poste: string | null; localisation: string | null; groupe_politique: string | null;
   parlementaire_slug: string | null; source_url: string; source_connector: string;
-  source_raw: string | null; publie_le: string | null; expire_le: string | null;
+  source_raw: string | null; chambre: string | null; departement: string | null;
+  elu_prenom: string | null; elu_nom: string | null;
+  publie_le: string | null; expire_le: string | null;
   review_status: string; review_note: string | null; match_confidence: number | null;
   created_at: string; updated_at: string;
 };
 
 // File de revue : chaque offre collectée ou soumise passe par une validation
-// humaine — on publie, on corrige avant de publier, on rejette avec un motif,
-// ou on supprime définitivement (offre de test, spam, doublon bancal).
+// humaine — on publie, on corrige avant de publier (chambre, élu, département
+// pour le titre standard et les filtres), on rejette ou on supprime.
 export default function Revue() {
   const { data, err, recharger } = useRessource<{ offres: Offre[] }>("/api/admin/jobs?vue=revue");
   const [info, setInfo] = useState<string | null>(null);
@@ -43,6 +46,10 @@ function Carte({ offre: o, onDone, setInfo }: { offre: Offre; onDone: () => void
     localisation: o.localisation ?? "",
     groupe_politique: o.groupe_politique ?? "",
     parlementaire_slug: o.parlementaire_slug ?? "",
+    chambre: o.chambre ?? "",
+    departement: o.departement ?? "",
+    elu_prenom: o.elu_prenom ?? "",
+    elu_nom: o.elu_nom ?? "",
     publie_le: (o.publie_le ?? "").slice(0, 10),
     expire_le: (o.expire_le ?? "").slice(0, 10),
     review_note: "",
@@ -50,7 +57,7 @@ function Carte({ offre: o, onDone, setInfo }: { offre: Offre; onDone: () => void
   const [occupe, setOccupe] = useState(false);
   const maj = (k: keyof typeof f) => ({
     value: f[k],
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value }),
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setF({ ...f, [k]: e.target.value }),
   });
 
   async function decider(decision: "valider" | "rejeter") {
@@ -79,11 +86,20 @@ function Carte({ offre: o, onDone, setInfo }: { offre: Offre; onDone: () => void
       <p><a href={o.source_url} target="_blank" rel="noopener noreferrer">{o.source_url}</a>{o.match_confidence != null && <span className="meta"> · confiance rattachement : {Math.round(o.match_confidence * 100)} %</span>}</p>
       {o.source_raw && <details><summary className="meta">Texte brut collecté</summary><pre>{o.source_raw}</pre></details>}
       <form onSubmit={(e) => { e.preventDefault(); decider("valider"); }}>
+        <label>Chambre
+          <select {...maj("chambre")}>
+            <option value="">—</option>
+            {CHAMBRES.map((c) => <option key={c.valeur} value={c.valeur}>{c.libelle}</option>)}
+          </select>
+        </label>
+        <label>Département (ex : Meurthe-et-Moselle)<input {...maj("departement")} maxLength={100} /></label>
+        <label>Prénom de l'élu<input {...maj("elu_prenom")} maxLength={100} /></label>
+        <label>Nom de l'élu<input {...maj("elu_nom")} maxLength={100} /></label>
+        <label>Groupe / parti<input {...maj("groupe_politique")} maxLength={100} /></label>
         <label>Titre<input {...maj("titre")} required maxLength={300} /></label>
         <label>Description<textarea {...maj("description")} rows={6} /></label>
         <label>Type de poste<input {...maj("type_poste")} maxLength={100} /></label>
         <label>Localisation<input {...maj("localisation")} maxLength={100} /></label>
-        <label>Groupe politique<input {...maj("groupe_politique")} maxLength={100} /></label>
         <label>Élu / équipe (clé du répertoire)<input {...maj("parlementaire_slug")} maxLength={200} placeholder="ex : bourcier_corinne21046e" /></label>
         <label>Publiée le<input type="date" {...maj("publie_le")} /></label>
         <label>Expire le<input type="date" {...maj("expire_le")} /></label>
