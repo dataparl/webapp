@@ -5,6 +5,10 @@ import { authAdmin } from "@/lib/supabaseAdmin";
 export const dynamic = "force-dynamic";
 
 // Lien tracé : enregistre le clic (provenance, pays, IP tronquée) puis redirige.
+// Les éventuels paramètres utm_* de l'adresse courte (ex. l/daily?utm_source=x)
+// sont transmis à la destination, pour l'attribution dans l'outil de mesure —
+// seulement s'ils sont explicitement mis dans le lien partagé. Sans eux, la
+// destination est servie telle quelle : le clic reste compté ici, sans pistage.
 export async function GET(req: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
   const accueil = NextResponse.redirect("https://www.dataparl.fr/", 302);
@@ -22,5 +26,14 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
     });
     if (error) console.error("lien tracé", error.message);
   }
-  return NextResponse.redirect(data.destination as string, { status: 302, headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex", "Referrer-Policy": "no-referrer" } });
+  let destination = data.destination as string;
+  const utm = (["utm_source", "utm_medium", "utm_campaign"] as const)
+    .map((k) => [k, u.searchParams.get(k)] as const)
+    .filter(([, v]) => v);
+  if (utm.length) {
+    const d = new URL(destination);
+    for (const [k, v] of utm) d.searchParams.set(k, (v as string).slice(0, 120));
+    destination = d.toString();
+  }
+  return NextResponse.redirect(destination, { status: 302, headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex", "Referrer-Policy": "no-referrer" } });
 }
