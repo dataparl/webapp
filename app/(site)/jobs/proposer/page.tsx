@@ -1,6 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import { sessionActuelle } from "@/lib/supabaseBrowser";
 import { CHAMBRES, DOMAINES_PARLEMENT, domaineAutorise } from "@/lib/jobs";
 
@@ -8,8 +7,9 @@ import { CHAMBRES, DOMAINES_PARLEMENT, domaineAutorise } from "@/lib/jobs";
 // doit appartenir à un domaine parlementaire (voir lib/jobs.ts). L'offre part
 // en file de revue : rien n'est publié sans validation humaine.
 
+type SessionDP = NonNullable<Awaited<ReturnType<typeof sessionActuelle>>>;
+
 export default function Proposer() {
-  type SessionDP = NonNullable<Awaited<ReturnType<typeof sessionActuelle>>>;
   const [session, setSession] = useState<SessionDP | null | undefined>(undefined);
 
   useEffect(() => {
@@ -21,11 +21,11 @@ export default function Proposer() {
   return (
     <>
       <h1>Proposer une offre</h1>
-      <p className="lead">Ton offre sera relue par l'équipe avant publication — elle n'apparaît pas immédiatement.</p>
+      <p className="lead">Ton offre sera relue par l&apos;équipe avant publication — elle n&apos;apparaît pas immédiatement.</p>
       {!session ? (
         <div className="card" style={{ marginTop: "24px" }}>
           <p style={{ marginTop: 0 }}>
-            <strong>Connexion requise.</strong> Connecte-toi avec ton compte DataParl' pour proposer une offre.
+            <strong>Connexion requise.</strong> Connecte-toi avec ton compte DataParl&apos; pour proposer une offre.
           </p>
           <p>
             <a className="btn" href="/connexion?suite=/jobs/proposer">Se connecter ou créer un compte</a>
@@ -38,12 +38,11 @@ export default function Proposer() {
       ) : !domaineAutorise(session.user.email ?? "") ? (
         <div className="card" style={{ marginTop: "24px" }}>
           <p style={{ marginTop: 0 }}>
-            <strong>Adresse parlementaire requise.</strong> Le compte connecté ({session.user.email}) n'appartient
-            pas à un domaine parlementaire, donc il ne peut pas proposer d'offre.
+            <strong>Adresse parlementaire requise.</strong> Le compte connecté ({session.user.email}) n&apos;appartient
+            pas à un domaine parlementaire, donc il ne peut pas proposer d&apos;offre.
           </p>
           <p style={{ color: "#6b7280", fontSize: "0.88rem", marginBottom: 0 }}>
- 
-           Domaines acceptés : {DOMAINES_PARLEMENT.join(", ")}. Les sous-domaines de ces domaines sont également acceptés.
+            Domaines acceptés : {DOMAINES_PARLEMENT.join(", ")}. Les sous-domaines de ces domaines sont également acceptés.
           </p>
         </div>
       ) : (
@@ -91,17 +90,18 @@ function Formulaire({ session }: { session: SessionDP }) {
       <label>Chambre
         <select {...maj("chambre")}>
           <option value="">—</option>
-          {CHAMBRES.map((c) => <option key={c.valeu
-r} value={c.valeur}>{c.libelle}</option>)}
+          {CHAMBRES.map((c) => (
+            <option key={c.valeur} value={c.valeur}>{c.libelle}</option>
+          ))}
         </select>
       </label>
       <label>Département (ex : Meurthe-et-Moselle)<input {...maj("departement")} maxLength={100} /></label>
-      <label>Prénom de l'élu<input {...maj("elu_prenom")} maxLength={100} /></label>
-      <label>Nom de l'élu<input {...maj("elu_nom")} maxLength={100} /></label>
+      <label>Prénom de l&apos;élu<input {...maj("elu_prenom")} maxLength={100} /></label>
+      <label>Nom de l&apos;élu<input {...maj("elu_nom")} maxLength={100} /></label>
       <label>Groupe / parti<input {...maj("groupe_politique")} maxLength={100} /></label>
       <label>Intitulé du poste *<input {...maj("titre")} required maxLength={300} /></label>
       <label>Description<textarea {...maj("description")} rows={6} /></label>
-      <label>URL de la source *<input type="url" {...maj("source_url")} required maxLength={1000} placeholder="Lien public de l'annonce" /></label>
+      <label>URL de la source *<input type="url" {...maj("source_url")} required maxLength={1000} placeholder="Lien public de l&apos;annonce" /></label>
       <label>Type de poste<input {...maj("type_poste")} maxLength={100} placeholder="CDI, stage…" /></label>
       <label>Localisation<input {...maj("localisation")} maxLength={100} /></label>
       <label>Publiée le<input type="date" {...maj("publie_le")} /></label>
@@ -109,7 +109,7 @@ r} value={c.valeur}>{c.libelle}</option>)}
       {erreur && <p className="erreur">{erreur}</p>}
       {info && <p className="meta">{info}</p>}
       <p style={{ color: "#6b7280", fontSize: "0.82rem", margin: 0 }}>
-        Déposé avec l'adresse {session.user.email} — conservée en note interne de revue, jamais publiée.
+        Déposé avec l&apos;adresse {session.user.email} — conservée en note interne de revue, jamais publiée.
       </p>
       <button type="submit" disabled={occupe}>{occupe ? "Envoi…" : "Envoyer en revue"}</button>
     </form>
