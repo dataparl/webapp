@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
-// Icône tactile iOS (180x180) : monogramme « D' » sur fond or, lettre bleue —
-// même identité que /icon.svg et /favicon (palette du site : #FFD23F / #164DFF).
+// Icône tactile iOS (180x180) de l'espace API : monogramme « À » —
+// même famille que le D' du site principal (palette : #FFD23F / #164DFF).
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
@@ -23,7 +23,7 @@ export default function AppleIcon() {
           color: "#164DFF",
         }}
       >
-        D&apos;
+        À
       </div>
     ),
     { ...size }
