@@ -8,8 +8,15 @@ export const dynamic = "force-dynamic";
 // (daily, daily-x, daily-bsky…), le reste de l'adresse est ajouté à la
 // destination du lien. Ex. /l/daily/2026-10-06 avec daily → /daily/ redirige
 // vers /daily/2026-10-06. Les paramètres utm_* explicites sont transmis.
+// Tolérance : un préfixe « /l/ » doublé (/l/l/<code>/…, publié par erreur
+// par l'automate du Daily les 6-7 octobre 2026) est ramené à /l/<code>/…
+// pour que les posts déjà en ligne continuent de mener au bon endroit.
 export async function GET(req: Request, { params }: { params: Promise<{ code: string; chemin: string[] }> }) {
-  const { code, chemin } = await params;
+  let { code, chemin } = await params;
+  if (code === "l" && chemin.length && CODE.test(chemin[0])) {
+    code = chemin[0];
+    chemin = chemin.slice(1);
+  }
   const accueil = NextResponse.redirect("https://www.dataparl.fr/", 302);
   if (!CODE.test(code) || !chemin.length) return accueil;
   const db = authAdmin();
