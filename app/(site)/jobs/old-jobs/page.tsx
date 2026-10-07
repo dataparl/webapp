@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { authAdmin } from "@/lib/supabaseAdmin";
 import { SIGLE, titreStandard, type Chambre } from "@/lib/jobs";
-import FooterJobs from "../_components/FooterJobs";
 
 // Anciennes offres : offres validées mais pourvues ou expirées.
 // Elles ne sont plus actives : affichage informatif, sans lien de candidature.
@@ -96,8 +95,6 @@ export default async function OldJobs() {
       <p className="meta" style={{ marginTop: "28px" }}>
         <a href="/jobs">← Voir les offres actives</a>
       </p>
-
-      <FooterJobs />
     </>
   );
 }
