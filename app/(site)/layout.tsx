@@ -1,4 +1,4 @@
-import { EnTeteSite } from "../_components/SiteChrome";
+import EnteteSiteRoute from "../../_components/EnteteSiteRoute";
 import PiedDePageRoute from "./jobs/_components/FooterJobs";
 import RetourHaut from "../_components/RetourHaut";
 import CrayonPage from "../_components/CrayonPage";
@@ -7,7 +7,7 @@ import EnqueteInvite from "../_components/EnqueteInvite";
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="page">
-      <EnTeteSite />
+      <EnteteSiteRoute />
       <main><div className="wrap">{children}</div></main>
       <PiedDePageRoute />
       <RetourHaut />
