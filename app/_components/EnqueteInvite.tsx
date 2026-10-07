@@ -38,21 +38,29 @@ export default function EnqueteInvite() {
   }
 
   async function accepter() {
+    // La fenêtre doit être ouverte PENDANT le clic : après un await, le
+    // navigateur ne la considère plus comme déclenchée par l'utilisateur et
+    // le bloqueur de popups l'interdit (d'où « rien ne se passe »). On ouvre
+    // donc un onglet vierge tout de suite, puis on le remplit avec l'URL du
+    // jeton une fois celle-ci reçue.
+    const f = window.open("", "_blank");
     try {
       const a = authBrowser();
       const { data } = await a.auth.getSession();
       const jeton = data.session?.access_token;
-      if (!jeton) { setVisible(false); return; }
+      if (!jeton) { f?.close(); fermer("plus-tard"); return; }
       const r = await fetch("/api/enquete/debut", {
         method: "POST",
         headers: { Authorization: `Bearer ${jeton}` },
       });
-      if (!r.ok) { fermer("plus-tard"); return; }
+      if (!r.ok) { f?.close(); fermer("plus-tard"); return; }
       const d = (await r.json()) as { url: string };
       localStorage.setItem(CLE_VUE, "non");
       setVisible(false);
-      window.open(d.url, "_blank", "noopener");
+      if (f) f.location.href = d.url;
+      else window.location.href = d.url; // onglet bloqué : onglet courant
     } catch {
+      f?.close();
       fermer("plus-tard");
     }
   }
