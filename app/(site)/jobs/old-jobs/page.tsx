@@ -4,6 +4,7 @@ import { SIGLE, titreStandard, type Chambre } from "@/lib/jobs";
 
 // Anciennes offres : offres validées mais pourvues ou expirées.
 // Elles ne sont plus actives : affichage informatif, sans lien de candidature.
+// URL publique : https://jobs.dataparl.fr/old-jobs (voir middleware.ts).
 
 export const revalidate = 300;
 export const dynamic = "force-dynamic";
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
   title: "Anciennes offres | DataParl' Jobs",
   description:
     "Les offres de collaborateur parlementaire pourvues ou expirées, archivées pour consultation.",
-  alternates: { canonical: "/jobs/old-jobs" },
+  alternates: { canonical: "https://jobs.dataparl.fr/old-jobs" },
 };
 
 type Offre = {
