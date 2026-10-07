@@ -9,6 +9,10 @@ import { estInactif } from "./lib/pagesRegistre";
 //                           /connexion servie telle quelle (OAuth PKCE sur la même origine)
 //                           /api/* (routes internes des pages) servies telles quelles
 //                           tout le reste -> /espace-api/* (site de l'API)
+//   jobs.dataparl.fr        DataParl' Jobs sans préfixe : / -> /jobs,
+//                           /proposer et /old-jobs -> /jobs/*, /<uuid>_<slug>
+//                           -> /jobs/<slug> ; /sitemap, /informations-legales,
+//                           /connexion et /api/* servis tels quels
 //   admin.dataparl.fr       /x -> /admin/x, sauf /connexion et /api/*
 //   webmail.dataparl.fr     /x -> /webmail/x, sauf /connexion et /api/*
 //   mail.dataparl.fr        /lire/<jeton> (version en ligne des emails), le reste -> www
@@ -19,6 +23,7 @@ import { estInactif } from "./lib/pagesRegistre";
 //   raw.dataparl.fr        /schemas/*.json (schémas de données bruts) ; le reste -> www
 //   survey.dataparl.fr     / -> /enquete (questionnaire d'avis, jeton ?j=) ; le reste -> www
 //   drive.dataparl.fr      ancien domaine du tableur -> media (308)
+// Sur www, tout /jobs part vers jobs.dataparl.fr (sans le préfixe).
 // Sur www : une page désactivée dans l'admin (Plan du site) répond 404.
 // Anciens domaines (cavaparlement.eu, dataparl.com) : redirection 308 vers la
 // même adresse sur dataparl.fr. Exceptions, servies telles quelles pendant la
@@ -30,6 +35,9 @@ import { estInactif } from "./lib/pagesRegistre";
 
 const DOMAINE = "dataparl.fr";
 const ANCIENS = ["cavaparlement.eu", "dataparl.com"];
+
+// Slug d'offre DataParl' Jobs : <uuid>_<chambre>_<Prénom>_<NOM>_<intitulé>.
+const SLUG_OFFRE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(_|$)/i;
 
 // Anciennes adresses de l'espace admin -> nouvelles (réorganisation d'octobre 2026).
 const REDIRECTIONS_ADMIN: [avant: string, apres: string][] = [
@@ -95,6 +103,27 @@ export async function proxy(req: NextRequest) {
     if (path.startsWith("/api/") || path === "/connexion" || path.startsWith("/espace-api")) return NextResponse.next();
     url.pathname = `/espace-api${path === "/" ? "" : path}`;
     return NextResponse.rewrite(url);
+  }
+
+  // jobs.dataparl.fr : DataParl' Jobs vit à la racine, sans préfixe /jobs.
+  if (host === `jobs.${DOMAINE}`) {
+    if (path === "/" || path === "") {
+      const url = req.nextUrl.clone();
+      url.pathname = "/jobs";
+      return NextResponse.rewrite(url);
+    }
+    if (path === "/proposer" || path === "/old-jobs" || SLUG_OFFRE.test(path.slice(1))) {
+      const url = req.nextUrl.clone();
+      url.pathname = `/jobs${path}`;
+      return NextResponse.rewrite(url);
+    }
+    // Liens internes en /jobs/x : canonicalisation vers /x.
+    if (path === "/jobs" || path.startsWith("/jobs/")) {
+      const cibleJobs = path === "/jobs" ? "/" : path.slice("/jobs".length) || "/";
+      return vers(req, `jobs.${DOMAINE}`, cibleJobs, 308);
+    }
+    // Sitemap, informations légales, CGU Jobs, connexion, API : servis tels quels.
+    return NextResponse.next();
   }
 
   // mail.cavaparlement.eu : uniquement les versions en ligne des emails.
@@ -202,6 +231,11 @@ export async function proxy(req: NextRequest) {
 
   if (host === `www.${DOMAINE}`) {
     if (path === "/api" || path === "/api/") return vers(req, `api.${DOMAINE}`, "/", 308);
+    // DataParl' Jobs vit sur son sous-domaine, sans préfixe /jobs.
+    if (path === "/jobs" || path.startsWith("/jobs/")) {
+      const cibleJobs = path === "/jobs" ? "/" : path.slice("/jobs".length) || "/";
+      return vers(req, `jobs.${DOMAINE}`, cibleJobs, 308);
+    }
     // Le tableur vit sur media.dataparl.fr.
     if (path === "/sheets" || path.startsWith("/sheets/") || path === "/search") {
       return vers(req, `media.${DOMAINE}`, path, 308);
