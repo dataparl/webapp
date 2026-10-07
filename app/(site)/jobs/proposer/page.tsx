@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { sessionActuelle } from "@/lib/supabaseBrowser";
 import { CHAMBRES, domaineAutorise } from "@/lib/jobs";
-import FooterJobs from "../_components/FooterJobs";
 
 // Proposer une offre — connexion DataParl' obligatoire, et l'email du compte
 // doit appartenir à un domaine parlementaire (voir lib/jobs.ts). L'offre part
@@ -45,7 +44,6 @@ export default function Proposer() {
       ) : (
         <Formulaire session={session} />
       )}
-      <FooterJobs />
     </>
   );
 }
