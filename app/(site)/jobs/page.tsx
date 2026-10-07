@@ -3,7 +3,7 @@ import { authAdmin } from "@/lib/supabaseAdmin";
 import ListeOffres, { type OffreListe } from "./_components/ListeOffres";
 
 // Offres d'emploi des équipes parlementaires — page publique.
-// Le module vit sur jobs.dataparl.fr (voir middleware.ts) : cette route /jobs
+// Le module vit sur jobs.dataparl.fr (voir proxy.ts) : cette route /jobs
 // sert de fondation interne, redirigée depuis dataparl.fr et réécrite depuis
 // la racine du sous-domaine.
 
@@ -32,6 +32,30 @@ function Bulle({ icone, nombre, libelle }: { icone: string; nombre: number; libe
       <p style={{ margin: "0 0 6px", fontSize: "1.3rem" }}>{icone}</p>
       <p style={{ margin: "0 0 2px", fontSize: "1.5rem", fontWeight: 800, color: "var(--ink)" }}>{nombre}</p>
       <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--muted)" }}>{libelle}</p>
+    </div>
+  );
+}
+
+// Étape du fonctionnement du service (état vide).
+function Etape({ numero, titre, texte }: { numero: string; titre: string; texte: string }) {
+  return (
+    <div
+      className="card"
+      style={{
+        maxWidth: "none",
+        margin: 0,
+        borderRadius: 16,
+        display: "grid",
+        gap: 6,
+      }}
+    >
+      <p style={{ margin: 0 }}>
+        <span style={{ background: "var(--jaune)", color: "#071A41", borderRadius: 999, padding: "3px 12px", fontWeight: 800, fontSize: "0.85rem" }}>
+          {numero}
+        </span>
+      </p>
+      <h2 style={{ margin: "6px 0 0", fontSize: "1.05rem" }}>{titre}</h2>
+      <p style={{ margin: 0, color: "var(--muted)", fontSize: "0.92rem" }}>{texte}</p>
     </div>
   );
 }
@@ -69,21 +93,6 @@ export default async function Jobs() {
         Les postes de collaborateur parlementaire publiés dans les équipes, collectés depuis les sources officielles et vérifiés à la main.
       </p>
 
-      {/* ——— Bulles statistiques ——— */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-          gap: 14,
-          margin: "28px 0 0",
-        }}
-      >
-        <Bulle icone="🏛️" nombre={offres.length} libelle="Offres actives" />
-        <Bulle icone="🧑‍⚖️" nombre={elus.size} libelle="Élus concernés" />
-        <Bulle icone="🗺️" nombre={departements.size} libelle="Départements" />
-        <Bulle icone="✨" nombre={nouvelles} libelle="Nouvelles cette semaine" />
-      </div>
-
       {/* ——— Carte d'appel : proposer une offre ——— */}
       <div
         style={{
@@ -110,17 +119,68 @@ export default async function Jobs() {
       </div>
 
       {offres.length === 0 ? (
-        <p style={{ marginTop: "32px" }}>
-          Aucune offre active pour le moment — les nouvelles publications apparaissent ici dès leur validation.
-        </p>
+        /* ——— État vide : comment fonctionne DataParl' Jobs ——— */
+        <div style={{ marginTop: "32px" }}>
+          <h2>Aucune offre active pour le moment</h2>
+          <p className="lead" style={{ fontSize: "1rem" }}>
+            Le service vient de s&apos;ouvrir : les premières offres validées apparaîtront ici. Voici comment il fonctionne.
+          </p>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              gap: 14,
+              margin: "20px 0 0",
+            }}
+          >
+            <Etape
+              numero="1"
+              titre="Collecte"
+              texte="Les annonces des sources officielles (Assemblée nationale, Sénat, Parlement européen, sites des élus) sont relevées automatiquement, chaque mardi et vendredi."
+            />
+            <Etape
+              numero="2"
+              titre="Relecture humaine"
+              texte="Chaque offre est vérifiée à la main avant publication : intitulé, équipe de l'élu, chambre et département."
+            />
+            <Etape
+              numero="3"
+              titre="Publication"
+              texte="Les offres validées sont publiées ici, avec un lien vers l'annonce d'origine et un archivage une fois pourvues ou expirées."
+            />
+          </div>
+          <p className="meta" style={{ marginTop: "20px" }}>
+            Les élus et leurs équipes peuvent aussi déposer une offre directement —{" "}
+            <a href="/jobs/proposer">proposer une offre</a>
+            {" — et les offres pourvues ou expirées restent consultables dans les "}
+            <a href="/jobs/old-jobs">anciennes offres</a>.
+          </p>
+        </div>
       ) : (
-        <ListeOffres offres={offres} />
-      )}
+        <>
+          {/* ——— Bulles statistiques ——— */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+              gap: 14,
+              margin: "28px 0 0",
+            }}
+          >
+            <Bulle icone="🏛️" nombre={offres.length} libelle="Offres actives" />
+            <Bulle icone="🧑‍⚖️" nombre={elus.size} libelle="Élus concernés" />
+            <Bulle icone="🗺️" nombre={departements.size} libelle="Départements" />
+            <Bulle icone="✨" nombre={nouvelles} libelle="Nouvelles cette semaine" />
+          </div>
 
-      <p className="meta" style={{ marginTop: "28px" }}>
-        Les offres pourvues ou expirées restent consultables dans les{" "}
-        <a href="/jobs/old-jobs">anciennes offres</a>.
-      </p>
+          <ListeOffres offres={offres} />
+
+          <p className="meta" style={{ marginTop: "28px" }}>
+            Les offres pourvues ou expirées restent consultables dans les{" "}
+            <a href="/jobs/old-jobs">anciennes offres</a>.
+          </p>
+        </>
+      )}
     </>
   );
 }
