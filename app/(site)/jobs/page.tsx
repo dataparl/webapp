@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { authAdmin } from "@/lib/supabaseAdmin";
 import ListeOffres, { type OffreListe } from "./_components/ListeOffres";
-import FooterJobs from "./_components/FooterJobs";
 
 // Offres d'emploi des équipes parlementaires — page publique.
 // Lecture serveur uniquement (clé service jamais exposée) : seules les
@@ -121,8 +120,6 @@ export default async function Jobs() {
         Les offres pourvues ou expirées restent consultables dans les{" "}
         <a href="/jobs/old-jobs">anciennes offres</a>.
       </p>
-
-      <FooterJobs />
     </>
   );
 }
