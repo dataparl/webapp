@@ -17,15 +17,17 @@ import { estInactif } from "./lib/pagesRegistre";
 //   webmail.dataparl.fr     /x -> /webmail/x, sauf /connexion et /api/*
 //   mail.dataparl.fr        /lire/<jeton> (version en ligne des emails), le reste -> www
 //   link.dataparl.fr        /<code> -> /l/<code> (liens tracés), le reste -> www
-//   media.dataparl.fr       photos des élus (/an|senat|pe/…) et le tableur
-//                           DataParl' Sheets (/sheets/*, /search) ; tout autre
-//                           chemin : message de 15 s puis bascule vers www
+//   media.dataparl.fr       photos des élus (/an|senat|pe/…), fichiers du bucket
+//                           « assets » (/assets/*) et le tableur DataParl' Sheets
+//                           (/sheets/*, /search) ; tout autre chemin : message de
+//                           15 s puis bascule vers www
 //   raw.dataparl.fr        /schemas/*.json (schémas de données bruts) ; le reste -> www
 //   survey.dataparl.fr     / -> /enquete (questionnaire d'avis, jeton ?j=) ; le reste -> www
 //   drive.dataparl.fr      ancien domaine du tableur -> media (308)
 // Sur www, tout /jobs part vers jobs.dataparl.fr (sans le préfixe).
 // Sur www : une page désactivée dans l'admin (Plan du site) répond 404.
 // Anciens domaines (cavaparlement.eu, dataparl.com) : redirection 308 vers la
+
 // même adresse sur dataparl.fr. Exceptions, servies telles quelles pendant la
 // transition : /api/* (webhooks, formulaires déjà ouverts) et l'API /v1 sur
 // api.cavaparlement.eu (clients existants).
@@ -79,7 +81,8 @@ function protege(res: NextResponse): NextResponse {
 }
 
 export async function proxy(req: NextRequest) {
-  const host = (req.headers.get("host") ?? "").split(":")[0].toLowerCase();
+  const ho
+st = (req.headers.get("host") ?? "").split(":")[0].toLowerCase();
   const path = req.nextUrl.pathname;
 
   const cible = nouvelHote(host);
@@ -128,7 +131,8 @@ export async function proxy(req: NextRequest) {
 
   // mail.cavaparlement.eu : uniquement les versions en ligne des emails.
   if (host === `mail.${DOMAINE}`) {
-    if (path.startsWith("/lire/")) return protege(NextResponse.next());
+    if (path.startsWith("/lire/")) return protege(
+NextResponse.next());
     return vers(req, `www.${DOMAINE}`, "/", 307);
   }
 
@@ -160,6 +164,13 @@ export async function proxy(req: NextRequest) {
       url.pathname = `/media${path}`;
       return NextResponse.rewrite(url);
     }
+    // media.dataparl.fr/assets/… : fichiers du bucket public Supabase « assets »
+    // (logos, visuels déposés depuis l'admin : admin.dataparl.fr/assets).
+    if (path === "/assets" || path.startsWith("/assets/")) {
+      const url = req.nextUrl.clone();
+      url.pathname = `/media${path}`;
+      return NextResponse.rewrite(url);
+    }
     if (path.startsWith("/photo-credit")) return vers(req, `www.${DOMAINE}`, "/", 307);
     const autorise =
       path === "/sheets" || path.startsWith("/sheets/") ||
@@ -170,7 +181,8 @@ export async function proxy(req: NextRequest) {
       path.startsWith("/preferences") ||
       path.startsWith("/desinscription");
     if (autorise) return NextResponse.next();
-    // Message de 15 secondes, puis bascule automatique vers www.
+    // Me
+ssage de 15 secondes, puis bascule automatique vers www.
     const url = req.nextUrl.clone();
     url.pathname = "/redirection-media";
     url.search = `?vers=${encodeURIComponent(path + req.nextUrl.search)}`;
@@ -218,7 +230,8 @@ export async function proxy(req: NextRequest) {
   for (const espace of ["admin", "webmail"] as const) {
     if (host !== `${espace}.${DOMAINE}`) continue;
     let res: NextResponse;
-    if (path.startsWith("/api/") || path.startsWith(`/${espace}`) || path === "/connexion") res = NextResponse.next();
+    if (path.startsWith("/ap
+i/") || path.startsWith(`/${espace}`) || path === "/connexion") res = NextResponse.next();
     else {
       const nouveau = espace === "admin" ? nouvelCheminAdmin(path) : null;
       if (nouveau) return protege(vers(req, `admin.${DOMAINE}`, nouveau || "/", 308));
@@ -260,6 +273,7 @@ export async function proxy(req: NextRequest) {
   return NextResponse.next();
 }
 
-export const config = {
+export const conf
+ig = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)"],
 };
