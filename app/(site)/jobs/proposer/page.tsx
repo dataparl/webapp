@@ -20,11 +20,11 @@ export default function Proposer() {
   return (
     <>
       <h1>Proposer une offre</h1>
-      <p className="lead">Ton offre sera relue par l&apos;équipe avant publication — elle n&apos;apparaît pas immédiatement.</p>
+      <p className="lead">Votre offre sera relue par l&apos;équipe avant publication — elle n&apos;apparaît pas immédiatement.</p>
       {!session ? (
         <div className="card" style={{ marginTop: "24px" }}>
           <p style={{ marginTop: 0 }}>
-            <strong>Connexion requise.</strong> Connecte-toi avec ton compte DataParl&apos; pour proposer une offre.
+            <strong>Connexion requise.</strong> Connectez-vous avec votre compte DataParl&apos; pour proposer une offre.
           </p>
           <p>
             <a className="btn" href="/connexion?suite=/jobs/proposer">Se connecter ou créer un compte</a>
@@ -34,11 +34,11 @@ export default function Proposer() {
         <div className="card" style={{ marginTop: "24px" }}>
           <p style={{ marginTop: 0 }}>
             <strong>Adresse non acceptée.</strong> Cette adresse email ne permet pas de proposer une offre.
-            Connecte-toi avec ton adresse du Parlement (Assemblée nationale, Sénat ou Parlement européen).
+            Connectez-vous avec votre adresse du Parlement (Assemblée nationale, Sénat ou Parlement européen).
           </p>
           <p style={{ marginBottom: 0 }}>
             Besoin de publier une offre sans adresse parlementaire ?{" "}
-            <a href="https://www.dataparl.fr/contact">Écris-nous via la page contact</a>.
+            <a href="https://www.dataparl.fr/contact">Écrivez-nous via la page contact</a>.
           </p>
         </div>
       ) : (
@@ -75,7 +75,7 @@ function Formulaire({ session }: { session: SessionDP }) {
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.erreur ?? "erreur inconnue");
-      setInfo("Merci ! Ton offre est en file de revue — l'équipe la relit avant publication.");
+      setInfo("Merci ! Votre offre est en file de revue — l'équipe la relit avant publication.");
       setF({ titre: "", description: "", source_url: "", type_poste: "", localisation: "", groupe_politique: "", chambre: "", departement: "", elu_prenom: "", elu_nom: "", publie_le: "", expire_le: "" });
     } catch (e2) { setErreur((e2 as Error).message); }
     setOccupe(false);
