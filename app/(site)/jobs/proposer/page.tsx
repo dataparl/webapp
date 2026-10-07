@@ -1,12 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import { sessionActuelle } from "@/lib/supabaseBrowser";
-import { CHAMBRES, DOMAINES_PARLEMENT, domaineAutorise } from "@/lib/jobs";
+import { CHAMBRES, domaineAutorise } from "@/lib/jobs";
 
 // Proposer une offre — connexion DataParl' obligatoire, et l'email du compte
 // doit appartenir à un domaine parlementaire (voir lib/jobs.ts). L'offre part
 // en file de revue : rien n'est publié sans validation humaine.
-
 type SessionDP = NonNullable<Awaited<ReturnType<typeof sessionActuelle>>>;
 
 export default function Proposer() {
@@ -30,19 +29,16 @@ export default function Proposer() {
           <p>
             <a className="btn" href="/connexion?suite=/jobs/proposer">Se connecter ou créer un compte</a>
           </p>
-          <p style={{ color: "#6b7280", fontSize: "0.88rem", marginBottom: 0 }}>
-            Seules les adresses parlementaires peuvent déposer une offre :
-            {" "}{DOMAINES_PARLEMENT.join(", ")}.
-          </p>
         </div>
       ) : !domaineAutorise(session.user.email ?? "") ? (
         <div className="card" style={{ marginTop: "24px" }}>
           <p style={{ marginTop: 0 }}>
-            <strong>Adresse parlementaire requise.</strong> Le compte connecté ({session.user.email}) n&apos;appartient
-            pas à un domaine parlementaire, donc il ne peut pas proposer d&apos;offre.
+            <strong>Adresse non acceptée.</strong> Cette adresse email ne permet pas de proposer une offre.
+            Connecte-toi avec ton adresse du Parlement (Assemblée nationale, Sénat ou Parlement européen).
           </p>
-          <p style={{ color: "#6b7280", fontSize: "0.88rem", marginBottom: 0 }}>
-            Domaines acceptés : {DOMAINES_PARLEMENT.join(", ")}. Les sous-domaines de ces domaines sont également acceptés.
+          <p style={{ marginBottom: 0 }}>
+            Besoin de publier une offre sans adresse parlementaire ?{" "}
+            <a href="https://www.dataparl.fr/contact">Écris-nous via la page contact</a>.
           </p>
         </div>
       ) : (
