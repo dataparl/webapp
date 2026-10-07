@@ -1,13 +1,20 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
-// Pied de page du site www : sur les pages DataParl' Jobs, le footer Jobs
-// remplace le footer standard (un seul footer, jamais deux empilés).
+// Pied de page du site www : sur DataParl' Jobs (pages /jobs et sous-domaine
+// jobs.dataparl.fr), le footer Jobs remplace le footer standard.
+// Le middleware réécrit les URLs du sous-domaine, donc on complète le test du
+// chemin par le nom d'hôte après hydratation.
 
 export default function PiedDePageRoute() {
   const chemin = usePathname();
-  const jobs = !!chemin && (chemin === "/jobs" || chemin.startsWith("/jobs/"));
+  const [jobs, setJobs] = useState(!!chemin && (chemin === "/jobs" || chemin.startsWith("/jobs/")));
+
+  useEffect(() => {
+    if (window.location.hostname === "jobs.dataparl.fr") setJobs(true);
+  }, []);
 
   return (
     <footer className="site">
