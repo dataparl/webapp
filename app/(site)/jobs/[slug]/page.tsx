@@ -5,6 +5,7 @@ import { SIGLE, idDepuisSlug, slugOffre, titreStandard, type Chambre } from "@/l
 import { PastilleProvenance } from "../_components/ListeOffres";
 
 // Détail d'une offre — hébergé sur DataParl' (jamais de redirection).
+// URL publique : https://jobs.dataparl.fr/<slug> (voir middleware.ts).
 // Pastille de provenance : déposée par l'élu ou collectée sur une source publique.
 
 export const revalidate = 300;
@@ -52,7 +53,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const id = idDepuisSlug(slug);
   const o = id ? await offreVisible(id) : null;
   return o
-    ? { title: titreStandard(o) + " | DataParl' Jobs", alternates: { canonical: "/jobs/" + slugOffre(o) } }
+    ? { title: titreStandard(o) + " | DataParl' Jobs", alternates: { canonical: "https://jobs.dataparl.fr/" + slugOffre(o) } }
     : { title: "Offre introuvable | DataParl'", robots: { index: false, follow: true } };
 }
 
