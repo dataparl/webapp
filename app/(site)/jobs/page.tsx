@@ -3,8 +3,9 @@ import { authAdmin } from "@/lib/supabaseAdmin";
 import ListeOffres, { type OffreListe } from "./_components/ListeOffres";
 
 // Offres d'emploi des équipes parlementaires — page publique.
-// Lecture serveur uniquement (clé service jamais exposée) : seules les
-// offres approuvées, actives et non expirées sont affichées.
+// Le module vit sur jobs.dataparl.fr (voir middleware.ts) : cette route /jobs
+// sert de fondation interne, redirigée depuis dataparl.fr et réécrite depuis
+// la racine du sous-domaine.
 
 export const revalidate = 300;
 export const dynamic = "force-dynamic";
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
   title: "Offres d'emploi parlementaires | DataParl'",
   description:
     "Les offres d'emploi de collaborateur parlementaire : Assemblée nationale, Sénat, Parlement européen. Filtres par chambre, élu, groupe et département.",
-  alternates: { canonical: "/jobs" },
+  alternates: { canonical: "https://jobs.dataparl.fr/" },
 };
 
 // Petite carte statistique arrondie.
