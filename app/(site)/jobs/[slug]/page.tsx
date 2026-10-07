@@ -3,7 +3,6 @@ import Link from "next/link";
 import { authAdmin } from "@/lib/supabaseAdmin";
 import { SIGLE, idDepuisSlug, slugOffre, titreStandard, type Chambre } from "@/lib/jobs";
 import { PastilleProvenance } from "../_components/ListeOffres";
-import FooterJobs from "../_components/FooterJobs";
 
 // Détail d'une offre — hébergé sur DataParl' (jamais de redirection).
 // Pastille de provenance : déposée par l'élu ou collectée sur une source publique.
@@ -115,8 +114,6 @@ export default async function OffrePage({ params }: { params: Promise<{ slug: st
       <p style={{ marginTop: "32px" }}>
         <Link href="/jobs">← Retour aux offres</Link>
       </p>
-
-      <FooterJobs />
     </>
   );
 }
