@@ -6,8 +6,8 @@ export const revalidate = 3600;
 type Periode = { collab_id: string; chambre: string; elu_id: string; elu_nom: string; debut: string; fin: string; en_cours: boolean; fonction: string };
 
 export const metadata: Metadata = {
-  title: "Liste compl\u00e8te des collaborateurs parlementaires en cours de fonction",
-  description: "La liste r\u00e9f\u00e9rence de tous les collaborateurs directs des d\u00e9put\u00e9s, s\u00e9nateurs et d\u00e9put\u00e9s europ\u00e9ens fran\u00e7ais en poste, toutes chambres confondues, avec l\u2019\u00e9lu employeur et la fonction.",
+  title: "Liste complète des collaborateurs parlementaires en cours de fonction",
+  description: "La liste référence de tous les collaborateurs directs des députés, sénateurs et députés européens français en poste, toutes chambres confondues, avec l’élu employeur et la fonction.",
   alternates: { canonical: "/collab/liste" },
 };
 
@@ -28,12 +28,12 @@ export default async function ListeCollaborateurs({ searchParams }: { searchPara
   return (
     <>
       <p className="meta"><a href="/collab">&larr; Collaborateurs</a></p>
-      <h1>La liste compl\u00e8te des collaborateurs parlementaires</h1>
+      <h1>La liste complète des collaborateurs parlementaires</h1>
       <p className="lead">
-        En octobre 2026, ${total.toLocaleString("fr-FR")} collaborateurs parlementaires sont en poste aupr\u00e8s des \u00e9lus fran\u00e7ais : ${parChambreTxt}, d\u2019apr\u00e8s les listes officielles suivies quotidiennement par DataParl'.
+        En octobre 2026, ${total.toLocaleString("fr-FR")} collaborateurs parlementaires sont en poste auprès des élus français : ${parChambreTxt}, d’après les listes officielles suivies quotidiennement par DataParl'.
       </p>
       <table className="stats">
-        <thead><tr><th>\u00c9lu employeur</th><th>Chambre</th><th>Fonction</th></tr></thead>
+        <thead><tr><th>Élu employeur</th><th>Chambre</th><th>Fonction</th></tr></thead>
         <tbody>
         {lignes.map((r) => (
             <tr key="${r.collab_id}-{r.chambre}-{r.elu_id}">
@@ -45,10 +45,10 @@ export default async function ListeCollaborateurs({ searchParams }: { searchPara
         </tbody>
       </table>
       {totalPages > 1 && (
-        <p className="meta">Page ${pageS\u00fbre} sur ${totalPages} \u2014 <a href="/collab/liste?page=${pageS\u00fbre - 1}">pr\u00e9c\u00e9dente</a> \u00b7 <a href="/collab/liste?page=${pageS\u00fbre + 1}">suivante</a></p>
+        <p className="meta">Page ${pageSûre} sur ${totalPages} — <a href="/collab/liste?page=${pageSûre - 1}">précédente</a> · <a href="/collab/liste?page=${pageSûre + 1}">suivante</a></p>
       )}
       <p className="meta">
-        Liste \u00e9tablie \u00e0 partir des listes officielles de collaborateurs publi\u00e9es par l'Assembl\u00e9e nationale et le S\u00e9nat, mise \u00e0 jour quotidienne. Version tableur d\u00e9taill\u00e9e : <a href="https://media.dataparl.fr/sheets/liste_collab_dataparl">DataParl' Sheets</a>.
+        Liste établie à partir des listes officielles de collaborateurs publiées par l'Assemblée nationale et le Sénat, mise à jour quotidienne. Version tableur détaillée : <a href="https://media.dataparl.fr/sheets/liste_collab_dataparl">DataParl' Sheets</a>.
       </p>
     </>
   );
