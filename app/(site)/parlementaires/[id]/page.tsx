@@ -19,7 +19,7 @@ export const revalidate = 3600;
 
 type Props = { params: Promise<{ id: string }> };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const id = decodeURIComponent((await params).id);
   const f = await parlementaireDepuisId(id).catch(() => null);
   if (f) {
@@ -73,7 +73,7 @@ function ListeOrganes({ items }: { items: Appartenance[] }) {
   );
 }
 
-export default async function Parlementaire({ params }: Props) {
+export default async function Parlementaire({ params }: { params: Promise<{ id: string }> }) {
   const id = decodeURIComponent((await params).id);
   const f = await parlementaireDepuisId(id).catch(() => null);
   if (!f) return <FicheSimple id={id} />;
@@ -81,7 +81,7 @@ export default async function Parlementaire({ params }: Props) {
   const { fiches, mandats, appartenances } = await personne(f.personne_id);
   const e = eluDepuisFiche(f);
   const [collabs, mouvements, stats, periodes, commeCollab, gouvernement] = await Promise.all([
-    f.actif && f.chambre !== "europarl" ? equipe(e) : Promise.resolve([]),
+    f.actif ? equipe(e) : Promise.resolve([]),
     mouvementsElu(e, 5).catch(() => []),
     f.actif ? statsElu(e).catch(() => null) : Promise.resolve(null),
     periodesElu(fiches).catch(() => []),
@@ -181,10 +181,7 @@ export default async function Parlementaire({ params }: Props) {
         </>
       )}
 
-      {f.actif && f.chambre === "europarl" && (
-        <p className="meta">Le suivi des assistants parlementaires européens est en pause : le site du Parlement européen bloque aujourd&apos;hui la lecture automatique de ses listes.</p>
-      )}
-      {f.actif && f.chambre !== "europarl" && (
+      {f.actif && (
         <>
           <h2>L&apos;équipe aujourd&apos;hui</h2>
           {collabs.length === 0 ? (
@@ -323,4 +320,4 @@ async function FicheSimple({ id }: { id: string }) {
       <ListeMouvements mouvements={mouvements} />
     </>
   );
-}	
+}
