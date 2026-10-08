@@ -1,5 +1,6 @@
 import sharp from "sharp";
 import { analyserFichier, CHAMBRE_DE_CODE, CREDIT, sourceAutorisee } from "@/lib/media";
+import { DATA_SUPABASE_URL } from "@/lib/env";
 import { parlementaireDepuisId, personne, type Parlementaire } from "@/lib/referentiel";
 
 // Photo officielle d'un élu, redimensionnée et servie par DataParl' :
@@ -17,9 +18,9 @@ const absente = () => new Response("Photo introuvable", { status: 404, headers: 
 // bucket public Supabase « media-europarl » ; on le sert en premier, et
 // l'URL officielle reste en repli (si un jour le WAF est retiré).
 const cacheEuroparl = (photoUrl: string): string | null => {
-  const base = (process.env.NEXT_PUBLIC_DATA_SUPABASE_URL ?? "").replace(/\/$/, "");
+  const base = DATA_SUPABASE_URL.replace(/\/$/, "");
   const id = /mepphoto\/(\d+)\.jpg/.exec(photoUrl)?.[1];
-  return base && id ? `${base}/storage/v1/object/public/media-europarl/${id}.jpg` : null;
+  return id ? `${base}/storage/v1/object/public/media-europarl/${id}.jpg` : null;
 };
 
 export async function GET(_req: Request, { params }: { params: Promise<{ chambre: string; fichier: string }> }) {
