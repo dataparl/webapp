@@ -10,6 +10,9 @@ import { sessionActuelle } from "@/lib/supabaseBrowser";
 // Affichage : lignes zébrées, 25 lignes par page, bouton plein écran et
 // recherche dans la grille (Ctrl+F). L'export CSV porte la source
 // (dataparl.fr) et chaque téléchargement est journalisé (compte + IP).
+// En lecture seule, la prop facultative « liens » rend certaines cellules
+// cliquables (une par ligne de donnees) : la grille devient alors une
+// navigation vers les fiches détaillées.
 
 const LETTRES = (c: number): string => { let s = ""; c++; while (c > 0) { const m = (c - 1) % 26; s = String.fromCharCode(65 + m) + s; c = Math.floor((c - 1) / 26); } return s; };
 const INDICE = (l: string): number => { let n = 0; for (const ch of l.toUpperCase()) n = n * 26 + (ch.charCodeAt(0) - 64); return n - 1; };
@@ -163,9 +166,20 @@ export function evaluer(grille: string[][], r: number, c: number, vus: Set<strin
 }
 
 // ── Composant ─────────────────────────────────────────────────────────────
-type Props = { id: string; titre: string; description: string; provenance: string; entetes: string[]; donnees: (string | number | null)[][]; lectureSeule?: boolean };
+type Props = {
+  id: string;
+  titre: string;
+  description: string;
+  provenance: string;
+  entetes: string[];
+  donnees: (string | number | null)[][];
+  lectureSeule?: boolean;
+  // Liens par cellule, alignés sur donnees (ligne à ligne) : en lecture
+  // seule, la cellule devient un lien cliquable vers une fiche DataParl'.
+  liens?: (string | null)[][];
+};
 
-export default function Tableur({ id, provenance, entetes, donnees, lectureSeule = false }: Props) {
+export default function Tableur({ id, provenance, entetes, donnees, lectureSeule = false, liens }: Props) {
   const CLE = `dp-sheets-${id}`;
   const initiales = useMemo(() => {
     const g: string[][] = [entetes.map(String), ...donnees.map((l) => l.map((v) => (v === null || v === undefined ? "" : String(v))))];
@@ -346,6 +360,7 @@ export default function Tableur({ id, provenance, entetes, donnees, lectureSeule
                     const v = calculee[r][c];
                     const saisie = actif && !lectureSeule;
                     const trouve = recherche.trim().length >= 2 && resultats.some((m) => m.r === r && m.c === c);
+                    const lien = lectureSeule ? (liens?.[r - 1]?.[c] ?? null) : null;
                     return (
                       <td key={c} className={actif ? "cell-active" : trouve ? "cell-trouvee" : ""} onClick={() => choisir(r, c)}>
                         {saisie ? (
@@ -356,7 +371,7 @@ export default function Tableur({ id, provenance, entetes, donnees, lectureSeule
                               if (e.key === "Tab") { e.preventDefault(); (e.target as HTMLInputElement).blur(); deplacer(0, e.shiftKey ? -1 : 1); }
                             }} />
                         ) : (
-                          r === 0 ? <strong>{String(v)}</strong> : <span>{aff(v)}</span>
+                          r === 0 ? <strong>{String(v)}</strong> : lien ? <a href={lien}>{aff(v)}</a> : <span>{aff(v)}</span>
                         )}
                       </td>
                     );
