@@ -93,6 +93,13 @@ export default async function Page() {
         interconnections. {TOP} structure(s) comptent au moins 5 clients ; {multi} eurodéputé(s) en emploient plusieurs.
       </p>
       <GrapheReseau noeuds={noeuds} aretes={aretes} />
+      <p className="meta">
+        Export :{" "}
+        <a href="https://media.dataparl.fr/assets/collab-reseau">graphe SVG (media.dataparl.fr/assets/collab-reseau)</a>
+        {" · "}
+        <a href="https://media.dataparl.fr/assets/collab-reseau?telecharger=1">télécharger le fichier</a>
+        {" — "}données ouvertes DataParl&apos;, rafraîchies toutes les heures.
+      </p>
       <h2>Classement des structures</h2>
       <Tableur
         id="reseau-structures"
