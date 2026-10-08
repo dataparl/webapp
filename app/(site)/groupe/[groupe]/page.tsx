@@ -46,8 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const slug = (await params).groupe;
   const g = groupeDepuisSlug(slug, await groupesExistants().catch(() => []));
   if (!g) return { title: "Groupe parlementaire" };
-  const titre = `Groupe ${g.groupe_libe
-lle || g.groupe} — ${CHAMBRE_LONG[g.chambre]}`;
+  const titre = `Groupe ${g.groupe_libelle || g.groupe} — ${CHAMBRE_LONG[g.chambre]}`;
   return {
     title: titre,
     description: `Les élus du groupe ${g.groupe_libelle || g.groupe} à ${CHAMBRE_LONG[g.chambre]} : leurs fiches, leurs biographies, leurs équipes de collaborateurs et leurs mouvements.`,
@@ -93,8 +92,7 @@ export default async function FicheGroupe({ params }: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(filAriane).replace(/</g, "\\u003c") }} />
-      <p className="meta" style={{ marginT
-op: 0 }}>
+      <p className="meta" style={{ marginTop: 0 }}>
         <a href="/senatoriales2026">← Sénatoriales 2026</a> · <a href="/groupe">← Tous les groupes</a>
       </p>
       <h1>
