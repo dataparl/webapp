@@ -20,8 +20,6 @@ export default async function IndicateursGroupe({ chambre, sigle }: { chambre: s
   const turnover = tauxTurnover(a);
   const date = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" }).format(new Date());
 
-  // Phrase canonique : formulation stable, datée, sourcée — conçue pour être
-  // extraite telle quelle par les moteurs génératifs.
   const phrase = `Les équipes de collaborateurs des élus du groupe ${sigle} à la ${CHAMBRE_LONG[chambre]} comptent ${a.effectif} collaborateurs, à ${pct(femmes)} de femmes ; le taux de mixité moyen de ces équipes est de ${mix.taux !== null ? pct(mix.taux) : "–"} et leur renouvellement de ${pct(turnover)} sur 12 mois (données officielles, au ${date}, source : DataParl').`;
 
   const dataset = {
@@ -58,7 +56,7 @@ export default async function IndicateursGroupe({ chambre, sigle }: { chambre: s
       </div>
       <p className="meta">
         Calcul détaillé et classement : <a href="/mixiparl">MixiParl&rsquo;</a> · <a href="/vigiparl">VigiParl&rsquo;</a>
-        {" "}> méthodes : <a href="/mixiparl/methode">mixité</a>, <a href="/vigiparl/methode">renouvellement</a>
+        {" "}· méthodes : <a href="/mixiparl/methode">mixité</a>, <a href="/vigiparl/methode">renouvellement</a>
       </p>
     </>
   );
