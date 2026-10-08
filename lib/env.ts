@@ -26,8 +26,7 @@ export const ADMIN_GITHUB_LOGINS = (process.env.ADMIN_GITHUB_LOGINS ?? "").split
 // Adresses d'expédition autorisées depuis la webmail (domaine dataparl.fr,
 // envoi et réception chez Resend). La dernière sert seulement à répondre aux
 // anciens échanges, le temps de la transition.
-export const EXPEDITEURS = ["hello@dataparl.fr", "contact@dataparl.fr", "presse@dataparl.fr", "rgpd@dataparl.fr", "support@dataparl.fr", "it@dataparl.fr", "nore
-ply@dataparl.fr",
+export const EXPEDITEURS = ["hello@dataparl.fr", "contact@dataparl.fr", "presse@dataparl.fr", "rgpd@dataparl.fr", "support@dataparl.fr", "it@dataparl.fr", "noreply@dataparl.fr",
   "hello@mail.cavaparlement.eu"];
 
 // Publicité vidéo récompensée (AppLixir) : active seulement si la clé publique
