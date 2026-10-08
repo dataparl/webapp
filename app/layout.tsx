@@ -34,6 +34,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
+
     <html lang="fr" className={`${dmSans.variable} ${spectral.variable}`}>
       <head>
         {/* Consent Mode v2 (Google) : tout refusé par défaut, AVANT tout script
@@ -43,6 +44,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{
             __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
 gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500});`,
+          }}
+        />
+        {/* Google Analytics 4 (gtag.js, G-GC1JD019GY) : mesure d'audience,
+            chargée après les défauts de consentement ci-dessus — tant que le
+            visiteur n'a pas accepté, GA4 ne dépose aucun cookie (Consent Mode v2). */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-GC1JD019GY" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `gtag('js', new Date());
+gtag('config', 'G-GC1JD019GY');`,
           }}
         />
         {/* Google AdSense : validation du site et diffusion des annonces (ca-pub-6168263680630864). */}
