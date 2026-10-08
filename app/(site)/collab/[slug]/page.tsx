@@ -10,14 +10,15 @@ import PubGoogle from "@/app/_components/PubGoogle";
 export const revalidate = 3600;
 type Props = { params: Promise<{ slug: string }> };
 
-// Fiches collaborateurs indexables : données publiées officiellement (listes de collaborateurs de l'AN et du Sénat).
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+// Fiches collaborateurs indexables : listes officielles publiques (AN, Senat).
+export async function generateMetadata({ params }: { slug: string }): Promise<Metadata> {
   const c = await collaborateurDepuisSlug((await params).slug).catch(() => null);
-const nom = prenomNom(c.prenom, c.nom);
+  if (!c) return { title: "Collaborateur" };
+  const nom = prenomNom(c.prenom, c.nom);
   return {
-    title: \`\${nom} : parcours de collaborateur parlementaire\`,
-    description: \`Parcours de \${nom} : postes de collaborateur parlementaire (fonction, élu, chambre, périodes), d'après les listes officielles de l'Assemblée nationale et du Sénat.\`,
-    alternates: { canonical: \`/collab/\${c.slug}\` },
+    title: nom + " : parcours de collaborateur parlementaire",
+    description: "Parcours de " + nom + " : postes de collaborateur parlementaire (fonction, élu, chambre, périodes), d'après les listes officielles de l'Assemblée nationale et du Sénat.",
+    alternates: { canonical: "/collab/" + c.slug },
   };
 }
 
