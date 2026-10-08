@@ -43,7 +43,7 @@ export default async function VigiParl() {
   const groupes = CHAMBRES.flatMap((c) => agreger(rows.filter((r) => r.chambre === c), (r) => r.elu_groupe)
     .sort((a, b) => (tauxTurnover(b) ?? 0) - (tauxTurnover(a) ?? 0))
     .map((g) => carte(`groupe-${segmentDe(c)}-${g.cle.replace(/[^\p{L}\p{N}]+/gu, "-")}`, g.cle, g, `/vigiparl/${segmentDe(c)}/parlementaires?groupe=${encodeURIComponent(g.cle)}`, undefined, CHAMBRE_LONG[c])));
-  const maxBarre = Math.max(0.5, ...[...familles, ...groupes].map((l) => l.taux ?? 0));
+  const maxBarre = Math.max(0.5, ...[familles, ...groupes].map((l) => l.taux ?? 0));
 
   return (
     <>
@@ -129,7 +129,7 @@ export default async function VigiParl() {
       <h2>Méthode</h2>
       <p>
         Taux de renouvellement = départs ÷ effectif moyen de l&apos;équipe, hors départs liés à la fin de mandat de l&apos;élu.
-        Dates de publication officielles, archives depuis 2015. {CHAMBRE.europarl} : suivi en pause.{" "}
+        Dates de publication officielles, archives depuis 2015. {CHAMBRE.europarl} : suivi repris le 8 octobre 2026, indicateurs dès 12 mois de recul.{" "}
         <a href="/vigiparl/methode">La méthode complète, avec un exemple chiffré →</a>
       </p>
     </>

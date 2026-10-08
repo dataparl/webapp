@@ -48,7 +48,7 @@ export default async function Page() {
       />
       <p className="meta">
         Suivi quotidien depuis le 8 octobre 2026 ; les arrivées et départs de structures apparaissent dans les{" "}
-        <Link href="/mouvements?chambre=europarl">mouvements europarl</Link>. Identification SIREN via le registre
+        <Link href="/mouvements/europarl">mouvements du Parlement européen</Link>. Identification SIREN via le registre
         des entreprises (Pappers) pour les structures appariées. Le nom de chaque structure ouvre sa fiche détaillée :
         eurodéputés clients en graphe relationnel, identification SIREN et mouvements.{" "}
         <Link href="/collab/pe/reseau">Voir le réseau global des structures →</Link>
