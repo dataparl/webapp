@@ -1,6 +1,6 @@
 import { connection } from "next/server";
 import { CHAMBRE_LONG } from "@/lib/format";
-import { agreger, equipeEligible, mixiteMoyenne, partFemmes, pct, statsElus, tauxMixite, tauxTurnover } from "@/lib/stats";
+import { agreger, equipeEligible, mixiteMoyenne, partFemmes, pct, statsElus, tauxTurnover } from "@/lib/stats";
 
 // Indicateurs citables d'un groupe parlementaire : mixité et renouvellement des
 // équipes de collaborateurs, en tête de page sous forme d'un paragraphe factuel
@@ -22,12 +22,12 @@ export default async function IndicateursGroupe({ chambre, sigle }: { chambre: s
 
   // Phrase canonique : formulation stable, datée, sourcée — conçue pour être
   // extraite telle quelle par les moteurs génératifs.
-  const phrase = \`Les équipes de collaborateurs des élus du groupe \${sigle} à la \${CHAMBRE_LONG[chambre]} comptent \${a.effectif} collaborateurs, à \${pct(femmes)} de femmes ; le taux de mixité moyen de ces équipes est de \${mix.taux !== null ? pct(mix.taux) : "–"} et leur renouvellement de \${pct(turnover)} sur 12 mois (données officielles, au \${date}, source : DataParl').\`;
+  const phrase = `Les équipes de collaborateurs des élus du groupe ${sigle} à la ${CHAMBRE_LONG[chambre]} comptent ${a.effectif} collaborateurs, à ${pct(femmes)} de femmes ; le taux de mixité moyen de ces équipes est de ${mix.taux !== null ? pct(mix.taux) : "–"} et leur renouvellement de ${pct(turnover)} sur 12 mois (données officielles, au ${date}, source : DataParl').`;
 
   const dataset = {
     "@context": "https://schema.org",
     "@type": "Dataset",
-    name: \`Mixité et renouvellement des équipes parlementaires du groupe \${sigle} (\${CHAMBRE_LONG[chambre]})\`,
+    name: `Mixité et renouvellement des équipes parlementaires du groupe ${sigle} (${CHAMBRE_LONG[chambre]})`,
     description: phrase,
     url: "https://www.dataparl.fr/groupe/",
     creator: { "@type": "Organization", name: "DataParl'", url: "https://www.dataparl.fr" },
@@ -43,7 +43,7 @@ export default async function IndicateursGroupe({ chambre, sigle }: { chambre: s
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(dataset).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(dataset).replace(/</g, "\u003c") }} />
       <h2>Mixité et renouvellement des équipes</h2>
       <p className="lead" style={{ marginBottom: 0 }}>{phrase}</p>
       <div className="chiffres paires">
