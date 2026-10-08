@@ -37,7 +37,7 @@ export default function FeuilleGate({ id, titre }: { id: string; titre: string }
     if (!session && !libre) return;
     setContenu(null);
     setEtat("chargement");
-    const entetes: Record<string, string> = libre ? {} : { Authorization: `Bearer ${session.access_token}` };
+    const entetes: Record<string, string> = libre || !session ? {} : { Authorization: `Bearer ${session.access_token}` };
     const r = await fetch(`/api/sheets/${encodeURIComponent(id)}`, {
       headers: entetes,
       cache: "no-store",
@@ -47,7 +47,8 @@ export default function FeuilleGate({ id, titre }: { id: string; titre: string }
     setEtat("erreur");
   }, [session, id, libre]);
 
-  useEffect(() => { charger(); }, [charger]);
+  useEffect(() => { 
+charger(); }, [charger]);
 
   if (session === undefined) return <p className="meta">Chargement…</p>;
 
@@ -78,7 +79,7 @@ export default function FeuilleGate({ id, titre }: { id: string; titre: string }
     );
   }
 
-  if (etat === "verrouillee") {
+  if (etat === "verrouillee" && session) {
     return (
       <>
         <VideoDeblocage
