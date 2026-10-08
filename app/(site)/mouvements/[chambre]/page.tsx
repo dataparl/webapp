@@ -36,9 +36,6 @@ export default async function MouvementsChambre({ params }: { params: Promise<{ 
   return (
     <>
       <h1>Mouvements : <span className="surligne">{page.titre}</span></h1>
-      {chambre === "europarl" && (
-        <p className="meta">Le suivi quotidien du Parlement européen est en pause : son site bloque actuellement les robots.</p>
-      )}
       <Onglets actif={chambre} />
       {apercu.length > 0 && (
         <>
