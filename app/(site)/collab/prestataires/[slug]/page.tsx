@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page({ params }: Props) {
   const { slug } = await params;
-  const s = await structureDesdeSlug("Prestataire de services spécialisé" as keyof typeof FONCTIONS_STRUCTURES, slug);
+  const s = await structureDepuisSlug("Prestataire de services spécialisé" as keyof typeof FONCTIONS_STRUCTURES, slug);
   if (!s) notFound();
   const [info, mouvements] = await Promise.all([pappers(s.nom), mouvementsStructure(s.cle)]);
   return (
