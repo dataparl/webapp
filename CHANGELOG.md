@@ -19,14 +19,14 @@ versionnement [SemVer](https://semver.org/lang/fr/).
   site après 4 minutes à un visiteur connecté (une fois, lien par jeton
   rattaché au compte) ; réponses et notes dans l'admin (Contenu → Enquête
   utilisateurs). Table : scripts/survey.sql.
-- Enquête utilisateurs : questionnaire survey.dataparl.fr (3 notes —
-  expérience, contenu de fond, globale — et un commentaire), proposé sur le
-  site après 4 minutes à un visiteur connecté (une fois, lien par jeton
-  rattaché au compte) ; réponses et notes dans l'admin (Contenu → Enquête
-  utilisateurs). Table : scripts/survey.sql.
 
 ### Modifié
 
+- Pages « structures du Parlement européen » : tiers payants, prestataires
+  et réseau vivent désormais sous `/collab/pe/` (segment chambre `pe`,
+  comme les photos des élus) ; les anciens chemins `/collab/tiers-payants`,
+  `/collab/prestataires` et `/collab/reseau` redirigent en 308, fiches
+  comprises.
 - Le tableur DataParl' Sheets vit désormais sur `media.dataparl.fr/sheets`
   (et `/search`) ; `www.dataparl.fr/sheets` et l'ancien domaine
   `drive.dataparl.fr` redirigent en 308 vers `media`.
@@ -41,11 +41,6 @@ versionnement [SemVer](https://semver.org/lang/fr/).
   police de repli aux métriques ajustées) : fin du reflow au chargement des
   polices Google (CLS 0,27 → ~0 sur l'accueil, mesuré PageSpeed). DM Sans pour
   le corps de texte, Spectral pour les titres — visuel inchangé.
-  polices Google (CLS 0,27 → ~0 sur l'accueil).
-- Emails d'alertes : nouvel en-tête épuré (fini le bandeau bleu nuit du
-  DataParl' Daily/Weekly), pied de page réduit à une ligne, et expéditeurs
-  dédiés `dataparl-daily@dataparl.fr` / `dataparl-weekly@dataparl.fr`
-  (à valider dans Resend).
 - Emails d'alertes : nouvel en-tête épuré (fini le bandeau bleu nuit du
   DataParl' Daily/Weekly), pied de page réduit à une ligne, et expéditeurs
   dédiés `dataparl-daily@dataparl.fr` / `dataparl-weekly@dataparl.fr`

@@ -252,6 +252,13 @@ export async function proxy(req: NextRequest) {
     if (path === "/sheets" || path.startsWith("/sheets/") || path === "/search") {
       return vers(req, `media.${DOMAINE}`, path, 308);
     }
+    // Les pages structures du Parlement européen vivent sous /collab/pe/ :
+    // les anciens chemins redirigent en 308 (fiches comprises).
+    for (const ancien of ["tiers-payants", "prestataires", "reseau"] as const) {
+      if (path === "/collab/" + ancien || path.startsWith("/collab/" + ancien + "/")) {
+        return vers(req, host, "/collab/pe/" + path.slice("/collab/".length), 308);
+      }
+    }
     if (path.startsWith("/admin")) {
       const cible = (path.replace(/^\/admin/, "") || "/").replace(/\/$/, "") || "/";
       return vers(req, `admin.${DOMAINE}`, nouvelCheminAdmin(cible) ?? cible, 307);
