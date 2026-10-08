@@ -46,7 +46,7 @@ export function TableStructures({
 }
 
 // Carte d'identité SIREN d'une structure (si enrichissement réussi) :
-// identification, « qui encaisse » (dirigeants, bénéficiaires effectifs)
+// identification, personnes physiques (dirigeants, bénéficiaires effectifs)
 // et liens vers les fichiers publics.
 export function CarteSiren({ info }: { info: InfoSiren | null }) {
   if (!info) {
@@ -69,10 +69,11 @@ export function CarteSiren({ info }: { info: InfoSiren | null }) {
         {info.forme_juridique ? info.forme_juridique + " · " : ""}SIREN {info.siren}
         {info.adresse ? " · " + info.adresse : ""}
       </p>
-      <h3 style={{ margin: "12px 0 4px" }}>Qui encaisse l&apos;argent ?</h3>
+      <h3 style={{ margin: "12px 0 4px" }}>Qui dirige la structure ?</h3>
       <p className="meta" style={{ margin: "0 0 6px" }}>
-        Les sommes versées par le Parlement européen au titre du contrat de l&apos;eurodéputé (rémunération,
-        cotisations ou prestations) transitent par cette structure avant reversement. Personnes derrière elle :
+        Dirigeants et bénéficiaires effectifs déclarés au registre national des entreprises pour cette structure,
+        qui perçoit les sommes versées par le Parlement européen au titre du contrat de l&apos;eurodéputé
+        (rémunération, cotisations ou prestations) :
       </p>
       {info.dirigeants.length > 0 && (
         <p className="meta" style={{ margin: "0 0 4px" }}>

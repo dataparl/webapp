@@ -22,6 +22,13 @@ versionnement [SemVer](https://semver.org/lang/fr/).
 
 ### Modifié
 
+- Accueil : le compteur détaille les trois chambres (Assemblée, Sénat,
+  Parlement européen) et « Explorer » pointe vers les mouvements du
+  Parlement européen (`/mouvements/europarl`).
+- Carte SIREN des structures du Parlement européen : la section « Qui
+  encaisse l'argent ? » devient « Qui dirige la structure ? »
+  (formulation neutre, mêmes informations : dirigeants et bénéficiaires
+  effectifs).
 - Pages « structures du Parlement européen » : tiers payants, prestataires
   et réseau vivent désormais sous `/collab/pe/` (segment chambre `pe`,
   comme les photos des élus) ; les anciens chemins `/collab/tiers-payants`,
