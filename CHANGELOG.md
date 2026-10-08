@@ -22,6 +22,9 @@ versionnement [SemVer](https://semver.org/lang/fr/).
 
 ### Modifié
 
+- Plan du site (`/sitemap`) et `sitemap.xml` : ajout des pages du Parlement
+  européen — tiers payants, prestataires, réseau des collaborateurs, et une
+  URL par fiche structure dans le plan XML.
 - Accueil : le compteur détaille les trois chambres (Assemblée, Sénat,
   Parlement européen) et « Explorer » pointe vers les mouvements du
   Parlement européen (`/mouvements/europarl`).

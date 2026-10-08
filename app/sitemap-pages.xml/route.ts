@@ -43,12 +43,22 @@ export async function GET() {
       }
     } catch { /* sans les groupes */ }
   }
+  // Une page par structure du Parlement européen (tiers payants, prestataires).
+  try {
+    const { FONCTIONS_STRUCTURES, slugStructure, structures } = await import("@/lib/structures");
+    for (const [fonction, f] of Object.entries(FONCTIONS_STRUCTURES)) {
+      if (estInactif(`/collab/pe/${f.slug}`, inactifs)) continue;
+      for (const s of await structures(fonction as keyof typeof FONCTIONS_STRUCTURES)) {
+        urls.push({ loc: `${base}/collab/pe/${f.slug}/${slugStructure(s.nom)}`, changefreq: "weekly", priority: "0.5" });
+      }
+    }
+  } catch { /* sans les structures */ }
   // Une page par département représenté.
   if (!estInactif("/departement", inactifs)) {
     try {
       const { slugDepartement } = await import("@/lib/senatoriales");
       const { departementsExistants } = await import("@/lib/collectifsData");
-      for (const d of await departementsExistants()) {
+      for (const d of departementsExistants()) {
         const slug = slugDepartement(d);
         if (slug) urls.push({ loc: `${base}/departement/${slug}/`, changefreq: "weekly", priority: "0.6" });
       }
