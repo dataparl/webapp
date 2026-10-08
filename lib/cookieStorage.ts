@@ -17,7 +17,15 @@ function lire(): Map<string, string> {
   for (const part of document.cookie.split("; ")) {
     if (!part) continue;
     const i = part.indexOf("=");
-    m.set(decodeURIComponent(part.slice(0, i)), part.slice(i + 1));
+    // Tolérant aux noms contenant un « % » non valide : un cookie parasite
+    // ne doit jamais faire planter la lecture/écriture des autres.
+    let nom: string;
+    try {
+      nom = decodeURIComponent(part.slice(0, i));
+    } catch {
+      nom = part.slice(0, i);
+    }
+    m.set(nom, part.slice(i + 1));
   }
   return m;
 }
@@ -46,11 +54,19 @@ export const cookieStorage = {
   },
   setItem(cle: string, valeur: string): void {
     if (typeof document === "undefined") return;
-    const enc = encodeURIComponent(valeur);
+    // La suppression des morceaux obsolètes (lire()) ne doit pas pouvoir
+    // faire échouer l'écriture : try/catch autour de toute l'opération.
+    let enc: string;
+    try {
+      enc = encodeURIComponent(valeur);
+    } catch {
+      return;
+    }
     const n = Math.ceil(enc.length / TAILLE) || 1;
     // Ne jamais couper une séquence %XX en deux.
     let debut = 0;
-    let i = 0;
+    let
+ i = 0;
     while (debut < enc.length || i === 0) {
       let fin = Math.min(debut + TAILLE, enc.length);
       const p = enc.lastIndexOf("%", fin - 1);
