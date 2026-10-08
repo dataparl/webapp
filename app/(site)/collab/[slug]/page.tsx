@@ -11,7 +11,7 @@ export const revalidate = 3600;
 type Props = { params: Promise<{ slug: string }> };
 
 // Fiches collaborateurs indexables : listes officielles publiques (AN, Senat).
-export async function generateMetadata({ params }: { slug: string }): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const c = await collaborateurDepuisSlug((await params).slug).catch(() => null);
   if (!c) return { title: "Collaborateur" };
   const nom = prenomNom(c.prenom, c.nom);
@@ -37,7 +37,8 @@ export default async function FicheCollab({ params }: Props) {
 
   return (
     <>
-      <p className="meta" style={{ marginBottom: 0 }}>{role} · {c.chambres.split(" ").map((x) => CHAMBRE_LONG[x]).join(", ")}</p>
+      <p className="meta" style={{ marginBottom: 0 }}>{rol
+e} · {c.chambres.split(" ").map((x) => CHAMBRE_LONG[x]).join(", ")}</p>
       <h1>{nom}</h1>
       <p className="lead">
         {c.actif ? "En poste aujourd'hui." : `Dernière présence connue : ${moisAnnee(c.derniere_date)}.`}{" "}
@@ -70,7 +71,8 @@ export default async function FicheCollab({ params }: Props) {
                 <li key={i}>
                   {p.fonction || (c.genre === "F" ? "Collaboratrice" : "Collaborateur")} de{" "}
                   {f ? <a href={`/parlementaires/${encodeURIComponent(f.slug)}`}>{eluNom}</a> : eluNom}
-                  <span className="meta"> · {CHAMBRE_LONG[p.chambre]}{f?.groupe ? ` · ${f.groupe}` : ""} · {libellePeriode(p)}</span>
+                  <span className="meta"> · {CHAMBRE_LONG[p.chambre]}{f?.groupe ? ` · ${f.gro
+upe}` : ""} · {libellePeriode(p)}</span>
                 </li>
               );
             })}
