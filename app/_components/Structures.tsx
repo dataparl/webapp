@@ -32,7 +32,7 @@ export function TableStructures({
           return (
             <tr key={s.cle}>
               <td>
-                <Link href={`${hrefBase}/${slugStructure(s.nom)}`}>{s.nom}</Link>
+                <Link href={hrefBase + "/" + slugStructure(s.nom)}>{s.nom}</Link>
               </td>
               <td>{s.clients.length}</td>
               {avecSiren && <td>{info?.forme_juridique || "—"}</td>}
@@ -45,7 +45,9 @@ export function TableStructures({
   );
 }
 
-// Carte d'identité SIREN d'une structure (si enrichissement réussi).
+// Carte d'identité SIREN d'une structure (si enrichissement réussi) :
+// identification, « qui encaisse » (dirigeants, bénéficiaires effectifs)
+// et liens vers les fichiers publics.
 export function CarteSiren({ info }: { info: InfoSiren | null }) {
   if (!info) {
     return (
@@ -61,19 +63,41 @@ export function CarteSiren({ info }: { info: InfoSiren | null }) {
       <p style={{ margin: "0 0 6px" }}>
         <strong>{info.denomination}</strong>
         {info.actif ? <span className="puce">société active</span> : null}
+        {info.manuel ? <span className="puce">SIREN vérifié à la main</span> : null}
       </p>
       <p className="meta" style={{ margin: 0 }}>
-        {info.forme_juridique} · SIREN {info.siren}
-        {info.adresse ? ` · ${info.adresse}` : ""}
+        {info.forme_juridique ? info.forme_juridique + " · " : ""}SIREN {info.siren}
+        {info.adresse ? " · " + info.adresse : ""}
+      </p>
+      <h3 style={{ margin: "12px 0 4px" }}>Qui encaisse l&apos;argent ?</h3>
+      <p className="meta" style={{ margin: "0 0 6px" }}>
+        Les sommes versées par le Parlement européen au titre du contrat de l&apos;eurodéputé (rémunération,
+        cotisations ou prestations) transitent par cette structure avant reversement. Personnes derrière elle :
       </p>
       {info.dirigeants.length > 0 && (
-        <p className="meta" style={{ margin: "6px 0 0" }}>
-          Dirigeants : {info.dirigeants.join(", ")}
+        <p className="meta" style={{ margin: "0 0 4px" }}>
+          <strong>Dirigeants :</strong> {info.dirigeants.join(", ")}
         </p>
       )}
-      <p className="meta" style={{ margin: "6px 0 0" }}>
-        Source : registre des entreprises via Pappers — dénomination PE rapprochée automatiquement, à vérifier en cas
-        d'homonymie.
+      {info.beneficiaires.length > 0 && (
+        <p className="meta" style={{ margin: "0 0 4px" }}>
+          <strong>Bénéficiaires effectifs :</strong> {info.beneficiaires.join(", ")}
+        </p>
+      )}
+      {info.dirigeants.length === 0 && info.beneficiaires.length === 0 && (
+        <p className="meta" style={{ margin: 0 }}>
+          Dirigeants et bénéficiaires effectifs non disponibles pour cette société (ajouter la clé PAPPERS_API_KEY
+          sur Vercel pour les afficher).
+        </p>
+      )}
+      <p className="meta" style={{ margin: "8px 0 0" }}>
+        Fichiers publics :{" "}
+        <a href={"https://annuaire-entreprises.data.gouv.fr/recherche?q=" + info.siren}>annuaire des entreprises</a>
+        {" · "}
+        <a href={"https://www.pappers.fr/recherche?q=" + info.siren}>Pappers</a>
+        {info.manuel
+          ? " — SIREN vérifié manuellement par DataParl'."
+          : " — dénomination PE rapprochée automatiquement, à vérifier en cas d'homonymie."}
       </p>
     </div>
   );
