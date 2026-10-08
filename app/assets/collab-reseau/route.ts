@@ -4,9 +4,9 @@ import { structures } from "@/lib/structures";
 // Export SVG du réseau structures-eurodéputés, servi sur
 // media.dataparl.fr/assets/collab-reseau (chemin autorisé dans proxy.ts ;
 // l'extension .svg redirige vers la même ressource). Généré côté serveur
-// à partir des affectations du Parlement européen, avec les mêmes
-// positions initiales (cercles) que le composant GrapheReseau, le logo
-// DataParl' en tête et la légende des groupes politiques en pied.
+// à partir des affectations du Parlement européen : structures sur un
+// cercle intérieur, eurodéputés sur une ellipse extérieure, logo
+// DataParl' en tête et légende des groupes politiques en pied.
 // ?telecharger force le téléchargement (Content-Disposition).
 
 export const revalidate = 3600;
@@ -24,9 +24,10 @@ const COULEURS: Record<string, string> = {
   "NI": "#94a3b8",
 };
 
+const APOS = String.fromCharCode(8217); // apostrophe typographique
 const echappe = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-const court = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
+const court = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + "\u2026" : s);
 const nb = (x: number) => String(x).replace(".", ",");
 
 export async function GET(req: NextRequest) {
@@ -66,30 +67,31 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Positions initiales : structures sur un cercle intérieur, élus sur un
-  // cercle extérieur (déterministe, identique au rendu initial de la page).
-  const W = 1100, H = 760;
+  // Positions : structures sur un cercle intérieur, élus sur une ellipse
+  // extérieure (déterministe, même logique que le rendu initial de la page).
+  const W = 1500, H = 1000;
   const cx = W / 2, cy = H / 2 + 30;
   const pos = new Map<string, { x: number; y: number }>();
   const nbS = Math.max(1, toutes.length), nbE = Math.max(1, elus.size);
   let iS = 0, iE = 0;
   for (const s of toutes) {
-    const a = (2 * Math.PI * iS++) / nbS;
-    pos.set(s.cle, { x: cx + 160 * Math.cos(a), y: cy + 120 * Math.sin(a) });
+    const a = (2 * Math.PI * iS++) / nbS - Math.PI / 2;
+    pos.set(s.cle, { x: cx + 270 * Math.cos(a), y: cy + 250 * Math.sin(a) });
   }
   for (const [id] of elus) {
-    const a = (2 * Math.PI * iE++) / nbE;
-    pos.set(id, { x: cx + 320 * Math.cos(a), y: cy + (H / 2 - 90) * Math.sin(a) });
+    const a = (2 * Math.PI * iE++) / nbE - Math.PI / 2;
+    pos.set(id, { x: cx + 640 * Math.cos(a), y: cy + 400 * Math.sin(a) });
   }
 
   const p: string[] = [];
-  // En-tête : logo DataParl' et sous-titre.
   p.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" font-family="system-ui, -apple-system, sans-serif">');
   p.push('<rect width="' + W + '" height="' + H + '" fill="#ffffff"/>');
-  p.push('<text x="36" y="52" font-size="32" font-weight="700" fill="#14224e">Data</text>');
-  p.push('<rect x="106" y="26" width="76" height="38" rx="5" fill="#FFD23F"/>');
-  p.push('<text x="115" y="55" font-size="32" font-weight="700" fill="#071A41">Parl&apos;</text>');
-  p.push('<text x="36" y="82" font-size="15" fill="#475569">Le réseau des tiers payants et prestataires des eurodéputés français — ' + nb(toutes.length) + ' structures · ' + nb(elus.size) + ' eurodéputés · ' + nb(aretes.length) + ' contrats · dataparl.fr</text>');
+  // Logo DataParl' : « Data » bleu nuit puis badge jaune « Parl' », mesurés
+  // pour ne jamais se chevaucher ni être coupés par le bord.
+  p.push('<text x="48" y="72" font-size="44" font-weight="700" fill="#14224e" letter-spacing="1">Data</text>');
+  p.push('<rect x="158" y="38" width="102" height="46" rx="7" fill="#FFD23F"/>');
+  p.push('<text x="172" y="72" font-size="44" font-weight="700" fill="#071A41">Parl' + APOS + '</text>');
+  p.push('<text x="48" y="112" font-size="17" fill="#475569">Le réseau des tiers payants et prestataires des eurodéputés français — ' + nb(toutes.length) + ' structures · ' + nb(elus.size) + ' eurodéputés · ' + nb(aretes.length) + ' contrats · dataparl.fr</text>');
   // Arêtes puis nœuds.
   for (const a of aretes) {
     const s = pos.get(a.source), e = pos.get(a.target);
@@ -100,29 +102,30 @@ export async function GET(req: NextRequest) {
     const q = pos.get(id);
     if (!q) continue;
     const c = COULEURS[e.elu_groupe] || "#1E90FF";
-    p.push('<circle cx="' + nb(q.x) + '" cy="' + nb(q.y) + '" r="9" fill="' + c + '" stroke="#fff" stroke-width="1.5"/>');
-    p.push('<text x="' + nb(q.x) + '" y="' + nb(q.y - 14) + '" text-anchor="middle" font-size="8.5" fill="#334155">' + echappe(court(e.elu_nom, 22)) + '</text>');
+    const cote = q.x >= cx ? 1 : -1;
+    p.push('<circle cx="' + nb(q.x) + '" cy="' + nb(q.y) + '" r="10" fill="' + c + '" stroke="#fff" stroke-width="1.5"/>');
+    p.push('<text x="' + nb(q.x + cote * 15) + '" y="' + nb(q.y + 4) + '" text-anchor="' + (cote === 1 ? "start" : "end") + '" font-size="11" fill="#334155">' + echappe(court(e.elu_nom, 24)) + '</text>');
   }
   for (const s of toutes) {
     const q = pos.get(s.cle);
     if (!q) continue;
-    const r = Math.min(24, 9 + s.clients.length * 1.6);
+    const r = Math.min(26, 10 + s.clients.length * 1.5);
     p.push('<circle cx="' + nb(q.x) + '" cy="' + nb(q.y) + '" r="' + nb(r) + '" fill="' + COULEUR_STRUCTURE + '" stroke="#fff" stroke-width="2"/>');
-    p.push('<text x="' + nb(q.x) + '" y="' + nb(q.y + r + 13) + '" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1f2937">' + echappe(court(s.nom, 26)) + '</text>');
+    p.push('<text x="' + nb(q.x) + '" y="' + nb(q.y + r + 15) + '" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1f2937">' + echappe(court(s.nom, 28)) + '</text>');
   }
   // Légende : structures + groupes politiques présents.
   const groupes = [...new Set([...elus.values()].map((e) => e.elu_groupe).filter(Boolean))];
-  let lx = 36;
-  p.push('<circle cx="' + nb(lx + 5) + '" cy="' + nb(H - 28) + '" r="6" fill="' + COULEUR_STRUCTURE + '"/>');
-  p.push('<text x="' + nb(lx + 16) + '" y="' + nb(H - 24) + '" font-size="12" fill="#1f2937">Structures</text>');
-  lx += 16 + 9 * 10;
+  let lx = 48;
+  const legendeY = H - 44;
+  p.push('<circle cx="' + nb(lx + 7) + '" cy="' + nb(legendeY) + '" r="7" fill="' + COULEUR_STRUCTURE + '"/>');
+  p.push('<text x="' + nb(lx + 20) + '" y="' + nb(legendeY + 5) + '" font-size="14" fill="#1f2937">Structures</text>');
+  lx += 20 + "Structures".length * 8 + 28;
   for (const g of groupes) {
-    p.push('<circle cx="' + nb(lx + 5) + '" cy="' + nb(H - 28) + '" r="6" fill="' + (COULEURS[g] || "#1E90FF") + '"/>');
-    const w = g.length * 7 + 12;
-    p.push('<text x="' + nb(lx + 16) + '" y="' + nb(H - 24) + '" font-size="12" fill="#1f2937">' + echappe(g) + '</text>');
-    lx += 16 + w;
+    p.push('<circle cx="' + nb(lx + 7) + '" cy="' + nb(legendeY) + '" r="7" fill="' + (COULEURS[g] || "#1E90FF") + '"/>');
+    p.push('<text x="' + nb(lx + 20) + '" y="' + nb(legendeY + 5) + '" font-size="14" fill="#1f2937">' + echappe(g) + '</text>');
+    lx += 20 + echappe(g).length * 8 + 28;
   }
-  p.push('<text x="' + nb(W - 36) + '" y="' + nb(H - 24) + '" text-anchor="end" font-size="11" fill="#64748b">Taille des nœuds = nombre de liens · source : DataParl&apos; (dataparl.fr), données ouvertes</text>');
+  p.push('<text x="' + nb(W - 48) + '" y="' + nb(legendeY + 5) + '" text-anchor="end" font-size="12" fill="#64748b">Taille des nœuds = nombre de liens · source : DataParl' + APOS + ' (dataparl.fr), données ouvertes</text>');
   p.push("</svg>");
   const svg = p.join("\n");
 
