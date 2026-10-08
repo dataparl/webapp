@@ -8,7 +8,7 @@ export const PAGES: PageSite[] = [
   { chemin: "/", titre: "Accueil", verrou: "L'accueil ne se désactive pas", sitemap: true },
   { chemin: "/mouvements", titre: "Mouvements", dynamique: "une page par chambre", sitemap: true },
   { chemin: "/daily", titre: "DataParl' Daily (jour par jour)", dynamique: "une page par jour publié", sitemap: true },
-  { chemin: "/collab", titre: "Collaborateurs", dynamique: "une fiche par collaborateur (non indexée)", sitemap: true },
+  { chemin: "/collab", titre: "Collaborateurs", dynamique: "une fiche par collaborateur", sitemap: true },
   { chemin: "/parlementaires", titre: "Parlementaires", dynamique: "une fiche par élu, une biographie par élu", sitemap: true },
   { chemin: "/senatoriales2026", titre: "Sénatoriales 2026", dynamique: "une page par département renouvelé", sitemap: true },
   { chemin: "/groupe", titre: "Groupes parlementaires", dynamique: "une fiche par groupe et par chambre", sitemap: true },
@@ -16,10 +16,12 @@ export const PAGES: PageSite[] = [
   { chemin: "/parti", titre: "Partis politiques", dynamique: "une fiche par parti", sitemap: true },
   { chemin: "/methode", titre: "Méthode", dynamique: "les pages méthode (VigiParl', MixiParl', sources)", sitemap: true },
   { chemin: "/methode/sources", titre: "Méthode · sources", sitemap: true },
+  { chemin: "/questions", titre: "Questions fréquentes", dynamique: "une page par question", sitemap: true },
   { chemin: "/vigiparl", titre: "VigiParl'", sitemap: true },
   { chemin: "/vigiparl/methode", titre: "VigiParl' · méthode", sitemap: true },
   { chemin: "/vigiparl/timeline", titre: "VigiParl' · année par année", sitemap: true },
-  { chemin: "/vigiparl/an/parlementaires", titre: "VigiParl' · Assemblée, par élu", sitemap: true },
+  { chemin: "/vigiparl/an/parlementaires", titre: "VigiParl' · Assemblée, par élu", sitemap: true
+ },
   { chemin: "/vigiparl/senat/parlementaires", titre: "VigiParl' · Sénat, par élu", sitemap: true },
   { chemin: "/mixiparl", titre: "MixiParl'", sitemap: true },
   { chemin: "/mixiparl/methode", titre: "MixiParl' · méthode", sitemap: true },
@@ -48,5 +50,6 @@ export function estInactif(chemin: string, inactifs: Iterable<string>): boolean 
   return false;
 }
 
-// Arbre d'affichage : profondeur d'après le chemin.
+// Arbre d'affi
+chage : profondeur d'après le chemin.
 export const profondeur = (chemin: string) => (chemin === "/" ? 0 : chemin.split("/").length - 1);
