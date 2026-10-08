@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { InfoSiren, Structure } from "@/lib/structures";
+import { slugStructure, type InfoSiren, type Structure } from "@/lib/structures";
 
 // Tableau d'une liste de structures (tiers payants ou prestataires).
 // hrefBase : préfixe des fiches détail (/collab/tiers-payants, /collab/prestataires).
@@ -32,7 +32,7 @@ export function TableStructures({
           return (
             <tr key={s.cle}>
               <td>
-                <Link href={`${hrefBase}#${s.cle}`}>{s.nom}</Link>
+                <Link href={`${hrefBase}/${slugStructure(s.nom)}`}>{s.nom}</Link>
               </td>
               <td>{s.clients.length}</td>
               {avecSiren && <td>{info?.forme_juridique || "—"}</td>}
