@@ -181,6 +181,35 @@ export const FEUILLES: FeuilleDef[] = [
     ],
     charger: async () => classementMixite("senat"),
   },
+    {
+      id: "liste_collab_dataparl",
+      titre: "Liste des collaborateurs parlementaires en poste",
+      description: "Tous les collaborateurs directs des \u00e9lus fran\u00e7ais actuellement en poste, toutes chambres confondues : nom, \u00e9lu employeur, chambre et fonction — la liste de r\u00e9f\u00e9rence, mise \u00e0 jour quotidiennement.",
+      provenance: "Table periodes en cours (API DataParl'/Supabase) \u00b7 listes officielles AN, S\u00e9nat, Parlement europ\u00e9en",
+      colonnes: [
+        { cle: "collab", label: "Collaborateur", genre: "texte" },
+        { cle: "elu", label: "\u00c9lu employeur", genre: "texte" },
+        { cle: "chambre", label: "Chambre", genre: "texte" },
+        { cle: "fonction", label: "Fonction", genre: "texte" },
+        { cle: "depuis", label: "En poste depuis", genre: "texte" },
+      ],
+      charger: async () => {
+        const rows = await dataQueryTout<{ collab_id: string; chambre: string; elu_nom: string; debut: string; fonction: string | null }>(
+          "periodes", new URLSearchParams({ select: "collab_id,chambre,elu_nom,debut,fonction", en_cours: "eq.true", order: "elu_nom.asc" }),
+        );
+        const collabs = await dataQueryTout<{ collab_id: string; prenom: string; nom: string }>(
+          "collaborateurs", new URLSearchParams({ select: "collab_id,prenom,nom" }),
+        );
+        const noms = new Map(collabs.map((c) => [c.collab_id, `${c.prenom} ${c.nom}`]));
+        return rows.map((r) => ({
+          collab: noms.get(r.collab_id) ?? "",
+          elu: r.elu_nom,
+          chambre: CHAMBRE_LONG[r.chambre] ?? r.chambre,
+          fonction: r.fonction ?? "",
+          depuis: r.debut,
+        }));
+      },
+    },
 ];
 
 // Classement MixiParl' d'une chambre (mixité par élu), partagé par les
