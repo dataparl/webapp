@@ -58,7 +58,7 @@ export async function GET() {
     try {
       const { slugDepartement } = await import("@/lib/senatoriales");
       const { departementsExistants } = await import("@/lib/collectifsData");
-      for (const d of departementsExistants()) {
+      for (const d of await departementsExistants()) {
         const slug = slugDepartement(d);
         if (slug) urls.push({ loc: `${base}/departement/${slug}/`, changefreq: "weekly", priority: "0.6" });
       }
