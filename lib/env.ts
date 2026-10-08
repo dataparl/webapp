@@ -26,7 +26,8 @@ export const ADMIN_GITHUB_LOGINS = (process.env.ADMIN_GITHUB_LOGINS ?? "").split
 // Adresses d'expédition autorisées depuis la webmail (domaine dataparl.fr,
 // envoi et réception chez Resend). La dernière sert seulement à répondre aux
 // anciens échanges, le temps de la transition.
-export const EXPEDITEURS = ["hello@dataparl.fr", "contact@dataparl.fr", "presse@dataparl.fr", "rgpd@dataparl.fr", "support@dataparl.fr", "it@dataparl.fr", "noreply@dataparl.fr",
+export const EXPEDITEURS = ["hello@dataparl.fr", "contact@dataparl.fr", "presse@dataparl.fr", "rgpd@dataparl.fr", "support@dataparl.fr", "it@dataparl.fr", "nore
+ply@dataparl.fr",
   "hello@mail.cavaparlement.eu"];
 
 // Publicité vidéo récompensée (AppLixir) : active seulement si la clé publique
@@ -34,7 +35,7 @@ export const EXPEDITEURS = ["hello@dataparl.fr", "contact@dataparl.fr", "presse@
 // Publicité display Google AdSense : le script est chargé dans le layout
 // (app/layout.tsx) ; un bloc ne s'affiche que si son identifiant est configuré.
 export const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? "ca-pub-6168263680630864";
-export const ADSENSE_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT ?? "";
+export const ADSENSE_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT ?? "2498344789"; // bloc « fiches-dataparl »
 
 export const APPLIXIR_API_KEY = process.env.NEXT_PUBLIC_APPLIXIR_API_KEY ?? "";
 export const APPLIXIR_SDK = "https://cdn.applixir.com/applixir.app.v6.1.0.js";
