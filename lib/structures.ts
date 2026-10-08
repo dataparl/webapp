@@ -81,10 +81,17 @@ export async function mouvementsStructure(cle: string): Promise<Mouvement[]> {
   return (await dataQuery<Mouvement>("mouvements", p, 3600)).rows;
 }
 
-// ── Enrichissement SIREN (Pappers) ─────────────────────────────────────────
+// ── Enrichissement SIREN (Pappers API v2) ───────────────────────────────────
 // La clé est facultative : sans PAPPERS_API_KEY les pages fonctionnent,
 // simplement sans les colonnes d'identification. Les réponses sont mises
 // en cache serveur 24 h par Next.
+//
+// Méthode : /recherche?q=<nom> pour trouver le SIREN (la dénomination PE
+// peut différer de la raison sociale — recherche Pappers « standard »),
+// puis /entreprise?siren=… pour la fiche complète (forme juridique,
+// dirigeants, siège, statut consolidé). Un seul résultat actif est requis
+// pour l'appariement : plusieurs résultats → non identifiée (à valider à
+// la main), zéro → non identifiée.
 
 export type InfoSiren = {
   siren: string;
@@ -93,35 +100,60 @@ export type InfoSiren = {
   actif: boolean;
   dirigeants: string[];
   adresse: string;
+  code_naf: string;
+  domaine_activite: string;
 };
 
-export async function pappers(nom: string): Promise<InfoSiren | null> {
+async function pappersFetch(path: string, params: Record<string, string>) {
   const token = process.env.PAPPERS_API_KEY;
-  if (!token || !nom) return null;
+  if (!token) return null;
+  const url = new URL(`https://api.pappers.fr/v2${path}`);
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
   try {
-    const url = `https://api.pappers.fr/v1/entreprise?nom_entreprise=${encodeURIComponent(nom)}&api_token=${token}`;
-    const r = await fetch(url, { next: { revalidate: 86400 } });
+    const r = await fetch(url, { headers: { "api-key": token }, next: { revalidate: 86400 } });
     if (!r.ok) return null;
-    const d = (await r.json()) as Record<string, unknown>;
-    const siren = d.siren as string | undefined;
-    if (!siren) return null;
-    const siege = (d.siege ?? {}) as Record<string, unknown>;
-    const dirigeants = Array.isArray(d.dirigeants)
-      ? (d.dirigeants as Record<string, unknown>[]).slice(0, 5)
-          .map((x) => String(x.nom_complet ?? x.nom ?? "").trim())
-          .filter(Boolean)
-      : [];
-    const adresseL1 = String(siege.adresse_ligne_1 ?? "").trim();
-    const adresse = [adresseL1, String(siege.code_postal ?? ""), String(siege.ville ?? "")].filter(Boolean).join(" ");
-    return {
-      siren,
-      denomination: String(d.nom_entreprise ?? nom),
-      forme_juridique: String(d.forme_juridique ?? ""),
-      actif: String(d.etat ?? "").toUpperCase().includes("ACTIF"),
-      dirigeants,
-      adresse,
-    };
+    return (await r.json()) as Record<string, unknown>;
   } catch {
     return null;
   }
+}
+
+export async function pappers(nom: string): Promise<InfoSiren | null> {
+  if (!nom) return null;
+  // 1. Recherche par dénomination : on veut un résultat non cessé.
+  const recherche = await pappersFetch("/recherche", { q: nom, par_page: "5" });
+  if (!recherche || !Array.isArray(recherche.resultats) || recherche.resultats.length === 0) return null;
+  const resultats = recherche.resultats as Record<string, unknown>[];
+  const actifs = resultats.filter((x) => !x.entreprise_cessee);
+  // Appariement prudent : exactement une société active → identifiée ;
+  // plusieurs → ambigu, on laisse « non identifiée » (validation manuelle).
+  if (actifs.length !== 1) return null;
+  const siren = String(actifs[0].siren ?? "");
+  if (!siren) return null;
+  // 2. Fiche complète.
+  const fiche = await pappersFetch("/entreprise", { siren });
+  if (!fiche || !fiche.siren) return null;
+  const siege = (fiche.siege ?? {}) as Record<string, unknown>;
+  const dirigeants = Array.isArray(fiche.representants)
+    ? (fiche.representants as Record<string, unknown>[]).slice(0, 5)
+        .map((x) => {
+          const n = String(x.nom ?? "").trim();
+          const p = String(x.prenom ?? "").trim();
+          return [p, n].filter(Boolean).join(" ");
+        })
+        .filter(Boolean)
+    : [];
+  const adresse = [String(siege.adresse_ligne_1 ?? ""), String(siege.code_postal ?? ""), String(siege.ville ?? "")]
+    .filter(Boolean)
+    .join(" ");
+  return {
+    siren: String(fiche.siren),
+    denomination: String(fiche.nom_entreprise ?? fiche.denomination ?? nom),
+    forme_juridique: String(fiche.forme_juridique ?? ""),
+    actif: String(fiche.statut_consolide ?? "").toLowerCase() === "actif",
+    dirigeants,
+    adresse,
+    code_naf: String(fiche.code_naf ?? ""),
+    domaine_activite: String(fiche.domaine_activite ?? ""),
+  };
 }
