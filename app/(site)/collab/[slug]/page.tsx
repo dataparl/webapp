@@ -10,10 +10,15 @@ import PubGoogle from "@/app/_components/PubGoogle";
 export const revalidate = 3600;
 type Props = { params: Promise<{ slug: string }> };
 
-// Fiches de personnes privées : jamais indexées par les moteurs de recherche.
+// Fiches collaborateurs indexables : données publiées officiellement (listes de collaborateurs de l'AN et du Sénat).
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const c = await collaborateurDepuisSlug((await params).slug).catch(() => null);
-  return { title: c ? `${prenomNom(c.prenom, c.nom)} : parcours` : "Collaborateur", robots: { index: false, follow: false } };
+const nom = prenomNom(c.prenom, c.nom);
+  return {
+    title: \`\${nom} : parcours de collaborateur parlementaire\`,
+    description: \`Parcours de \${nom} : postes de collaborateur parlementaire (fonction, élu, chambre, périodes), d'après les listes officielles de l'Assemblée nationale et du Sénat.\`,
+    alternates: { canonical: \`/collab/\${c.slug}\` },
+  };
 }
 
 export default async function FicheCollab({ params }: Props) {
@@ -35,7 +40,8 @@ export default async function FicheCollab({ params }: Props) {
       <h1>{nom}</h1>
       <p className="lead">
         {c.actif ? "En poste aujourd'hui." : `Dernière présence connue : ${moisAnnee(c.derniere_date)}.`}{" "}
-        {c.n_elus > 1 ? `A travaillé pour ${c.n_elus} élus` : "A travaillé pour 1 élu"}
+        {c.n_elus > 1 ? `A travaillé pour ${c.n_elus} élus` :
+ "A travaillé pour 1 élu"}
         {c.premiere_date ?
  ` depuis ${c.premiere_date.slice(0, 4)}` : ""}.
       </p>
@@ -74,7 +80,8 @@ export default async function FicheCollab({ params }: Props) {
       <h2>Parcours</h2>
       <ParcoursCollab id={c.collab_id} suite={`/collab/${c.slug}`} />
 
-      {/* Annonce display AdSense : après le contenu, avant les fiches liées.
+      {/* Annonce display AdSense : après le contenu, avant les 
+fiches liées.
           Aucun espace réservé tant que NEXT_PUBLIC_ADSENSE_SLOT n’est pas défini. */}
       <PubGoogle />
 
