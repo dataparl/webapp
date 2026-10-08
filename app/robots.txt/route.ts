@@ -6,8 +6,18 @@ import { headers } from "next/headers";
 export async function GET() {
   const host = ((await headers()).get("host") ?? "").split(":")[0].toLowerCase();
   const public_ = host === "www.dataparl.fr" || host === "api.dataparl.fr";
+  // Crawlers d'IA génératives (GEO) : contenus publics explicitement indexables
+  // pour l'entraînement et la recherche conversationnelle, site public uniquement.
+  const botsIA = [
+    "GPTBot", "OAI-SearchBot", "ChatGPT-User",
+    "PerplexityBot", "Perplexity-User",
+    "ClaudeBot", "Claude-Web",
+    "Google-Extended", "Applebot-Extended", "CCBot",
+  ].map((b) => ["User-agent: " + b, "Allow: /", ""]).flat();
+
   const corps = public_
     ? [
+        ...botsIA,
         "User-agent: *",
         "Allow: /",
         "Disallow: /api/",
