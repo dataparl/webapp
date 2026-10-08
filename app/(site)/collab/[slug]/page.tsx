@@ -81,14 +81,12 @@ export default async function FicheCollab({ params }: Props) {
       <h2>Parcours</h2>
       <ParcoursCollab id={c.collab_id} suite={`/collab/${c.slug}`} />
 
-      {/* Annonce display AdSense : après le contenu, avant les 
-fiches liées.
+      {/* Annonce display AdSense : après le contenu, avant les fiches liées.
           Aucun espace réservé tant que NEXT_PUBLIC_ADSENSE_SLOT n’est pas défini. */}
       <PubGoogle />
 
       <p className="meta" style={{ marginTop: 32 }}>
-        Fiche établie d&apos;après les listes officielles de coll
-aborateurs publiées par l&apos;Assemblée nationale et le Sénat.
+        Fiche établie d&apos;après les listes officielles de collaborateurs publiées par l&apos;Assemblée nationale et le Sénat.
         Deux personnes homonymes peuvent être confondues. Pour faire rectifier ou masquer une information :{" "}
         <a href="/contact?sujet=rgpd">formulaire de contact</a>.
       </p>
