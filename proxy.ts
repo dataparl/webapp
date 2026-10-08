@@ -19,7 +19,7 @@ import { estInactif } from "./lib/pagesRegistre";
 //   link.dataparl.fr        /<code> -> /l/<code> (liens tracés), le reste -> www
 //   media.dataparl.fr       photos des élus (/an|senat|pe)/…, le tableur
 //                           DataParl' Sheets (/sheets/*, /search) et l'export SVG
-//                           du réseau (/assets/collab-reseau) ; tout autre
+//                           du réseau (/assets/pe/reseau) ; tout autre
 //                           chemin : message de 15 s puis bascule vers www
 //   raw.dataparl.fr        /schemas/*.json (schémas de données bruts) ; le reste -> www
 //   survey.dataparl.fr     / -> /enquete (questionnaire d'avis, jeton ?j=) ; le reste -> www
@@ -135,8 +135,9 @@ export async function proxy(req: NextRequest) {
 
   // media.dataparl.fr : les photos des élus et des groupes, le tableur
   // DataParl' Sheets (/sheets/*, /search) et l'export SVG du réseau des
-  // structures (/assets/collab-reseau). Tout autre chemin affiche un
-  // message pendant 15 secondes avant la bascule vers www.dataparl.fr.
+  // structures (/assets/pe/reseau ; l'ancien chemin /assets/collab-reseau
+  // redirige en 308). Tout autre chemin affiche un message pendant 15
+  // secondes avant la bascule vers www.dataparl.fr.
   if (host === `media.${DOMAINE}`) {
     if (/^\/(an|senat|pe)\/[^/]+\.png$/.test(path)) {
       const url = req.nextUrl.clone();
@@ -163,15 +164,19 @@ export async function proxy(req: NextRequest) {
       return NextResponse.rewrite(url);
     }
     if (path.startsWith("/photo-credit")) return vers(req, `www.${DOMAINE}`, "/", 307);
-    // media.dataparl.fr/assets/collab-reseau : export SVG du réseau des
+    // media.dataparl.fr/assets/pe/reseau : export SVG du réseau des
     // structures et de leurs eurodéputés (généré par la webapp, avec logo).
-    if (path === "/assets/collab-reseau" || path === "/assets/collab-reseau.svg") {
+    if (path === "/assets/pe/reseau" || path === "/assets/pe/reseau.svg") {
       const url = req.nextUrl.clone();
       if (path.endsWith(".svg")) {
-        url.pathname = "/assets/collab-reseau";
+        url.pathname = "/assets/pe/reseau";
         return NextResponse.rewrite(url);
       }
       return NextResponse.next();
+    }
+    // Ancien chemin de l'export SVG : redirection 308 vers le nouveau.
+    if (path === "/assets/collab-reseau" || path === "/assets/collab-reseau.svg") {
+      return vers(req, host, "/assets/pe/reseau", 308);
     }
     const autorise =
       path === "/sheets" || path.startsWith("/sheets/") ||

@@ -95,9 +95,9 @@ export default async function Page() {
       <GrapheReseau noeuds={noeuds} aretes={aretes} />
       <p className="meta">
         Export :{" "}
-        <a href="https://media.dataparl.fr/assets/collab-reseau">graphe SVG (media.dataparl.fr/assets/collab-reseau)</a>
+        <a href="https://media.dataparl.fr/assets/pe/reseau">graphe SVG (media.dataparl.fr/assets/pe/reseau)</a>
         {" · "}
-        <a href="https://media.dataparl.fr/assets/collab-reseau?telecharger=1">télécharger le fichier</a>
+        <a href="https://media.dataparl.fr/assets/pe/reseau?telecharger=1">télécharger le fichier</a>
         {" — "}données ouvertes DataParl&apos;, rafraîchies toutes les heures.
       </p>
       <h2>Classement des structures</h2>
