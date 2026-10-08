@@ -5,6 +5,7 @@ import { libellePeriode, moisAnnee } from "@/lib/periodes";
 import { collaborateurDepuisSlug, parlementaireDepuisId, parlementairesParElu, periodesCollab } from "@/lib/referentiel";
 import { nomAffiche } from "@/lib/format";
 import ParcoursCollab from "./ParcoursCollab";
+import PubGoogle from "@/app/_components/PubGoogle";
 
 export const revalidate = 3600;
 type Props = { params: Promise<{ slug: string }> };
@@ -35,7 +36,8 @@ export default async function FicheCollab({ params }: Props) {
       <p className="lead">
         {c.actif ? "En poste aujourd'hui." : `Dernière présence connue : ${moisAnnee(c.derniere_date)}.`}{" "}
         {c.n_elus > 1 ? `A travaillé pour ${c.n_elus} élus` : "A travaillé pour 1 élu"}
-        {c.premiere_date ? ` depuis ${c.premiere_date.slice(0, 4)}` : ""}.
+        {c.premiere_date ?
+ ` depuis ${c.premiere_date.slice(0, 4)}` : ""}.
       </p>
 
       {commeElu && (
@@ -72,8 +74,13 @@ export default async function FicheCollab({ params }: Props) {
       <h2>Parcours</h2>
       <ParcoursCollab id={c.collab_id} suite={`/collab/${c.slug}`} />
 
+      {/* Annonce display AdSense : après le contenu, avant les fiches liées.
+          Aucun espace réservé tant que NEXT_PUBLIC_ADSENSE_SLOT n’est pas défini. */}
+      <PubGoogle />
+
       <p className="meta" style={{ marginTop: 32 }}>
-        Fiche établie d&apos;après les listes officielles de collaborateurs publiées par l&apos;Assemblée nationale et le Sénat.
+        Fiche établie d&apos;après les listes officielles de coll
+aborateurs publiées par l&apos;Assemblée nationale et le Sénat.
         Deux personnes homonymes peuvent être confondues. Pour faire rectifier ou masquer une information :{" "}
         <a href="/contact?sujet=rgpd">formulaire de contact</a>.
       </p>
