@@ -37,8 +37,7 @@ export default async function FicheCollab({ params }: Props) {
 
   return (
     <>
-      <p className="meta" style={{ marginBottom: 0 }}>{rol
-e} · {c.chambres.split(" ").map((x) => CHAMBRE_LONG[x]).join(", ")}</p>
+      <p className="meta" style={{ marginBottom: 0 }}>{role} · {c.chambres.split(" ").map((x) => CHAMBRE_LONG[x]).join(", ")}</p>
       <h1>{nom}</h1>
       <p className="lead">
         {c.actif ? "En poste aujourd'hui." : `Dernière présence connue : ${moisAnnee(c.derniere_date)}.`}{" "}
@@ -71,8 +70,7 @@ e} · {c.chambres.split(" ").map((x) => CHAMBRE_LONG[x]).join(", ")}</p>
                 <li key={i}>
                   {p.fonction || (c.genre === "F" ? "Collaboratrice" : "Collaborateur")} de{" "}
                   {f ? <a href={`/parlementaires/${encodeURIComponent(f.slug)}`}>{eluNom}</a> : eluNom}
-                  <span className="meta"> · {CHAMBRE_LONG[p.chambre]}{f?.groupe ? ` · ${f.gro
-upe}` : ""} · {libellePeriode(p)}</span>
+                  <span className="meta"> · {CHAMBRE_LONG[p.chambre]}{f?.groupe ? ` · ${f.groupe}` : ""} · {libellePeriode(p)}</span>
                 </li>
               );
             })}
