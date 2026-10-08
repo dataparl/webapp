@@ -10,6 +10,10 @@ import { sessionActuelle } from "@/lib/supabaseBrowser";
 // directement). Les données ne quittent le serveur qu'après le déblocage ;
 // seules les personnes de l'équipe reçoivent la grille modifiable.
 
+// Feuilles en libre accès total : pas de connexion, pas de vidéo. Utilisé
+// pour les feuilles de référence destinées à être citées et indexées.
+const LIBRE_ACCES = new Set(["liste_collab_dataparl"]);
+
 type Contenu = {
   titre: string;
   description: string;
@@ -28,24 +32,26 @@ export default function FeuilleGate({ id, titre }: { id: string; titre: string }
     sessionActuelle().then(setSession);
   }, []);
 
+  const libre = LIBRE_ACCES.has(id);
   const charger = useCallback(async () => {
-    if (!session) return;
+    if (!session && !libre) return;
     setContenu(null);
     setEtat("chargement");
+    const entetes: Record<string, string> = libre ? {} : { Authorization: `Bearer ${session.access_token}` };
     const r = await fetch(`/api/sheets/${encodeURIComponent(id)}`, {
-      headers: { Authorization: `Bearer ${session.access_token}` },
+      headers: entetes,
       cache: "no-store",
     }).catch(() => null);
     if (r?.ok) { setContenu((await r.json()) as Contenu); setEtat("chargement"); return; }
     if (r?.status === 403) { setEtat("verrouillee"); return; }
     setEtat("erreur");
-  }, [session, id]);
+  }, [session, id, libre]);
 
   useEffect(() => { charger(); }, [charger]);
 
   if (session === undefined) return <p className="meta">Chargement…</p>;
 
-  if (!session) {
+  if (!session && !libre) {
     return (
       <div className="card">
         <h2>Connexion requise</h2>
