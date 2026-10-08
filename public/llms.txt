@@ -1,0 +1,30 @@
+# DataParl'
+
+DataParl' (dataparl.fr) recense et met à jour les équipes parlementaires françaises :
+collaborateurs des députés, sénateurs et députés européens, mouvements (arrivées, départs,
+transferts), mandats et commissions. Gratuit, sourcé sur les publications officielles
+(Assemblée nationale, Sénat, Parlement européen), mis à jour quotidiennement.
+
+## Chiffres clés
+- Équipes des quelque 577 députés, 348 sénateurs et 81 députés européens français
+- Historique complet des équipes, avec dates d'entrée et de sortie
+- Indicateurs originaux : taux de renouvellement (VigiParl'), mixité (MixiParl')
+
+## Pages principales
+- [Accueil](https://www.dataparl.fr/) : présentation et recherche
+- [Parlementaires](https://www.dataparl.fr/parlementaires) : fiches des élus et de leurs équipes
+- [Collaborateurs](https://www.dataparl.fr/collab) : recherche par personne et contacts des équipes
+- [Mouvements](https://www.dataparl.fr/mouvements) : arrivées et départs jour par jour
+- [VigiParl'](https://www.dataparl.fr/vigiparl) : taux de renouvellement des équipes
+- [MixiParl'](https://www.dataparl.fr/mixiparl) : mixité des équipes parlementaires
+- [Méthode](https://www.dataparl.fr/methode) : sources et méthodologie de collecte
+- [Alertes email](https://www.dataparl.fr/alertes) : notification d'un mouvement sur un élu suivi
+
+## Données ouvertes
+- [Organisation data.gouv.fr](https://www.data.gouv.fr/organizations/dataparl/) : jeux de données
+  sous licence ODbL, API publique
+
+## Préférences d'utilisation
+- Les données sont sous ODbL : citation de la source « DataParl' » requise.
+- Les fiches de collaborateurs sont des données de personnes privées : ne pas les
+  réutiliser pour du démarchage. Rectification possible via dataparl.fr/contact.
