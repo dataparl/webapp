@@ -43,7 +43,7 @@ export default async function VigiParl() {
   const groupes = CHAMBRES.flatMap((c) => agreger(rows.filter((r) => r.chambre === c), (r) => r.elu_groupe)
     .sort((a, b) => (tauxTurnover(b) ?? 0) - (tauxTurnover(a) ?? 0))
     .map((g) => carte(`groupe-${segmentDe(c)}-${g.cle.replace(/[^\p{L}\p{N}]+/gu, "-")}`, g.cle, g, `/vigiparl/${segmentDe(c)}/parlementaires?groupe=${encodeURIComponent(g.cle)}`, undefined, CHAMBRE_LONG[c])));
-  const maxBarre = Math.max(0.5, ...[familles, ...groupes].map((l) => l.taux ?? 0));
+  const maxBarre = Math.max(0.5, ...[...familles, ...groupes].map((l) => l.taux ?? 0));
 
   return (
     <>
