@@ -1,12 +1,14 @@
 import { CHAMBRE_LONG } from "@/lib/format";
 import { dataQueryTout } from "@/lib/data";
 import { CHAMBRE_COURTE } from "@/lib/collectifs";
+import TableauCollabs, { type LigneCollab } from "../TableauCollabs";
 
 // Trombinoscope des collaborateurs d'une chambre : la planche de tous les
-// collaborateurs en poste, nom + élu employeur + fonction. L'intitulé reprend
-// les mots des publications officielles (« Trombinoscope des collaborateurs
-// de Sénateur », « Liste des collaborateurs par député ») pour figurer
-// devant elles sur les mêmes requêtes.
+// collaborateurs en poste, avec initiales, élu employeur et fonction.
+// Recherche, filtre par initiale, tri et groupement par élu côté navigateur ;
+// les cartes sont rendues côté serveur pour rester indexables. L'intitulé
+// reprend les mots des publications officielles (« Trombinoscope des
+// collaborateurs de Sénateur », « Liste des collaborateurs par député »).
 type Periode = { collab_id: string; elu_id: string; elu_nom: string; fonction: string };
 type Collab = { collab_id: string; nom: string; prenom: string };
 const AU: Record<string, string> = { assemblee: "à l'Assemblée nationale", senat: "au Sénat", europarl: "au Parlement européen" };
@@ -28,8 +30,11 @@ export default async function TrombinoChambre({ chambre }: { chambre: "assemblee
       3600).catch((): Collab[] => []),
   ]);
   const noms = new Map(collabs.map((c) => [c.collab_id, [c.prenom, c.nom].filter(Boolean).join(" ")]));
+  const lignes: LigneCollab[] = rows
+    .map((r) => ({ nom: noms.get(r.collab_id) ?? "—", elu: r.elu_nom, fonction: r.fonction || "" }))
+    .filter((r) => r.nom !== "—");
   const maj = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" }).format(new Date());
-  const total = rows.length;
+  const total = lignes.length;
 
   return (
     <>
@@ -37,24 +42,25 @@ export default async function TrombinoChambre({ chambre }: { chambre: "assemblee
       <h1>{TITRE[chambre]}</h1>
       <p className="lead">
         {total.toLocaleString("fr-FR")} collaborateurs parlementaires en poste {AU[chambre]} : la planche complète,
-        nom du collaborateur, élu employeur et fonction. Mise à jour quotidienne — page générée le {maj}.
+        avec initiales, élu employeur et fonction. Filtre par lettre, recherche et groupement par élu
+        ci-dessous. Mise à jour quotidienne — page générée le {maj}.
       </p>
       {total === 0 ? (
-        <p className="meta">Aucun collaborateur en poste enregistré pour cette chambre pour l&apos;instant.</p>
+        chambre === "europarl" ? (
+          <p className="lead">
+            Le trombinoscope des collaborateurs des eurodéputés français sera publié dès la reprise complète des
+            affectations (assistants accrédités, locaux et groupements). En attendant :{" "}
+            <a href="/collab/pe/tiers-payants">tiers payants</a>, <a href="/collab/pe/prestataires">prestataires</a>{" "}
+            et <a href="/collab/pe/reseau">le réseau des collaborateurs</a>.
+          </p>
+        ) : (
+          <p className="meta">Aucun collaborateur en poste enregistré pour cette chambre pour l&apos;instant.</p>
+        )
       ) : (
-        <ul style={{ listStyle: "none", padding: 0, margin: "16px 0", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: 8 }}>
-          {rows.map((r) => (
-            <li key={r.collab_id + "-" + r.elu_id} style={{ border: "1px solid #e3e3e3", borderRadius: 10, padding: "10px 12px" }}>
-              <strong>{noms.get(r.collab_id) ?? "—"}</strong>
-              <br />
-              <span className="meta">{"Collaborateur de " + r.elu_nom}</span>
-              {r.fonction ? (<><br /><span className="meta">{r.fonction}</span></>) : null}
-            </li>
-          ))}
-        </ul>
+        <TableauCollabs rows={lignes} mode="trombi" />
       )}
       <p className="meta">
-        {"Version tableau détaillée et exportable : "}
+        {"Version tableau détaillée : "}
         <a href={"/collab/" + seg + "/liste"}>{"liste des collaborateurs " + PAR[chambre]}</a>
         {" · "}
         <a href="https://media.dataparl.fr/sheets/liste_collab_dataparl">DataParl&apos; Sheets</a>.
@@ -66,7 +72,7 @@ export default async function TrombinoChambre({ chambre }: { chambre: "assemblee
             "@context": "https://schema.org",
             "@type": "Dataset",
             name: TITRE[chambre],
-            description: "Trombinoscope des collaborateurs parlementaires en poste " + AU[chambre] + " : nom, élu employeur et fonction, mis à jour quotidiennement.",
+            description: "Trombinoscope des collaborateurs parlementaires en poste " + AU[chambre] + " : initiales, élu employeur et fonction, mis à jour quotidiennement.",
             url: "https://www.dataparl.fr/collab/" + seg + "/trombinoscope",
             creator: { "@type": "Organization", name: "DataParl'", url: "https://www.dataparl.fr" },
             isAccessibleForFree: true,
