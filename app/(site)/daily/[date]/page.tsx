@@ -37,8 +37,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function Daily({ params }: Props) {
   const { date } = await params;
   if (!dateValide(date)) notFound();
-  const [jour, nav] = await Promise.all([jourDe(date), voisins(date).catch(() => ({ avant: null, apres: null }))]);
-  const libres = await mouvementsLibres(date, jour);
+  let jour, nav, libres;
+  try {
+    [jour, nav] = await Promise.all([jourDe(date), voisins(date).catch(() => ({ avant: null, apres: null }))]);
+    libres = await mouvementsLibres(date, jour);
+  } catch (e) {
+    return <pre style={{ whiteSpace: "pre-wrap", padding: 20 }}>{`DIAGNOSTIC /daily/${date} — attrapé dans Daily :\n${e instanceof Error ? e.stack ?? e.message : String(e)}`}</pre>;
+  }
   const total = jour?.n ?? 0;
   const url = `https://www.dataparl.fr/daily/${date}`;
   const jsonLd = total ? {
