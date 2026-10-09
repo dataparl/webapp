@@ -34,6 +34,21 @@ export function appliquer(c: Choix) {
   });
 }
 
+// Charge le script Google AdSense (une seule fois), uniquement après un
+// consentement publicitaire. Sans accord, le script n'est jamais injecté :
+// c'est la promesse du bandeau (« rien n'est activé sans ton accord »),
+// et ~220 Ko de scripts publicitaires en moins au chargement.
+export function chargerPub() {
+  if (typeof document === "undefined") return;
+  if (document.getElementById("adsense-dataparl")) return;
+  const s = document.createElement("script");
+  s.id = "adsense-dataparl";
+  s.async = true;
+  s.crossOrigin = "anonymous";
+  s.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6168263680630864";
+  document.head.appendChild(s);
+}
+
 // Choix mémorisé (null si le visiteur n'a jamais répondu).
 export function lire(): Choix | null {
   if (typeof document === "undefined") return null;

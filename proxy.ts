@@ -18,8 +18,9 @@ import { estInactif } from "./lib/pagesRegistre";
 //   mail.dataparl.fr        /lire/<jeton> (version en ligne des emails), le reste -> www
 //   link.dataparl.fr        /<code> -> /l/<code> (liens tracés), le reste -> www
 //   media.dataparl.fr       photos des élus (/an|senat|pe)/…, le tableur
-//                           DataParl' Sheets (/sheets/*, /search) et l'export SVG
-//                           du réseau (/assets/pe/reseau) ; tout autre
+//                           DataParl' Sheets (/sheets/*, /search), l'export SVG
+//                           du réseau (/assets/pe/reseau) et les exports CSV
+//                           (/assets/collab/{an,senat,pe}.csv) ; tout autre
 //                           chemin : message de 15 s puis bascule vers www
 //   raw.dataparl.fr        /schemas/*.json (schémas de données bruts) ; le reste -> www
 //   survey.dataparl.fr     / -> /enquete (questionnaire d'avis, jeton ?j=) ; le reste -> www
@@ -134,14 +135,16 @@ export async function proxy(req: NextRequest) {
   }
 
   // media.dataparl.fr : les photos des élus et des groupes, le tableur
-  // DataParl' Sheets (/sheets/*, /search) et l'export SVG du réseau des
+  // DataParl' Sheets (/sheets/*, /search), l'export SVG du réseau des
   // structures (/assets/pe/reseau ; l'ancien chemin /assets/collab-reseau
-  // redirige en 308). Tout autre chemin affiche un message pendant 15
-  // secondes avant la bascule vers www.dataparl.fr.
+  // redirige en 308) et les exports CSV bruts des collaborateurs par chambre
+  // (/assets/collab/{an,senat,pe}.csv, publiés aussi sur data.gouv.fr). Tout
+  // autre chemin affiche un message pendant 15 secondes avant la bascule vers
+  // www.dataparl.fr.
   if (host === `media.${DOMAINE}`) {
     if (/^\/(an|senat|pe)\/[^/]+\.png$/.test(path)) {
       const url = req.nextUrl.clone();
-      // Ouverture directe dans un navigateur (pas une <img> du site, pas un aperçu
+      // Ouverture directe dans un navigateur (pas une <img> du site, pas une aperçu
       // de lien) : page de crédit, à la même adresse. Jamais pour une demande d'image.
       const accept = req.headers.get("accept") ?? "";
       let interne = false;
@@ -164,6 +167,9 @@ export async function proxy(req: NextRequest) {
       return NextResponse.rewrite(url);
     }
     if (path.startsWith("/photo-credit")) return vers(req, `www.${DOMAINE}`, "/", 307);
+    // media.dataparl.fr/assets/collab/{an,senat,pe}.csv : export CSV brut des
+    // collaborateurs d'une chambre, généré par la webapp (app/assets/collab).
+    if (/^\/assets\/collab\/(an|senat|pe)(\.csv)?$/.test(path)) return NextResponse.next();
     // media.dataparl.fr/assets/pe/reseau : export SVG du réseau des
     // structures et de leurs eurodéputés (généré par la webapp, avec logo).
     if (path === "/assets/pe/reseau" || path === "/assets/pe/reseau.svg") {
@@ -251,7 +257,7 @@ export async function proxy(req: NextRequest) {
     // DataParl' Jobs vit sur son sous-domaine, sans préfixe /jobs.
     if (path === "/jobs" || path.startsWith("/jobs/")) {
       const cibleJobs = path === "/jobs" ? "/" : path.slice("/jobs".length) || "/";
-      return vers(req, `jobs.${DOMAINE}`, cibleJobs, 308);
+      return vers(req, `jobs.${DOMAINE}`, cibleJobs, 307);
     }
     // Le tableur vit sur media.dataparl.fr.
     if (path === "/sheets" || path.startsWith("/sheets/") || path === "/search") {
