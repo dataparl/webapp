@@ -5,7 +5,7 @@ export type Statut = "active" | "desactivee" | "brouillon";
 export type PageSite = { chemin: string; titre: string; verrou?: string; dynamique?: string; sitemap?: boolean };
 
 export const PAGES: PageSite[] = [
-  { chemin: "/", titre: "Accueil", verrou: "L'accueil ne se désactive pas", sitemap: true },
+  { chemin: "/", titre: "Accueil", verrou: "L'accueil ne désactive pas", sitemap: true },
   { chemin: "/mouvements", titre: "Mouvements", dynamique: "une page par chambre", sitemap: true },
   { chemin: "/daily", titre: "DataParl' Daily (jour par jour)", dynamique: "une page par jour publié", sitemap: true },
   { chemin: "/collab", titre: "Collaborateurs", dynamique: "une fiche par collaborateur", sitemap: true },
@@ -14,7 +14,7 @@ export const PAGES: PageSite[] = [
   { chemin: "/collab/pe/reseau", titre: "Le réseau des collaborateurs du Parlement européen", sitemap: true },
   { chemin: "/parlementaires", titre: "Parlementaires", dynamique: "une fiche par élu, une biographie par élu", sitemap: true },
   { chemin: "/senatoriales2026", titre: "Sénatoriales 2026", dynamique: "une page par département renouvelé", sitemap: true },
-  { chemin: "/groupe", titre: "Groupes parlementaires", dynamique: "une fiche par groupe et par chambre", sitemap: true },
+  { chemin: "/groupe", titre: "Groupes parlementaires", dynamique: "une fiche par groupe et par chambre, et une par mandature (législature ou série)", sitemap: true },
   { chemin: "/departement", titre: "Départements", dynamique: "une fiche par département", sitemap: true },
   { chemin: "/parti", titre: "Partis politiques", dynamique: "une fiche par parti", sitemap: true },
   { chemin: "/methode", titre: "Méthode", dynamique: "les pages méthode (VigiParl', MixiParl', sources)", sitemap: true },

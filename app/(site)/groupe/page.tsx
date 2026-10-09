@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { groupesExistants } from "@/lib/collectifsData";
+import { mandaturesExistantes, type MandatureExistante } from "@/lib/mandaturesData";
 import { CHAMBRE_COURTE, slugCollectif, type GroupeExistant } from "@/lib/collectifs";
 
 export const revalidate = 3600;
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 
 export default async function IndexGroupes() {
   const groupes = await groupesExistants().catch((): GroupeExistant[] => []);
+  const mandatures = await mandaturesExistantes().catch((): MandatureExistante[] => []);
   const parChambre: Record<string, typeof groupes> = { assemblee: [], senat: [], europarl: [] };
   for (const g of groupes) (parChambre[g.chambre] ??= []).push(g);
   return (
@@ -37,6 +39,17 @@ export default async function IndexGroupes() {
                 </li>
               ))}
             </ul>
+          )}
+          {mandatures.filter((m) => m.chambre === chambre).length > 0 && (
+            <p className="meta">
+              {"Par mandature : "}
+              {mandatures.filter((m) => m.chambre === chambre).map((m, i) => (
+                <span key={m.slug}>
+                  {i > 0 ? " · " : ""}
+                  <a href={"/groupe/" + CHAMBRE_COURTE[chambre] + "/" + m.slug}>{m.libelle}</a>
+                </span>
+              ))}
+            </p>
           )}
         </section>
       ))}

@@ -8,6 +8,17 @@ versionnement [SemVer](https://semver.org/lang/fr/).
 
 ### Ajouté
 
+- Pages « groupes par mandature » : une chambre pendant une mandature
+  (`/groupe/an/xvii`, `/groupe/pe/10e`, `/groupe/senat/serie-1`…)
+  et un groupe pendant une mandature (`/groupe/pe-renew/10e`,
+  `/groupe/an-rn/xvii`…), avec le groupe de l'époque de chaque élu ;
+  renommages harmonisés (FN → RN, UMP → LR, LFI → LFI-NFP, ALDE → Renew,
+  ID et EF → Patriots…) et mandatures déduites des mandats enregistrés
+  (« jusqu'où on a les valeurs ») ; au Sénat, qui n'a pas de législature
+  numérotée, les pages suivent les deux séries de renouvellement
+  (série 1, renouvelée en 2023 ; série 2, renouvelée en 2020 puis 2026).
+  Les fiches de groupes, l'index `/groupe` et le sitemap XML pointent
+  vers ces pages.
 - Schémas Table Schema des jeux de données data.gouv.fr (membres des
   gouvernements, turnover annuel, mixité annuelle, parlementaires) : dossier
   `public/schemas/`, servis sur `raw.dataparl.fr/schemas/…`.

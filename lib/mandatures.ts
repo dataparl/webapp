@@ -45,8 +45,8 @@ export function mandatureDuMandat(chambre: string, legislature: string | null | 
 
 // Série du Sénat d'un siège, d'après la date d'élection du mandat (mandat de
 // six ans, renouvelé à élection + 6) : la série 1 a été renouvelée en 2023
-// (sièges élus en 2017 et 2023), la série 2 en 2020 puis en 2026 (sièges
-// élus en 2014, 2020 et 2026).
+// (sièges élus en 2017 et 2023), la série 2 en 2020 puis en 2026 (sièges élus
+// en 2014, 2020 et 2026).
 export function serieDuSiege(debut: string): 1 | 2 | null {
   const annee = Number((debut ?? "").slice(0, 4));
   if (!Number.isInteger(annee) || annee < 2001 || annee > 2100) return null;
@@ -117,14 +117,14 @@ export function harmoniserSigle(chambre: string, sigle: string): string {
 
 // Sigles d'hier rattachés à un sigle actuel (ex. RN → [FN]).
 export function anciensNoms(chambre: string, sigle: string): string[] {
-  return Object.entries(RENNOMMAGES[chambre] ?? {}).filter(([, actuel]) => actuel === sigle).map(([ancien]) => ancien);
+  return Object.entries(RENOMMAGES[chambre] ?? {}).filter(([, actuel]) => actuel === sigle).map(([ancien]) => ancien);
 }
 
 // Retrouve le sigle actuel d'après un slug qui peut être un ancien nom
 // (ex. « fn » → RN) : la fiche d'aujourd'hui, avec le nom d'hier.
 export function sigleDepuisSlug(chambre: string, slug: string, actuels: readonly string[]): { actuel: string; ancien: string | null } | null {
   for (const a of actuels) if (slugCollectif(a) === slug) return { actuel: a, ancien: null };
-  for (const [ancien, actuel] of Object.entries(RENNOMMAGES[chambre] ?? {})) {
+  for (const [ancien, actuel] of Object.entries(RENOMMAGES[chambre] ?? {})) {
     if (slugCollectif(ancien) === slug) return { actuel, ancien };
   }
   return null;

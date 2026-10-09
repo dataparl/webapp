@@ -43,6 +43,17 @@ export async function GET() {
       }
     } catch { /* sans les groupes */ }
   }
+  // Une page par mandature (législature ou série de renouvellement), pour chaque chambre.
+  if (!estInactif("/groupe", inactifs)) {
+    try {
+      const { CHAMBRE_COURTE } = await import("@/lib/collectifs");
+      const { mandaturesExistantes } = await import("@/lib/mandaturesData");
+      for (const m of await mandaturesExistantes()) {
+        const c = CHAMBRE_COURTE[m.chambre];
+        if (c) urls.push({ loc: `${base}/groupe/${c}/${m.slug}`, changefreq: "weekly", priority: "0.6" });
+      }
+    } catch { /* sans les mandatures */ }
+  }
   // Une page par structure du Parlement européen (tiers payants, prestataires).
   try {
     const { FONCTIONS_STRUCTURES, slugStructure, structures } = await import("@/lib/structures");

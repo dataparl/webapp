@@ -3,6 +3,7 @@ import Link from "next/link";
 import ListeElus, { CHAMBRE_LONG } from "@/app/_components/ListeElus";
 import IndicateursGroupe from "./IndicateursGroupe";
 import { elusDuGroupe, groupesExistants } from "@/lib/collectifsData";
+import { mandaturesExistantes, type MandatureExistante } from "@/lib/mandaturesData";
 import { CHAMBRE_COURTE, hrefParti, groupeDepuisSlug, slugCollectif } from "@/lib/collectifs";
 import { couleurParti } from "@/lib/couleurs";
 import { cheminLogoGroupe } from "@/lib/media";
@@ -72,6 +73,7 @@ export default async function FicheGroupe({ params }: Props) {
     );
   }
   const elus = await elusDuGroupe(g.chambre, g.groupe).catch(() => []);
+  const mandatures = (await mandaturesExistantes().catch((): MandatureExistante[] => [])).filter((m) => m.chambre === g.chambre);
   const logo = g.chambre === "assemblee" ? cheminLogoGroupe(g.chambre, g.groupe) : null;
 
   const jsonLd = {
@@ -110,6 +112,17 @@ export default async function FicheGroupe({ params }: Props) {
         Voir aussi : <a href={hrefParti(g.groupe) ?? "#"}>la fiche du parti {g.groupe}, toutes chambres confondues</a>
         {" "}<Link href="/parlementaires">· tous les parlementaires</Link>
       </p>
+      {mandatures.length > 0 && (
+        <p className="meta">
+          {"Au fil des mandatures : "}
+          {mandatures.map((m, i) => (
+            <span key={m.slug}>
+              {i > 0 ? " · " : ""}
+              <Link href={"/groupe/" + slug + "/" + m.slug}>{m.libelle}</Link>
+            </span>
+          ))}
+        </p>
+      )}
       {/* Indicateurs citables : phrase canonique datée + JSON-LD Dataset (GEO) */}
       <IndicateursGroupe chambre={g.chambre} sigle={g.groupe} />
 
