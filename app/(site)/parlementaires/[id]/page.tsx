@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const url = `https://www.dataparl.fr/parlementaires/${encodeURIComponent(f.slug)}`;
     const photo = f.photo_url ? photoAbsolue(f.chambre, f.slug, 400) : null;
     return {
-      title: `${nom}${f.groupe ? ` (${f.groupe})` : ""} : équipe, bio et mandats`, description,
+      title: `${nom}${f.groupe ? ` (${f.groupe})` : ""} : ses collaborateurs, bio et mandats`, description,
       alternates: { canonical: url },
       openGraph: { title: `${nom} · DataParl'`, description, url, type: "profile", images: photo ? [{ url: photo, width: 400, height: 400, alt: `Photo officielle de ${nom}` }] : undefined },
       twitter: { card: "summary", title: `${nom} · DataParl'`, description, images: photo ? [photo] : undefined },
@@ -63,7 +63,7 @@ function ListeOrganes({ items }: { items: Appartenance[] }) {
   return (
     <ul className="organes">
       {items.map((a, i) => (
-        <li key={`${a.code}-${a.debut}-${i}`}>
+        <li key={`${a.code}-${a.debut}-${i}`>
           {a.libelle}
           {a.fonction && a.fonction.toLowerCase() !== "membre" && <span className="puce">{a.fonction}</span>}
           <span className="meta"> · {a.fin ? `${moisAnnee(a.debut)} à ${moisAnnee(a.fin)}` : `depuis ${moisAnnee(a.debut)}`}</span>
@@ -183,7 +183,7 @@ export default async function Parlementaire({ params }: { params: Promise<{ id: 
 
       {f.actif && (
         <>
-          <h2>L&apos;équipe aujourd&apos;hui</h2>
+          <h2>Ses collaborateurs</h2>
           {collabs.length === 0 ? (
             <p className="meta">Aucun collaborateur dans la dernière publication officielle.</p>
           ) : (
@@ -228,7 +228,7 @@ export default async function Parlementaire({ params }: { params: Promise<{ id: 
         {chrono.map(({ mandat: m, gouvern: g }, i) => {
           if (g) {
             return (
-              <li key={`gouv-${g.debut}-${i}`}>
+              <li key={`gouv-${g.debut}-${i}`>
                 <p className="parcours-titre">
                   <strong>{g.fonction}</strong>
                   <span className="meta">
@@ -246,7 +246,7 @@ export default async function Parlementaire({ params }: { params: Promise<{ id: 
           const organes = fusionner(pendant.filter((a) => a.type !== "groupe")).filter((a) => !m.fin || !a.fin || chevauche(a, a, 15));
           const fiche = fiches.find((x) => x.chambre === m.chambre);
           return (
-            <li key={`${m.chambre}-${m.debut}-${i}`}>
+            <li key={`${m.chambre}-${m.debut}-${i}`>
               <p className="parcours-titre">
                 <strong>{m.libelle}</strong>
                 {m.circonscription && m.chambre !== "europarl" ? ` · ${m.circonscription}` : ""}
@@ -312,7 +312,7 @@ async function FicheSimple({ id }: { id: string }) {
       <p className="meta">{CHAMBRE_LONG[e.chambre]}</p>
       <h1>{nomAffiche(e.nom)}</h1>
       <p className="lead">{e.groupe ? `Groupe ${e.groupe}. ` : ""}{officiel && <a href={officiel}>Fiche officielle</a>}</p>
-      <h2>L&apos;équipe</h2>
+      <h2>Ses collaborateurs</h2>
       <table className="stats">
         <tbody>{collabs.map((c, i) => <tr key={i}><td>{prenomNom(c.collab_prenom, c.collab_nom)}</td><td>{c.fonction || "Collaborateur"}</td></tr>)}</tbody>
       </table>

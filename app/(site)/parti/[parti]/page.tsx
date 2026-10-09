@@ -13,8 +13,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const sigle = partiDepuisSlug(slug, await partisExistants().catch(() => []));
   if (!sigle) return { title: "Parti" };
   return {
-    title: `Parti ${sigle} : tous ses élus, toutes chambres confondues`,
-    description: `Les élus du ${sigle} à l'Assemblée nationale, au Sénat et au Parlement européen : leurs fiches, leurs biographies et leurs équipes de collaborateurs.`,
+    title: `Parti ${sigle} : ses élus et leurs collaborateurs, toutes chambres confondues`,
+    description: `Les élus du ${sigle}` à l'Assemblée nationale, au Sénat et au Parlement européen : leurs fiches, leurs biographies et leurs équipes de collaborateurs. La liste des collaborateurs du parti, élu par élu : /collab/parti/${slug}`.`,
     alternates: { canonical: `/parti/${slug}` },
   };
 }
@@ -65,7 +65,8 @@ export default async function FicheParti({ params }: Props) {
       <h1>Parti <span className="surligne">{sigle}</span></h1>
       <p className="lead">
         Les {elus.length} élu{elus.length > 1 ? "s" : ""} du {sigle}, toutes chambres confondues — avec pour
-        chacun sa fiche, sa biographie et l&apos;équipe de ses collaborateurs.
+        chacun sa fiche, sa biographie et l&apos;équipe de ses collaborateurs.{" "}
+        <a href={`/collab/parti/${slug}`}>La liste des collaborateurs du {sigle}, élu par élu →</a>
       </p>
       <p className="meta"><Link href="/groupe">Voir les groupes parlementaires, chambre par chambre</Link></p>
       {[...parChambre.entries()].map(([chambre, l]) => (
