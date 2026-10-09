@@ -27,6 +27,13 @@ function signatureValide(req: Request, corps: string): boolean {
 
 export async function POST(req: Request) {
   const corps = await req.text();
+  // Vérification de l'abonnement : Notion envoie un jeton et l'active
+  // automatiquement si on le renvoie tel quel dans la réponse.
+  try {
+    const j = JSON.parse(corps) as { verification_token?: string; data?: { verification_token?: string } };
+    const jeton = j.verification_token ?? j.data?.verification_token;
+    if (jeton) return NextResponse.json({ verification_token: jeton });
+  } catch { /* corps non JSON : événement normal */ }
   if (!signatureValide(req, corps)) return NextResponse.json({ error: "signature invalide" }, { status: 401 });
   const maintenant = Date.now();
   if (maintenant - derniere < 60_000) return NextResponse.json({ ok: true, ignore: "sync trop récente" });
