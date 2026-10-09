@@ -10,21 +10,21 @@ export const revalidate = 3600;
 type Props = { params: Promise<{ chambre: string }> };
 
 // /mixiparl/<id-parlementaire> : mixité de l'équipe d'un élu, mois par mois.
-// /mixiparl/an et /mixiparl/senat renvoient vers le classement correspondant.
+// /mixiparl/{an,senat,pe} renvoient vers le classement correspondant.
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = decodeURIComponent((await params).chambre);
   const e = await eluDepuisId(id).catch(() => null);
   if (!e) return { title: "MixiParl'" };
   return {
-    title: `${nomAffiche(e.nom)} : la mixité de son équipe, mois par mois`,
-    description: `Historique mensuel de la mixité de l'équipe de collaborateurs de ${nomAffiche(e.nom)} : part de femmes et taux de mixité depuis le début du mandat.`,
-    alternates: { canonical: `/mixiparl/${encodeURIComponent(idParlementaire(e.chambre, e.id, e.cle, e.nom))}` },
+    title: nomAffiche(e.nom) + " : la mixité de son équipe, mois par mois",
+    description: "Historique mensuel de la mixité de l'équipe de collaborateurs de " + nomAffiche(e.nom) + " : part de femmes et taux de mixité depuis le début du mandat.",
+    alternates: { canonical: "/mixiparl/" + encodeURIComponent(idParlementaire(e.chambre, e.id, e.cle, e.nom)) },
   };
 }
 
 export default async function Page({ params }: Props) {
   const id = decodeURIComponent((await params).chambre);
-  if (id === "an" || id === "senat") redirect(`/mixiparl/${id}/parlementaires`);
+  if (id === "an" || id === "senat" || id === "pe") redirect("/mixiparl/" + id + "/parlementaires");
   const e = await eluDepuisId(id).catch(() => null);
   if (!e) notFound();
   const nom = nomAffiche(e.nom);
@@ -32,7 +32,7 @@ export default async function Page({ params }: Props) {
     historiqueMensuel(e).catch(() => ({ points: [] as { mois: string; femmes: number; hommes: number; arrivees: number; departs: number }[], debutSuivi: null as string | null })),
     statsElu(e).catch(() => null),
   ]);
-  const hrefFiche = `/parlementaires/${encodeURIComponent(idParlementaire(e.chambre, e.id, e.cle, e.nom))}`;
+  const hrefFiche = "/parlementaires/" + encodeURIComponent(idParlementaire(e.chambre, e.id, e.cle, e.nom));
   const dernier = points[points.length - 1] ?? null;
   const partFemmes = (f: number, h: number): number | null => (f + h > 0 ? f / (f + h) : null);
   const seriePart = points.map((p) => ({ mois: p.mois, valeur: partFemmes(p.femmes, p.hommes) }));
@@ -41,16 +41,16 @@ export default async function Page({ params }: Props) {
 
   return (
     <>
-      <p className="meta"><a href="/mixiparl">MixiParl&apos;</a> · <a href={`/mixiparl/${e.chambre === "assemblee" ? "an" : "senat"}/parlementaires`}>Classement {CHAMBRE_LONG[e.chambre]}</a></p>
+      <p className="meta"><a href="/mixiparl">MixiParl&apos;</a> · <a href={"/mixiparl/" + (e.chambre === "assemblee" ? "an" : e.chambre === "senat" ? "senat" : "pe") + "/parlementaires"}>Classement {CHAMBRE_LONG[e.chambre]}</a></p>
       <h1>La mixité de l&apos;équipe de <span className="surligne-mixi">{nom}</span></h1>
       <p className="lead">
-        Femmes et hommes dans l&apos;équipe de collaborateurs de {nom}{e.groupe ? ` (${e.groupe})` : ""}, mois par mois depuis le début du
+        Femmes et hommes dans l&apos;équipe de collaborateurs de {nom}{e.groupe ? " (" + e.groupe + ")" : ""}, mois par mois depuis le début du
         mandat. <a href={hrefFiche}>Voir la fiche complète</a>. <a href="/mixiparl/methode#taux-de-mixite">Définition du taux de mixité</a>
       </p>
 
       <div className="chiffres mixi paires">
         <div>
-          <strong>{dernier ? `${dernier.femmes} / ${dernier.hommes}` : "–"}</strong>
+          <strong>{dernier ? dernier.femmes + " / " + dernier.hommes : "–"}</strong>
           <span>femmes / hommes aujourd&apos;hui</span>
         </div>
         <div>
@@ -68,7 +68,7 @@ export default async function Page({ params }: Props) {
         <p className="erreur">Pas encore assez de mois de suivi pour tracer l&apos;historique de cette équipe.</p>
       ) : (
         <>
-          <CourbeMensuelle titre="Part de femmes dans l'équipe, fin de mois" points={seriePart} couleur="var(--mixi, #7B3FE4)" max={1} format={(v) => pct(v, 0)} legende={debutSuivi ? `suivi depuis ${debutSuivi}` : undefined} />
+          <CourbeMensuelle titre="Part de femmes dans l'équipe, fin de mois" points={seriePart} couleur="var(--mixi, #7B3FE4)" max={1} format={(v) => pct(v, 0)} legende={debutSuivi ? "suivi depuis " + debutSuivi : undefined} />
           <CourbeMensuelle titre="Taux de mixité de l'équipe, fin de mois" points={serieMixite} couleur="var(--bleu)" max={1} format={(v) => pct(v, 0)} />
 
           <div className="defile">

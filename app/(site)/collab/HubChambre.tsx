@@ -120,7 +120,7 @@ export default async function HubChambre({ chambre }: { chambre: "assemblee" | "
       <ul className="liste-deps">
         <li><a href={"/collab/" + seg + "/liste"}>{"La liste des collaborateurs " + PAR[chambre] + " (liste complète)"}</a></li>
         <li><a href={"/collab/" + seg + "/trombinoscope"}>{TROMBINO[chambre]}</a> <span className="meta">· la planche de tous les collaborateurs en poste</span></li>
-        <li><a href="/parti">Par parti politique</a> <span className="meta">· une fiche par parti : élus et équipes</span></li>
+        <li><a href="/collab/parti">Par parti politique</a> <span className="meta">· la liste des collaborateurs de chaque parti</span></li>
         <li><a href="/groupe">Par groupe parlementaire</a> <span className="meta">· une fiche par groupe : élus et équipes</span></li>
         <li><a href="/collab">Recherche par élu, groupe ou nom</a> <span className="meta">· compte gratuit, export CSV</span></li>
         {chambre === "europarl" && (
@@ -130,7 +130,7 @@ export default async function HubChambre({ chambre }: { chambre: "assemblee" | "
             <li><a href="/collab/pe/prestataires">Prestataires de services</a></li>
           </>
         )}
-        <li><a href={"/vigiparl/" + seg + "/parlementaires"}>VigiParl&apos; : le renouvellement des équipes, élu par élu</a></li>
+        <li><a href={"/vigiparl/" + seg}>VigiParl&apos; : le renouvellement des équipes</a> <span className="meta">· classement élu par élu</span></li>
         <li><a href={"/mixiparl/" + seg + "/parlementaires"}>MixiParl&apos; : la mixité des équipes, élue par élue</a></li>
         <li><a href={MOUVEMENTS[chambre]}>Les mouvements de la chambre, mois par mois</a></li>
         <li><a href="/lexique">Le lexique des collaborateurs parlementaires</a> <span className="meta">· définitions par chambre et statuts</span></li>
