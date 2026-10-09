@@ -60,11 +60,8 @@ export async function POST(req: Request) {
   }
 }
 
-// Sonde + AFFICHAGE TEMPORAIRE du dernier jeton de vérification reçu :
-// ouvre cette URL après « Renvoyer le jeton » dans Notion, copie la valeur
-// et colle-la dans le formulaire de vérification Notion.
+// Sonde : confirme que la route répond (le jeton de vérification, gardé en
+// base, n'est jamais exposé — l'abonnement est déjà vérifié).
 export async function GET() {
-  let jeton: string | null = null;
-  try { jeton = await lireJeton(); } catch { /* table absente : jeton non gardé */ }
-  return NextResponse.json({ ok: true, webhook: "notion", jeton_verification: jeton });
+  return NextResponse.json({ ok: true, webhook: "notion" });
 }
