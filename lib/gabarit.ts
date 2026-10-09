@@ -69,15 +69,23 @@ ${pied ? `<p style="max-width:600px;margin:16px auto 0;font-size:12px;line-heigh
 </body></html>`;
 }
 
-// Texte brut vers HTML : échappé, paragraphes, lignes citées (« > ») en gris.
+// Liens Markdown : [texte](https://…) ou [texte](mailto:…), après échappement.
+const LIEN_MD = /\[([^\]\[]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g;
+export function liensHtml(l: string): string {
+  return l.replace(LIEN_MD, (_, texte: string, href: string) =>
+    `<a href="${href}" style="color:${BLEU};text-decoration:underline">${texte}</a>`);
+}
+
+// Texte brut vers HTML : échappé, paragraphes, lignes citées (« > ») en gris,
+// liens Markdown cliquables.
 export function texteVersHtml(t: string): string {
   const blocs = t.replace(/\r\n/g, "\n").trim().split(/\n{2,}/);
   return blocs.map((b) => {
     const lignes = b.split("\n");
     if (lignes.every((l) => l.startsWith(">"))) {
-      const cite = lignes.map((l) => esc(l.replace(/^>\s?/, ""))).join("<br>");
+      const cite = lignes.map((l) => liensHtml(esc(l.replace(/^>\s?/, "")))).join("<br>");
       return `<blockquote style="margin:0 0 16px;padding:0 0 0 12px;border-left:3px solid ${LIGNE};color:${GRIS}">${cite}</blockquote>`;
     }
-    return `<p style="margin:0 0 16px">${lignes.map(esc).join("<br>")}</p>`;
+    return `<p style="margin:0 0 16px">${lignes.map((l) => liensHtml(esc(l))).join("<br>")}</p>`;
   }).join("\n");
 }
