@@ -6,6 +6,7 @@ import Photo from "@/app/_components/Photo";
 import PubGoogle from "@/app/_components/PubGoogle";
 import CrayonEdition from "@/app/_components/CrayonEdition";
 import { eluDepuisFiche, eluDepuisId, equipe, lienOfficiel, mouvementsElu, statsElu } from "@/lib/elus";
+import { FONCTIONS_SOCIETES } from "@/lib/exclusions";
 import { familleDe } from "@/lib/familles";
 import { photoAbsolue } from "@/lib/media";
 import { CHAMBRE_LONG, nomAffiche, prenomNom } from "@/lib/format";
@@ -90,6 +91,11 @@ export default async function Parlementaire({ params }: { params: Promise<{ id: 
     fonctionsGouvernement(f.personne_id).catch(() => []),
   ]);
   const nom = prenomNom(f.prenom, f.nom);
+  // La vue de stats compte aussi les sociétés (tiers payants, prestataires PE)
+  // parmi les « indéterminés » : on les retire du décompte affiché — ce ne
+  // sont pas des personnes.
+  const societes = f.chambre === "europarl" ? collabs.filter((c) => FONCTIONS_SOCIETES.includes(c.fonction)).length : 0;
+  const indetermines = stats ? Math.max(0, stats.indetermines - societes) : 0;
   const nbCollabs = new Set(periodes.map((p) => p.collab_id)).size;
   const depuis = periodes.map((p) => p.debut).filter(Boolean).sort()[0];
   const commissionsActuelles = fusionner(appartenances.filter((a) => a.chambre === f.chambre && a.elu_id === f.elu_id && a.type !== "groupe")).filter((a) => !a.fin);
@@ -170,7 +176,7 @@ export default async function Parlementaire({ params }: { params: Promise<{ id: 
           )}
           <div>
             <strong style={{ color: "var(--mixi)" }}>{pct(partFemmes(stats))}</strong>
-            <span><a href="/mixiparl">MixiParl&apos;</a> · de femmes ({stats.femmes} F, {stats.hommes} H{stats.indetermines ? `, ${stats.indetermines} ind.` : ""})</span>
+            <span><a href="/mixiparl">MixiParl&apos;</a> · de femmes ({stats.femmes} F, {stats.hommes} H{indetermines > 0 ? `, ${indetermines} ind.` : ""})</span>
           </div>
         </>}
         {nbCollabs > 0 && (
