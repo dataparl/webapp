@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { aujourdhuiParis, correspond, decaler, lundiDe, messageAlerte, type Abonnement, type MvtAlerte } from "@/lib/alertes";
 import { nouveauJetonPreferences } from "@/lib/consent";
+import { mouvementExclu } from "@/lib/exclusions";
 import { COLONNES_PUBLIQUES, dataQueryTout } from "@/lib/data";
 import { prenomNomAdresse } from "@/lib/gabarit";
 import { expedier, piedOptIn } from "@/lib/mail";
@@ -56,9 +57,11 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: true, jour, envoyes: 0, abonnes: 0 });
   }
 
-  const mvts = await dataQueryTout<MvtAlerte>("mouvements", new URLSearchParams({
+  // Exclusions temporaires (ex. fausses arrivées Sénat du 2026-10-09) :
+  // jamais envoyées dans les DataParl' Daily et Weekly.
+  const mvts = (await dataQueryTout<MvtAlerte>("mouvements", new URLSearchParams({
     select: `${COLONNES_PUBLIQUES},elu_origine_cle,elu_origine_id`, date_event: `gte.${decaler(jour, -7)}`, order: "date_event.desc,chambre.asc,id.asc",
-  }), 0);
+  }), 0)).filter((m) => !mouvementExclu(m));
 
   const periodes = [`quotidienne:${jour}`, `quotidienne:${decaler(jour, -1)}`, `hebdomadaire:${jour}`];
   const { data: deja } = await db.from("alert_sends").select("email, periode").in("periode", periodes);

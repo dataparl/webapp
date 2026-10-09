@@ -1,5 +1,6 @@
 import "server-only";
 import { aujourdhuiParis } from "./alertes";
+import { ajusterJournee } from "./exclusions";
 import { COLONNES_PUBLIQUES, dataQuery, dataQueryTout, type Mouvement } from "./data";
 
 // Pages « daily » : les mouvements publiés un jour donné.
@@ -42,7 +43,8 @@ function regrouper(rows: JourChambre[]): Jour[] {
 export async function joursPublies(depuis: string, jusqua = aujourdhuiParis()): Promise<Jour[]> {
   const rows = await dataQueryTout<JourChambre>("mouvements_par_jour",
     new URLSearchParams({ select: "*", and: `(date_event.gte.${depuis},date_event.lte.${jusqua})`, order: "date_event.desc" }), 3600);
-  return regrouper(rows);
+  // Exclusions temporaires : on retire les arrivées exclues des comptes du jour.
+  return regrouper(rows.map(ajusterJournee).filter((r) => r.n > 0));
 }
 
 export async function derniersJours(n: number): Promise<Jour[]> {
@@ -62,11 +64,13 @@ export async function voisins(date: string): Promise<{ avant: string | null; apr
 }
 
 // Les mouvements libres d'un jour : 10 au total, répartis entre les chambres.
+// Les mouvements temporairement exclus (lib/exclusions.ts) ne prennent pas
+// de place : on réserve les 10 lignes aux mouvements affichables.
 export async function mouvementsLibres(date: string, jour: Jour | undefined): Promise<Mouvement[]> {
   if (!jour) return [];
   const presentes = CHAMBRES.filter((c) => jour.parChambre[c]?.n);
   const parChambre = await Promise.all(presentes.map((c) => dataQuery<Mouvement>("mouvements", new URLSearchParams({
-    select: COLONNES_PUBLIQUES, date_event: `eq.${date}`, chambre: `eq.${c}`, order: "type.asc,id.asc", limit: String(LIBRES),
+    select: COLONNES_PUBLIQUES, date_event: `eq.${date}`, chambre: `eq.${c}`, order: "type.asc,id.asc", limit: String(LIBRES * 2),
   }), 3600).then((r) => r.rows)));
   // Une place à tour de rôle à chaque chambre qui a encore des mouvements.
   const pris = presentes.map(() => 0);

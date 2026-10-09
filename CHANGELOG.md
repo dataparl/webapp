@@ -1,3 +1,1 @@
-successfull- Pages « trombinoscope des collaborateurs » par chambre (`/collab/an/trombinoscope`, `/collab/senat/trombinoscope`, `/collab/pe/trombinoscope`) reprenant les intitulés des publications officielles (« Trombinoscope des collaborateurs de Sénateur », « Liste des collaborateurs par député ») : planche de tous les collaborateurs en poste, nom, élu employeur et fonction.
-- Les listes de collaborateurs par chambre affichent désormais le nom du collaborateur (plus seulement l'élu employeur et la fonction), et les intitulés des pages et liens reprennent les intitulés officiels (« liste des collaborateurs par sénateur », etc.).
-y downloaded text file (SHA: a231ffe40e0de224dfac9c3611283740e15f04c7)
+successfully downloaded text file (SHA: 32e7e991efa378b65615e02f6f4f64bfb985c4cc)
