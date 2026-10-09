@@ -7,7 +7,9 @@ import { CHAMBRE_LONG, nomAffiche, prenomNom, TYPE } from "@/lib/format";
 import SuiteDuJour from "./SuiteDuJour";
 
 export const revalidate = 3600;
-export async function generateStaticParams() { return []; } // pages générées à la première visite, puis en cache
+// Pages générées à la première visite, puis mises en cache (ISR) :
+// PAS de generateStaticParams retournant [] — bug Next.js (issue #57996) :
+// un tableau vide casse la route ISR à la demande (erreur 500 pour toutes les dates).
 
 type Props = { params: Promise<{ date: string }> };
 
