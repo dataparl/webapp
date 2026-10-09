@@ -52,7 +52,7 @@ function Editeur({ id, retour }: { id: string | null; retour: () => void }) {
           <input id="cp-t" type="text" value={f.titre} onChange={(e) => setF({ ...f, titre: e.target.value })} maxLength={160} />
           <label htmlFor="cp-c">Chapô <span className="meta">(l&apos;essentiel en deux phrases)</span></label>
           <textarea id="cp-c" rows={3} value={f.chapo} onChange={(e) => setF({ ...f, chapo: e.target.value })} maxLength={600} />
-          <label htmlFor="cp-x">Texte <span className="meta">(une ligne vide entre les paragraphes)</span></label>
+          <label htmlFor="cp-x">Texte <span className="meta">(une ligne vide entre les paragraphes · liens : [texte](https://exemple.fr))</span></label>
           <textarea id="cp-x" rows={16} value={f.corps} onChange={(e) => setF({ ...f, corps: e.target.value })} />
           {message && <p className={message.ok ? "ok" : "erreur"}>{message.t}</p>}
           <div className="actions">
