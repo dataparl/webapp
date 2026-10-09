@@ -90,17 +90,49 @@ function ligneDuBloc(b: Bloc): string | null {
   }
 }
 
-async function corpsNotion(pageId: string): Promise<string> {
-  const lignes: string[] = [];
+// Blocs enfants d'un bloc (ex. sous-puces d'un item de liste), aplatis.
+async function enfants(blocId: string): Promise<Bloc[]> {
+  const out: Bloc[] = [];
   let curseur: string | undefined;
-  for (let page = 0; page < 3 && lignes.length < 300; page++) {
+  for (let page = 0; page < 3; page++) {
     const q = new URLSearchParams({ page_size: "100" });
     if (curseur) q.set("start_cursor", curseur);
-    const r = await apiNotion<{ results: Bloc[]; has_more: boolean; next_cursor?: string }>("/blocks/" + pageId + "/children?" + q);
-    for (const b of r.results) { const l = ligneDuBloc(b); if (l) lignes.push(l); }
+    const r = await apiNotion<{ results: Bloc[]; has_more: boolean; next_cursor?: string }>("/blocks/" + blocId + "/children?" + q);
+    out.push(...r.results);
     if (!r.has_more || !r.next_cursor) break;
     curseur = r.next_cursor;
   }
+  return out;
+}
+
+// Blocs d'une page, récursifs sur les items de liste : les sous-puces Notion
+// deviennent des lignes « - » au même niveau (texteVersHtml n'imbrique pas).
+async function blocsAvecEnfants(pageId: string): Promise<Bloc[]> {
+  const out: Bloc[] = [];
+  const ajouter = async (blocs: Bloc[]) => {
+    for (const b of blocs) {
+      out.push(b);
+      if ((b as any).has_children && (b.type === "bulleted_list_item" || b.type === "numbered_list_item")) {
+        const sous = await enfants(b.id);
+        if (sous.length) await ajouter(sous);
+      }
+    }
+  };
+  let curseur: string | undefined;
+  for (let page = 0; page < 3 && out.length < 300; page++) {
+    const q = new URLSearchParams({ page_size: "100" });
+    if (curseur) q.set("start_cursor", curseur);
+    const r = await apiNotion<{ results: Bloc[]; has_more: boolean; next_cursor?: string }>("/blocks/" + pageId + "/children?" + q);
+    await ajouter(r.results);
+    if (!r.has_more || !r.next_cursor) break;
+    curseur = r.next_cursor;
+  }
+  return out;
+}
+
+async function corpsNotion(pageId: string): Promise<string> {
+  const lignes: string[] = [];
+  for (const b of await blocsAvecEnfants(pageId)) { const l = ligneDuBloc(b); if (l) lignes.push(l); }
   // Items de liste et lignes de citation contigus sur une même ligne par
   // élément ; les autres blocs séparés par une ligne vide (texteVersHtml).
   const out: string[] = [];
