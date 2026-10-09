@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 
 // Barre d’outils de rédaction pour le corps des communiqués (et mailings).
 // Format stocké : Markdown léger — **gras**, *italique*, [lien](https://…),
@@ -102,7 +102,7 @@ export default function EditeurTexte({ id, value, onChange }: { id: string; valu
   const mots = value.trim() ? value.trim().split(/\s+/).length : 0;
   const minutes = Math.max(1, Math.round(mots / 200));
 
-  const bouton = (titre: string, contenu: string, action: () => void) => (
+  const bouton = (titre: string, contenu: ReactNode, action: () => void) => (
     <button type="button" className="secondaire" title={titre} onMouseDown={garder} onClick={action}>{contenu}</button>
   );
 
