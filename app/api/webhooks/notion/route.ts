@@ -8,23 +8,29 @@ export const maxDuration = 120;
 
 // Webhook Notion : synchronisation en temps réel des communiqués.
 // Abonnement créé dans le tableau de bord de l'intégration Notion (onglet
-// Webhooks), cible cette URL. Le cron de 8 h et le bouton de l'admin restent
-// en filet de sécurité.
+// Webhooks). Le cron de 8 h et le bouton de l'admin restent en filet de sécurité.
+// Le jeton de vérification (one-time) et la clé de signature HMAC sont gardés
+// dans la table cle_valeur : le POST (Notion) et le GET (navigateur) peuvent
+// tomber sur des instances serveur différentes sur Vercel.
 
-// Dernier jeton de vérification reçu (il sert aussi de clé de signature HMAC
-// des événements ultérieurs — cf. developers.notion.com/reference/webhooks).
-// TEMPOURAIRE : exposé par le GET pour la mise en place de l'abonnement ;
-// à retirer une fois l'abonnement vérifié.
-let jetonVerif: string | null = null;
+const CLE_JETON = "notion_webhook_verification_token";
+
+async function garderJeton(jeton: string) {
+  await authAdmin().from("cle_valeur").upsert({ cle: CLE_JETON, valeur: jeton });
+}
+async function lireJeton(): Promise<string | null> {
+  const { data } = await authAdmin().from("cle_valeur").select("valeur").eq("cle", CLE_JETON).maybeSingle();
+  return (data?.valeur as string) ?? null;
+}
 
 // Pas plus d'une sync par minute : les webhooks Notion arrivent en rafales
 // (création + édition + publication…), et la sync est idempotente.
 let derniere = 0;
 
-function signatureValide(req: Request, corps: string): boolean {
-  const cle = jetonVerif ?? process.env.NOTION_WEBHOOK_SECRET ?? "";
+async function signatureValide(req: Request, corps: string): Promise<boolean> {
+  const cle = (await lireJeton()) ?? process.env.NOTION_WEBHOOK_SECRET ?? "";
   if (!cle) return true; // sans clé : accepté (sync idempotente, limitée en rythme)
-  const recu = req.headers.get("x-notion-signature") ?? req.headers.get("notion-signature") ?? "";
+  const recu = req.headers.get("x-notion-signature") ?? "";
   if (!recu.startsWith("sha256=")) return false;
   const attendu = "sha256=" + createHmac("sha256", cle).update(corps).digest("hex");
   return recu.length === attendu.length && timingSafeEqual(Buffer.from(recu), Buffer.from(attendu));
@@ -38,11 +44,11 @@ export async function POST(req: Request) {
     const j = JSON.parse(corps) as { verification_token?: string; data?: { verification_token?: string } };
     const jeton = j.verification_token ?? j.data?.verification_token;
     if (jeton) {
-      jetonVerif = jeton;
+      await garderJeton(jeton);
       return NextResponse.json({ verification_token: jeton });
     }
   } catch { /* corps non JSON : événement normal */ }
-  if (!signatureValide(req, corps)) return NextResponse.json({ error: "signature invalide" }, { status: 401 });
+  if (!(await signatureValide(req, corps))) return NextResponse.json({ error: "signature invalide" }, { status: 401 });
   const maintenant = Date.now();
   if (maintenant - derniere < 60_000) return NextResponse.json({ ok: true, ignore: "sync trop récente" });
   derniere = maintenant;
@@ -55,9 +61,10 @@ export async function POST(req: Request) {
 }
 
 // Sonde + AFFICHAGE TEMPORAIRE du dernier jeton de vérification reçu :
-// ouvre cette URL dans le navigateur après « Renvoyer le jeton » dans Notion,
-// copie la valeur et colle-la dans le formulaire de vérification Notion.
-// À remplacer par un simple { ok: true } une fois l'abonnement actif.
+// ouvre cette URL après « Renvoyer le jeton » dans Notion, copie la valeur
+// et colle-la dans le formulaire de vérification Notion.
 export async function GET() {
-  return NextResponse.json({ ok: true, webhook: "notion", jeton_verification: jetonVerif });
+  let jeton: string | null = null;
+  try { jeton = await lireJeton(); } catch { /* table absente : jeton non gardé */ }
+  return NextResponse.json({ ok: true, webhook: "notion", jeton_verification: jeton });
 }
