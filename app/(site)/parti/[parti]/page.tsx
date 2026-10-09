@@ -4,18 +4,25 @@ import ListeElus, { CHAMBRE_LONG } from "@/app/_components/ListeElus";
 import { elusDuParti, partisExistants } from "@/lib/collectifsData";
 import { partiDepuisSlug, slugCollectif } from "@/lib/collectifs";
 import { couleurParti } from "@/lib/couleurs";
+import { libelleParti, nomCompletParti } from "@/lib/partisNoms";
 
 export const revalidate = 3600;
 type Props = { params: Promise<{ parti: string }> };
 
+// /parti/<parti> : la fiche des élus d'un parti, toutes chambres confondues.
+// Le titre, le H1 et la réponse directe portent le nom complet du parti
+// (« Élus du Rassemblement National (RN) ») : c'est ce que cherchent les
+// internautes et ce que citent moteurs et assistants IA.
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const slug = (await params).parti;
   const sigle = partiDepuisSlug(slug, await partisExistants().catch(() => []));
   if (!sigle) return { title: "Parti" };
+  const complet = nomCompletParti(sigle);
+  const libelle = libelleParti(sigle);
   return {
-    title: `Parti ${sigle} : ses élus et leurs collaborateurs, toutes chambres confondues`,
-    description: `Les élus du ${sigle}` à l'Assemblée nationale, au Sénat et au Parlement européen : leurs fiches, leurs biographies et leurs équipes de collaborateurs. La liste des collaborateurs du parti, élu par élu : /collab/parti/${slug}`.`,
-    alternates: { canonical: `/parti/${slug}` },
+    title: "Élus du " + complet + (complet !== sigle ? " (" + sigle + ")" : "") + " : la liste complète",
+    description: "Tous les élus du " + complet + " : députés à l'Assemblée nationale, sénateurs et députés européens, avec la fiche, la biographie et l'équipe de collaborateurs de chacun.",
+    alternates: { canonical: "/parti/" + slug },
   };
 }
 
@@ -36,13 +43,14 @@ export default async function FicheParti({ params }: Props) {
           {partis.map((p) => (
             <Link key={p} className="pastille-groupe" href={`/parti/${slugCollectif(p)}/`} style={{ ["--c" as string]: couleurParti(p) }}>
               <span className="point" />
-              {p}
+              {libelleParti(p)}
             </Link>
           ))}
         </div>
       </>
     );
   }
+  const complet = nomCompletParti(sigle);
   const elus = await elusDuParti(sigle).catch(() => []);
   const parChambre = new Map<string, typeof elus>();
   for (const e of elus) {
@@ -50,32 +58,85 @@ export default async function FicheParti({ params }: Props) {
     l.push(e);
     parChambre.set(e.chambre, l);
   }
+  const nomsChambres = [...parChambre.keys()].map((c) => CHAMBRE_LONG[c] ?? c);
+  const nbAN = parChambre.get("assemblee")?.length ?? 0;
+  const nbSenat = parChambre.get("senat")?.length ?? 0;
+  const nbPE = parChambre.get("europarl")?.length ?? 0;
 
-  const jsonLd = {
-    "@context": "https://schema.org", "@type": "ItemList",
-    name: `Parti ${sigle}`, numberOfItems: elus.length,
-  };
+  const faq = [
+    {
+      q: "Combien d'élus le " + complet + " a-t-il ?",
+      r: "Le " + complet + " compte " + elus.length + " élu" + (elus.length > 1 ? "s" : "") + " actif" + (elus.length > 1 ? "s" : "") + " suivi" + (elus.length > 1 ? "s" : "") + " par DataParl'"
+        + (nbAN ? " : " + nbAN + " député" + (nbAN > 1 ? "s" : "") + " à l'Assemblée nationale" : "")
+        + (nbSenat ? (nbAN ? ", " : " : ") + nbSenat + " sénateur" + (nbSenat > 1 ? "s" : "") + " au Sénat" : "")
+        + (nbPE ? (nbAN || nbSenat ? " et " : " : ") + nbPE + " député" + (nbPE > 1 ? "s" : "") + " européen" + (nbPE > 1 ? "s" : "") : "")
+        + ". La liste complète, avec la fiche et la biographie de chacun, est sur cette page.",
+    },
+    {
+      q: "Qui sont les élus du " + sigle + " ?",
+      r: "Les élus " + sigle + " sont listés ci-dessous, chambre par chambre, avec photo, circonscription et liens vers la biographie et l'équipe de collaborateurs de chacun. Toute personne élue sous une autre étiquette apparentée figure sur la fiche du parti concerné.",
+    },
+    {
+      q: "Qui sont les collaborateurs des élus du " + complet + " ?",
+      r: "Chaque fiche d'élu présente son équipe de collaborateurs en poste. La liste de tous les collaborateurs des élus du " + sigle + ", élu employeur par élu employeur, est publiée sur la page « Collaborateurs du parti " + sigle + " ».",
+    },
+  ];
+
+  const jsonLd = [
+    {
+      "@context": "https://schema.org", "@type": "ItemList",
+      name: "Élus du " + complet,
+      numberOfItems: elus.length,
+    },
+    {
+      "@context": "https://schema.org", "@type": "FAQPage",
+      mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.r } })),
+    },
+    {
+      "@context": "https://schema.org", "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Partis politiques", item: "https://www.dataparl.fr/parti" },
+        { "@type": "ListItem", position: 2, name: complet },
+      ],
+    },
+  ];
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      {jsonLd.map((j, i) => (
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(j).replace(/</g, "\\u003c") }} />
+      ))}
       <p className="meta" style={{ marginTop: 0 }}>
-        <a href="/senatoriales2026">← Sénatoriales 2026</a> · <Link href="/parti">← Tous les partis</Link>
+        <Link href="/parti">← Tous les partis</Link>
       </p>
-      <h1>Parti <span className="surligne">{sigle}</span></h1>
+      <h1>Élus du <span className="surligne">{complet}</span>{complet !== sigle ? <span className="meta"> ({sigle})</span> : null}</h1>
       <p className="lead">
-        Les {elus.length} élu{elus.length > 1 ? "s" : ""} du {sigle}, toutes chambres confondues — avec pour
-        chacun sa fiche, sa biographie et l&apos;équipe de ses collaborateurs.{" "}
-        <a href={`/collab/parti/${slug}`}>La liste des collaborateurs du {sigle}, élu par élu →</a>
+        Les {elus.length} élu{elus.length > 1 ? "s" : ""} du {complet}, toutes chambres confondues
+        {nomsChambres.length ? " (" + nomsChambres.join(", ") + ")" : ""} : pour chacun, sa fiche, sa
+        biographie et l&apos;équipe de ses collaborateurs.{" "}
+        <a href={"/collab/parti/" + slug}>La liste des collaborateurs des élus {sigle} →</a>
       </p>
-      <p className="meta"><Link href="/groupe">Voir les groupes parlementaires, chambre par chambre</Link></p>
       {[...parChambre.entries()].map(([chambre, l]) => (
         <section key={chambre}>
-          <h2>{CHAMBRE_LONG[chambre] ?? chambre} <span className="meta">· {l.length} élu{l.length > 1 ? "s" : ""}</span></h2>
+          <h2 id={chambre}>{CHAMBRE_LONG[chambre] ?? chambre} <span className="meta">· {l.length} élu{l.length > 1 ? "s" : ""} {sigle}</span></h2>
           <ListeElus elus={l} afficher="parti" />
         </section>
       ))}
       {elus.length === 0 && <p className="meta">Aucun élu actif enregistré pour ce parti.</p>}
+      <h2 id="faq">Questions fréquentes</h2>
+      <dl>
+        {faq.map((f) => (
+          <div key={f.q}>
+            <dt><strong>{f.q}</strong></dt>
+            <dd>{f.r}</dd>
+          </div>
+        ))}
+      </dl>
+      <p className="meta">
+        <Link href="/collab/parti/" + slug>Collaborateurs du parti</Link> ·{" "}
+        <Link href="/groupe">Groupes parlementaires</Link> · Les effectifs sont mis à jour quotidiennement
+        d&apos;après les publications officielles.
+      </p>
     </>
   );
 }
