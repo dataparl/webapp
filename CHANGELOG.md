@@ -8,6 +8,12 @@ versionnement [SemVer](https://semver.org/lang/fr/).
 
 ### Ajouté
 
+- Pages d'accueil par chambre : `/an`, `/senat`, `/pe` — tout
+  ce que DataParl&apos; publie sur chaque chambre (mouvements, collaborateurs,
+  parlementaires, groupes et mandatures, VigiParl&apos;, MixiParl&apos;, et
+  sénatoriales 2026 pour le Sénat). Synonymes en redirection :
+  `/assemblee-nationale` → `/an` ; `/EP`,
+  `/parlement-européen` et `/parlement-europeen` → `/pe`.
 - Pages d'accueil des collaborateurs par chambre (`/collab/an`,
   `/collab/senat`, `/collab/pe`) : liste complète des
   collaborateurs en poste de chaque chambre (`/collab/pe/liste`…),

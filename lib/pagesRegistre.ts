@@ -6,6 +6,9 @@ export type PageSite = { chemin: string; titre: string; verrou?: string; dynamiq
 
 export const PAGES: PageSite[] = [
   { chemin: "/", titre: "Accueil", verrou: "L'accueil ne désactive pas", sitemap: true },
+  { chemin: "/an", titre: "Assemblée nationale", sitemap: true },
+  { chemin: "/senat", titre: "Sénat", sitemap: true },
+  { chemin: "/pe", titre: "Parlement européen", sitemap: true },
   { chemin: "/mouvements", titre: "Mouvements", dynamique: "une page par chambre", sitemap: true },
   { chemin: "/daily", titre: "DataParl' Daily (jour par jour)", dynamique: "une page par jour publié", sitemap: true },
   { chemin: "/collab", titre: "Collaborateurs", dynamique: "une fiche par collaborateur, une page d'accueil et une liste par chambre", sitemap: true },
