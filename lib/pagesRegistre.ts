@@ -15,6 +15,7 @@ export const PAGES: PageSite[] = [
   { chemin: "/collab/pe/tiers-payants", titre: "Tiers payants du Parlement européen", dynamique: "une fiche par structure", sitemap: true },
   { chemin: "/collab/pe/prestataires", titre: "Prestataires de services du Parlement européen", dynamique: "une fiche par structure", sitemap: true },
   { chemin: "/collab/pe/reseau", titre: "Le réseau des collaborateurs du Parlement européen", sitemap: true },
+  { chemin: "/lexique", titre: "Lexique des collaborateurs parlementaires", sitemap: true },
   { chemin: "/parlementaires", titre: "Parlementaires", dynamique: "une fiche par élu, une biographie par élu", sitemap: true },
   { chemin: "/senatoriales2026", titre: "Sénatoriales 2026", dynamique: "une page par département renouvelé", sitemap: true },
   { chemin: "/groupe", titre: "Groupes parlementaires", dynamique: "une fiche par groupe et par chambre, et une par mandature (législature, série ou scrutin)", sitemap: true },

@@ -5,7 +5,7 @@ export const revalidate = 3600;
 type Props = { searchParams: Promise<{ page?: string }> };
 
 export const metadata: Metadata = {
-  title: "Liste des collaborateurs · Parlement européen",
+  title: "Liste des collaborateurs du Parlement européen — complète",
   description: "La liste référence de tous les collaborateurs parlementaires en poste au Parlement européen, avec l'élu employeur et la fonction.",
   alternates: { canonical: "/collab/pe/liste" },
 };

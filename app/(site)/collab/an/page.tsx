@@ -4,8 +4,8 @@ import HubChambre from "../HubChambre";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Collaborateurs · Assemblée nationale",
-  description: "Les collaborateurs parlementaires Assemblée nationale : la liste complète en poste, les fiches par parti et par groupe, la recherche des équipes et le réseau.",
+  title: "Liste des collaborateurs de l'Assemblée nationale",
+  description: "La liste des collaborateurs parlementaires de l'Assemblée nationale : la liste complète en poste avec l'élu employeur, les fiches par parti et par groupe, la recherche des équipes et les mouvements.",
   alternates: { canonical: "/collab/an" },
 };
 

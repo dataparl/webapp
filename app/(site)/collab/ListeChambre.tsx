@@ -3,7 +3,9 @@ import { dataQueryTout } from "@/lib/data";
 import { CHAMBRE_COURTE } from "@/lib/collectifs";
 
 // La liste référence des collaborateurs en poste d'une chambre, avec l'élu
-// employeur et la fonction, paginée comme /collab/liste.
+// employeur et la fonction, paginée comme /collab/liste. La date de génération
+// et le jeu de données structuré (JSON-LD Dataset) sont là pour les moteurs
+// et les assistants IA qui citent la source.
 type Periode = { collab_id: string; elu_id: string; elu_nom: string; fonction: string };
 const TAILLE_PAGE = 200;
 const AU: Record<string, string> = { assemblee: "à l'Assemblée nationale", senat: "au Sénat", europarl: "au Parlement européen" };
@@ -15,6 +17,7 @@ const SOURCE: Record<string, string> = {
 
 export default async function ListeChambre({ chambre, page }: { chambre: "assemblee" | "senat" | "europarl"; page: number }) {
   const seg = CHAMBRE_COURTE[chambre];
+  const maj = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" }).format(new Date());
   const rows = await dataQueryTout<Periode>("periodes",
     new URLSearchParams({ select: "collab_id,elu_id,elu_nom,fonction", chambre: "eq." + chambre, en_cours: "eq.true", order: "elu_nom.asc" }),
     3600).catch((): Periode[] => []);
@@ -56,9 +59,23 @@ export default async function ListeChambre({ chambre, page }: { chambre: "assemb
         </p>
       )}
       <p className="meta">
-        {"Liste établie à partir de " + SOURCE[chambre] + ", mise à jour quotidiennement. Version tableur détaillée : "}
+        {"Liste établie à partir de " + SOURCE[chambre] + ", mise à jour quotidiennement — page générée le " + maj + ". Version tableur détaillée : "}
         <a href="https://media.dataparl.fr/sheets/liste_collab_dataparl">DataParl&apos; Sheets</a>.
       </p>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Dataset",
+            name: "Liste des collaborateurs " + CHAMBRE_LONG[chambre],
+            description: "Liste référence des collaborateurs parlementaires en poste " + AU[chambre] + ", avec l'élu employeur et la fonction, mise à jour quotidienne.",
+            url: "https://www.dataparl.fr/collab/" + seg + "/liste",
+            creator: { "@type": "Organization", name: "DataParl'", url: "https://www.dataparl.fr" },
+            isAccessibleForFree: true,
+          }),
+        }}
+      />
     </>
   );
 }
