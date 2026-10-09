@@ -1,7 +1,7 @@
 import { CHAMBRE_LONG } from "@/lib/format";
 import { dataQueryTout } from "@/lib/data";
 import { CHAMBRE_COURTE } from "@/lib/collectifs";
-import TableauCollabs, { type LigneCollab } from "../TableauCollabs";
+import TableauCollabs, { type LigneCollab } from "./TableauCollabs";
 
 // La liste référence des collaborateurs en poste d'une chambre : nom du
 // collaborateur, élu employeur et fonction. Le tableau est interactif

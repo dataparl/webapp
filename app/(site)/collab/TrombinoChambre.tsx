@@ -1,7 +1,7 @@
 import { CHAMBRE_LONG } from "@/lib/format";
 import { dataQueryTout } from "@/lib/data";
 import { CHAMBRE_COURTE } from "@/lib/collectifs";
-import TableauCollabs, { type LigneCollab } from "../TableauCollabs";
+import TableauCollabs, { type LigneCollab } from "./TableauCollabs";
 
 // Trombinoscope des collaborateurs d'une chambre : la planche de tous les
 // collaborateurs en poste, avec initiales, élu employeur et fonction.
