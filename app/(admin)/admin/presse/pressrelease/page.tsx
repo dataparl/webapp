@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useAdmin } from "@/app/_components/admin/Porte";
 import { dateHeure, useRessource } from "@/app/_components/admin/utils";
 import Onglets from "../Onglets";
+import EditeurTexte from "./EditeurTexte";
 
 type Resume = { id: string; slug: string; titre: string; statut: "brouillon" | "publie"; publie_le: string | null; maj_le: string };
 type Envoi = { id: string; cree_le: string; n_destinataires: number; n_echecs: number; ouvertures: number; lecteurs: string[] };
@@ -52,8 +53,8 @@ function Editeur({ id, retour }: { id: string | null; retour: () => void }) {
           <input id="cp-t" type="text" value={f.titre} onChange={(e) => setF({ ...f, titre: e.target.value })} maxLength={160} />
           <label htmlFor="cp-c">Chapô <span className="meta">(l&apos;essentiel en deux phrases)</span></label>
           <textarea id="cp-c" rows={3} value={f.chapo} onChange={(e) => setF({ ...f, chapo: e.target.value })} maxLength={600} />
-          <label htmlFor="cp-x">Texte <span className="meta">(une ligne vide entre les paragraphes · liens : [texte](https://exemple.fr))</span></label>
-          <textarea id="cp-x" rows={16} value={f.corps} onChange={(e) => setF({ ...f, corps: e.target.value })} />
+          <label htmlFor="cp-x">Texte</label>
+          <EditeurTexte id="cp-x" value={f.corps} onChange={(corps) => setF({ ...f, corps })} />
           {message && <p className={message.ok ? "ok" : "erreur"}>{message.t}</p>}
           <div className="actions">
             <button disabled={occupe || f.titre.trim().length < 3} onClick={enregistrer}>Enregistrer</button>
