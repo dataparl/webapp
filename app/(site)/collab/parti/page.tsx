@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import { partisExistants } from "@/lib/collectifsData";
 import { slugCollectif } from "@/lib/collectifs";
+import { libelleParti } from "@/lib/partisNoms";
 import { dataQueryTout } from "@/lib/data";
 
 export const revalidate = 3600;
 
 // /collab/parti : la liste des collaborateurs par parti politique, toutes
-// chambres confondues. Chaque parti a sa fiche : les collaborateurs en poste
-// chez ses élus, élu employeur et fonction. (Les fiches d'élus par parti
-// vivent sur /parti ; ici, ce sont les collaborateurs.)
+// chambres confondues. Chaque intitulé porte le nom complet du parti, pas
+// seulement le sigle : c'est la requête des internautes.
 export const metadata: Metadata = {
-  title: "Collaborateurs par parti politique : la liste de chaque parti",
-  description: "La liste des collaborateurs parlementaires par parti : pour chaque parti, ses élus à l'Assemblée nationale, au Sénat et au Parlement européen, et l'équipe de collaborateurs de chacun.",
+  title: "Collaborateurs des élus de chaque parti : la liste par parti",
+  description: "Les collaborateurs parlementaires des élus du Rassemblement National, de Renaissance, des Républicains, de La France insoumise… : pour chaque parti, la liste élu employeur par élu employeur.",
   alternates: { canonical: "/collab/parti" },
 };
 
@@ -57,7 +57,7 @@ export default async function CollabParParti() {
       <ul className="liste-deps">
         {partis.map((p) => (
           <li key={p}>
-            <a href={"/collab/parti/" + slugCollectif(p)}>Collaborateurs du parti {p}</a>
+            <a href={"/collab/parti/" + slugCollectif(p)}>{"Collaborateurs des élus du " + libelleParti(p)}</a>
             <span className="meta">{" · " + (parParti.get(p) ?? 0).toLocaleString("fr-FR") + " collaborateur" + ((parParti.get(p) ?? 0) > 1 ? "s" : "") + " en poste"}</span>
           </li>
         ))}

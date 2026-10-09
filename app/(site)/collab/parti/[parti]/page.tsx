@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import TableauCollabs, { type LigneCollab } from "../../TableauCollabs";
 import { elusDuParti, partisExistants } from "@/lib/collectifsData";
 import { partiDepuisSlug, slugCollectif } from "@/lib/collectifs";
+import { libelleParti, nomCompletParti } from "@/lib/partisNoms";
 import { dataQueryTout } from "@/lib/data";
 
 export const revalidate = 3600;
@@ -9,8 +10,7 @@ type Props = { params: Promise<{ parti: string }> };
 
 // /collab/parti/<parti> : les collaborateurs parlementaires en poste chez les
 // élus d'un parti, toutes chambres confondues — chaque ligne : collaborateur,
-// élu employeur, fonction. Le tableau est interactif (recherche, tri,
-// groupement par élu) et rendu côté serveur pour rester indexable.
+// élu employeur, fonction. Le titre et le H1 portent le nom complet du parti.
 type Periode = { collab_id: string; elu_nom: string; fonction: string };
 type Collab = { collab_id: string; nom: string; prenom: string };
 
@@ -22,9 +22,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const slug = (await params).parti;
   const sigle = partiDepuisSlug(slug, await partisExistants().catch((): string[] => []));
   if (!sigle) return { title: "Parti" };
+  const complet = nomCompletParti(sigle);
   return {
-    title: "Collaborateurs du parti " + sigle + " : la liste, élu par élu",
-    description: "Les collaborateurs parlementaires en poste chez les élus du " + sigle + " (Assemblée nationale, Sénat, Parlement européen) : nom, élu employeur et fonction de chacun.",
+    title: "Collaborateurs des élus du " + complet + " : la liste complète",
+    description: "Les collaborateurs parlementaires en poste chez les élus du " + complet + " (Assemblée nationale, Sénat, Parlement européen) : nom, élu employeur et fonction de chacun.",
     alternates: { canonical: "/collab/parti/" + slug },
   };
 }
@@ -41,6 +42,7 @@ export default async function CollabDuParti({ params }: Props) {
       </>
     );
   }
+  const complet = nomCompletParti(sigle);
   const [elus, periodes, collabs] = await Promise.all([
     elusDuParti(sigle).catch(() => []),
     dataQueryTout<Periode>("periodes",
@@ -61,12 +63,12 @@ export default async function CollabDuParti({ params }: Props) {
       <p className="meta">
         <a href="/collab/parti">&larr; Collaborateurs par parti</a> · <a href="/collab">&larr; Tous les collaborateurs</a>
       </p>
-      <h1>Les collaborateurs du parti <span className="surligne">{sigle}</span></h1>
+      <h1>Les collaborateurs des élus du <span className="surligne">{complet}</span>{complet !== sigle ? <span className="meta"> ({sigle})</span> : null}</h1>
       <p className="lead">
         {lignes.length.toLocaleString("fr-FR")} collaborateur{lignes.length > 1 ? "s" : ""} parlementaire{lignes.length > 1 ? "s" : ""} en poste
-        chez les {elus.length} élu{elus.length > 1 ? "s" : ""} du {sigle}, toutes chambres confondues : nom de chacun,
+        chez les {elus.length} élu{elus.length > 1 ? "s" : ""} du {libelleParti(sigle)}, toutes chambres confondues : nom de chacun,
         élu employeur et fonction. La fiche des élus du parti :{" "}
-        <a href={"/parti/" + slugCollectif(sigle)}>élus du {sigle}</a>.
+        <a href={"/parti/" + slugCollectif(sigle)}>élus du {complet}</a>.
       </p>
       {lignes.length === 0 ? (
         <p className="meta">Aucun collaborateur en poste enregistré pour ce parti pour l&apos;instant.</p>
@@ -84,8 +86,8 @@ export default async function CollabDuParti({ params }: Props) {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Dataset",
-            name: "Collaborateurs du parti " + sigle,
-            description: "Liste des collaborateurs parlementaires en poste chez les élus du " + sigle + " : nom, élu employeur et fonction, mise à jour quotidiennement.",
+            name: "Collaborateurs des élus du " + complet,
+            description: "Liste des collaborateurs parlementaires en poste chez les élus du " + complet + " : nom, élu employeur et fonction, mise à jour quotidiennement.",
             url: "https://www.dataparl.fr/collab/parti/" + slug,
             creator: { "@type": "Organization", name: "DataParl'", url: "https://www.dataparl.fr" },
             isAccessibleForFree: true,
