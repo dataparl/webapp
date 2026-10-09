@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, Spectral } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import BandeauCookies from "./_components/BandeauCookies";
 import "./globals.css";
 
@@ -84,6 +85,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </noscript>
         {children}
         <BandeauCookies />
+        {/* Vercel Analytics : pages vues sans cookie ni identificateur
+            cross-site, cohérent avec la promesse « sans pistage ». */}
+        <Analytics />
       </body>
     </html>
   );
