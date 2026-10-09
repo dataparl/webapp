@@ -18,7 +18,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const sigle = partiDepuisSlug(slug, await partisExistants().catch(() => []));
   if (!sigle) return { title: "Parti" };
   const complet = nomCompletParti(sigle);
-  const libelle = libelleParti(sigle);
   return {
     title: "Élus du " + complet + (complet !== sigle ? " (" + sigle + ")" : "") + " : la liste complète",
     description: "Tous les élus du " + complet + " : députés à l'Assemblée nationale, sénateurs et députés européens, avec la fiche, la biographie et l'équipe de collaborateurs de chacun.",
@@ -38,7 +37,8 @@ export default async function FicheParti({ params }: Props) {
           Ce parti n&apos;a pas (ou plus) d&apos;élu actif enregistré : le sigle de l&apos;adresse ne
           correspond à aucun parti du référentiel. Voici les partis et groupes existants :
         </p>
-        <p><Link className="btn secondaire" href="/parti">Voir tous les partis</Link></p>
+        <p><L
+ink className="btn secondaire" href="/parti">Voir tous les partis</Link></p>
         <div className="pastilles-groupes">
           {partis.map((p) => (
             <Link key={p} className="pastille-groupe" href={`/parti/${slugCollectif(p)}/`} style={{ ["--c" as string]: couleurParti(p) }}>
@@ -74,7 +74,8 @@ export default async function FicheParti({ params }: Props) {
     },
     {
       q: "Qui sont les élus du " + sigle + " ?",
-      r: "Les élus " + sigle + " sont listés ci-dessous, chambre par chambre, avec photo, circonscription et liens vers la biographie et l'équipe de collaborateurs de chacun. Toute personne élue sous une autre étiquette apparentée figure sur la fiche du parti concerné.",
+      r: "Les élus " + sigle + " sont listés ci-dessous, chambre par chambre, avec photo, circonscription et liens vers la biographie et l'équipe de collaborateurs de chacun. Toute personne élue sous une autre étiquette apparentée figure sur la fiche d
+u parti concerné.",
     },
     {
       q: "Qui sont les collaborateurs des élus du " + complet + " ?",
@@ -118,7 +119,8 @@ export default async function FicheParti({ params }: Props) {
       </p>
       {[...parChambre.entries()].map(([chambre, l]) => (
         <section key={chambre}>
-          <h2 id={chambre}>{CHAMBRE_LONG[chambre] ?? chambre} <span className="meta">· {l.length} élu{l.length > 1 ? "s" : ""} {sigle}</span></h2>
+          <h2 id={chambre}>{CHAMBRE_LONG[chambre] ?? chambre} <
+span className="meta">· {l.length} élu{l.length > 1 ? "s" : ""} {sigle}</span></h2>
           <ListeElus elus={l} afficher="parti" />
         </section>
       ))}
@@ -133,7 +135,7 @@ export default async function FicheParti({ params }: Props) {
         ))}
       </dl>
       <p className="meta">
-        <Link href="/collab/parti/" + slug>Collaborateurs du parti</Link> ·{" "}
+        <Link href={"/collab/parti/" + slug}>Collaborateurs du parti</Link> ·{" "}
         <Link href="/groupe">Groupes parlementaires</Link> · Les effectifs sont mis à jour quotidiennement
         d&apos;après les publications officielles.
       </p>

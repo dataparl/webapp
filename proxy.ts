@@ -25,7 +25,8 @@ import { estInactif } from "./lib/pagesRegistre";
 //   raw.dataparl.fr        /schemas/*.json (schémas de données bruts) ; le reste -> www
 //   survey.dataparl.fr     / -> /enquete (questionnaire d'avis, jeton ?j=) ; le reste -> www
 //   drive.dataparl.fr      ancien domaine du tableur -> media (308)
-// Sur www, tout /jobs part vers jobs.dataparl.fr (sans le préfixe).
+// Sur www, tout /jobs part vers jobs.dataparl.fr (sans le préfixe)
+.
 // Sur www : une page désactivée dans l'admin (Plan du site) répond 404.
 // Anciens domaines (cavaparlement.eu, dataparl.com) : redirection 308 vers la
 // même adresse sur dataparl.fr. Exceptions, servies telles quelles pendant la
@@ -75,7 +76,8 @@ function vers(req: NextRequest, host: string, pathname: string, status: 307 | 30
 function protege(res: NextResponse): NextResponse {
   res.headers.set("X-Robots-Tag", "noindex, nofollow");
   res.headers.set("X-Frame-Options", "DENY");
-  res.headers.set("Referrer-Policy", "no-referrer");
+  res.headers.set("Referrer-Pol
+icy", "no-referrer");
   res.headers.set("X-Content-Type-Options", "nosniff");
   return res;
 }
@@ -128,7 +130,8 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // mail.cavaparlement.eu : uniquement les versions en ligne des emails.
+  // ma
+il.cavaparlement.eu : uniquement les versions en ligne des emails.
   if (host === `mail.${DOMAINE}`) {
     if (path.startsWith("/lire/")) return protege(NextResponse.next());
     return vers(req, `www.${DOMAINE}`, "/", 307);
@@ -166,7 +169,8 @@ export async function proxy(req: NextRequest) {
       url.pathname = `/media${path}`;
       return NextResponse.rewrite(url);
     }
-    if (path.startsWith("/photo-credit")) return vers(req, `www.${DOMAINE}`, "/", 307);
+    if (path.startsWith("/
+photo-credit")) return vers(req, `www.${DOMAINE}`, "/", 307);
     // media.dataparl.fr/assets/collab/{an,senat,pe}.csv : export CSV brut des
     // collaborateurs d'une chambre, généré par la webapp (app/assets/collab).
     if (/^\/assets\/collab\/(an|senat|pe)(\.csv)?$/.test(path)) return NextResponse.next();
@@ -212,7 +216,8 @@ export async function proxy(req: NextRequest) {
     return vers(req, `www.${DOMAINE}`, "/", 307);
   }
 
-  // raw.dataparl.fr : les fichiers bruts publics (schémas de données
+  // raw.dataparl.fr
+ : les fichiers bruts publics (schémas de données
   // référencés sur data.gouv.fr, servis depuis public/schemas). Le reste du
   // domaine n'existe pas : tout revient vers www.dataparl.fr (même chemin).
   if (host === `raw.${DOMAINE}`) {
@@ -256,8 +261,9 @@ export async function proxy(req: NextRequest) {
     if (path === "/api" || path === "/api/") return vers(req, `api.${DOMAINE}`, "/", 308);
     // DataParl' Jobs vit sur son sous-domaine, sans préfixe /jobs.
     if (path === "/jobs" || path.startsWith("/jobs/")) {
-      const cibleJobs = path === "/jobs" ? "/" : path.slice("/jobs".length) || "/";
-      return vers(req, `jobs.${DOMAINE}`, cibleJobs, 307);
+  
+    const cibleJobs = path === "/jobs" ? "/" : path.slice("/jobs".length) || "/";
+      return vers(req, `jobs.${DOMAINE}`, cibleJobs, 308);
     }
     // Le tableur vit sur media.dataparl.fr.
     if (path === "/sheets" || path.startsWith("/sheets/") || path === "/search") {
