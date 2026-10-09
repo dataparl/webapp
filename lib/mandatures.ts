@@ -7,6 +7,7 @@
 //   /groupe/an/{xvii|xvi|xv|…}    ex. /groupe/an/xvii (XVIIe législature)
 //   /groupe/pe/{10e|9e|…}         ex. /groupe/pe/10e (10e législature)
 //   /groupe/senat/serie-{1|2}     ex. /groupe/senat/serie-1 (renouvelée en 2023)
+//   /groupe/senat/serie-{1|2}/{annee}  ex. /groupe/senat/serie-1/2023 (scrutin de 2023)
 //   et, par groupe : /groupe/pe-renew/10e, /groupe/an-rn/xvii, …
 import { slugCollectif } from "./collectifs";
 
@@ -46,7 +47,7 @@ export function mandatureDuMandat(chambre: string, legislature: string | null | 
 // Série du Sénat d'un siège, d'après la date d'élection du mandat (mandat de
 // six ans, renouvelé à élection + 6) : la série 1 a été renouvelée en 2023
 // (sièges élus en 2017 et 2023), la série 2 en 2020 puis en 2026 (sièges élus
-// en 2014, 2020 et 2026).
+// en 2014, 2020 et 2026). Les élections partielles hors cycle renvoient null.
 export function serieDuSiege(debut: string): 1 | 2 | null {
   const annee = Number((debut ?? "").slice(0, 4));
   if (!Number.isInteger(annee) || annee < 2001 || annee > 2100) return null;
@@ -78,6 +79,19 @@ export const RENOUVELLEMENTS_SERIES: Record<number, string> = {
   1: "renouvelée en 2023 (sièges élus en 2017 et 2023)",
   2: "renouvelée en 2020 puis en 2026 (sièges élus en 2014, 2020 et 2026)",
 };
+
+// Scrutins sénatoriaux organisés depuis 2010 : date, série renouvelée et
+// sièges renouvelés. Les pages /groupe/senat/serie-N/{annee} suivent ces
+// scrutins — une page n'existe que si des mandats élus cette année-là sont
+// réellement enregistrés (« jusqu'où on a les valeurs »).
+export const SCRUTINS_SENAT: { serie: 1 | 2; annee: number; date: string; sieges: number }[] = [
+  { serie: 1, annee: 2011, date: "25 septembre 2011", sieges: 170 },
+  { serie: 2, annee: 2014, date: "28 septembre 2014", sieges: 178 },
+  { serie: 1, annee: 2017, date: "24 septembre 2017", sieges: 170 },
+  { serie: 2, annee: 2020, date: "27 septembre 2020", sieges: 178 },
+  { serie: 1, annee: 2023, date: "24 septembre 2023", sieges: 170 },
+  { serie: 2, annee: 2026, date: "27 septembre 2026", sieges: 178 },
+];
 
 // Inverse du slug : « xvii » → 17, « 10e » → 10, « serie-1 » → 1, « XVII » → 17.
 export function mandatureDepuisSlug(chambre: string, slug: string): number | null {

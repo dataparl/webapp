@@ -17,7 +17,7 @@ export const PAGES: PageSite[] = [
   { chemin: "/collab/pe/reseau", titre: "Le réseau des collaborateurs du Parlement européen", sitemap: true },
   { chemin: "/parlementaires", titre: "Parlementaires", dynamique: "une fiche par élu, une biographie par élu", sitemap: true },
   { chemin: "/senatoriales2026", titre: "Sénatoriales 2026", dynamique: "une page par département renouvelé", sitemap: true },
-  { chemin: "/groupe", titre: "Groupes parlementaires", dynamique: "une fiche par groupe et par chambre, et une par mandature (législature ou série)", sitemap: true },
+  { chemin: "/groupe", titre: "Groupes parlementaires", dynamique: "une fiche par groupe et par chambre, et une par mandature (législature, série ou scrutin)", sitemap: true },
   { chemin: "/departement", titre: "Départements", dynamique: "une fiche par département", sitemap: true },
   { chemin: "/parti", titre: "Partis politiques", dynamique: "une fiche par parti", sitemap: true },
   { chemin: "/methode", titre: "Méthode", dynamique: "les pages méthode (VigiParl', MixiParl', sources)", sitemap: true },

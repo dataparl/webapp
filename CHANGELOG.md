@@ -8,6 +8,13 @@ versionnement [SemVer](https://semver.org/lang/fr/).
 
 ### Ajouté
 
+- Pages « par scrutin de renouvellement » au Sénat : `/groupe/senat/serie-1/2023`,
+  `/groupe/senat/serie-2/2020`… et par groupe (`/groupe/senat-lr/serie-1/2023`) —
+  les sénateurs élus lors de chaque scrutin organisé depuis 2010 (2011 et 2014
+  compris), avec le groupe de l'époque et les renommages harmonisés (UMP → LR…).
+  Data-driven : une page n'existe que si des mandats élus cette année-là sont
+  enregistrés ; les pages de série (`/groupe/senat/serie-1`) listent les
+  scrutins disponibles, et le sitemap XML référence chaque scrutin.
 - Pages d'accueil par chambre : `/an`, `/senat`, `/pe` — tout
   ce que DataParl' publie sur chaque chambre (mouvements, collaborateurs,
   parlementaires, groupes et mandatures, VigiParl', MixiParl', et

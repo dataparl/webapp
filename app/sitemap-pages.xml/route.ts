@@ -54,6 +54,15 @@ export async function GET() {
       }
     } catch { /* sans les mandatures */ }
   }
+  // Une page par scrutin sénatorial (série × année de renouvellement).
+  if (!estInactif("/groupe", inactifs)) {
+    try {
+      const { scrutinsExistants } = await import("@/lib/mandaturesData");
+      for (const s of await scrutinsExistants()) {
+        urls.push({ loc: `${base}/groupe/senat/serie-${s.serie}/${s.annee}`, changefreq: "weekly", priority: "0.6" });
+      }
+    } catch { /* sans les scrutins */ }
+  }
   // Une page d'accueil et une liste de collaborateurs par chambre.
   if (!estInactif("/collab", inactifs)) {
     try {
