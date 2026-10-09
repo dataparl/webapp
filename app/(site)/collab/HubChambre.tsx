@@ -3,13 +3,19 @@ import { dataQueryTout } from "@/lib/data";
 import { CHAMBRE_COURTE } from "@/lib/collectifs";
 
 // Page d'accueil des collaborateurs d'une chambre : la liste complète de la
-// chambre, les entrées par parti et par groupe, la recherche des équipes,
-// et pour le Parlement européen les tiers payants, prestataires et réseau.
-// Le titre, le H1, la réponse directe chiffrée et la FAQ reprennent les
-// requêtes réelles (« liste des collaborateurs du Sénat »…) : c'est ce que
-// moteurs de recherche et assistants IA citent.
+// chambre, le trombinoscope, les entrées par parti et par groupe, la recherche
+// des équipes, et pour le Parlement européen les tiers payants, prestataires
+// et réseau. Les intitulés reprennent les mots des publications officielles
+// (« Trombinoscope des collaborateurs de Sénateur », « Liste des
+// collaborateurs par député ») : c'est ce que moteurs et assistants IA citent.
 const AU: Record<string, string> = { assemblee: "à l'Assemblée nationale", senat: "au Sénat", europarl: "au Parlement européen" };
 const MOUVEMENTS: Record<string, string> = { assemblee: "/mouvements/assemblee", senat: "/mouvements/senat", europarl: "/mouvements/europarl" };
+const TROMBINO: Record<string, string> = {
+  assemblee: "Trombinoscope des collaborateurs de député",
+  senat: "Trombinoscope des collaborateurs de Sénateur",
+  europarl: "Trombinoscope des collaborateurs de député européen",
+};
+const PAR: Record<string, string> = { assemblee: "par député", senat: "par sénateur", europarl: "par député européen" };
 
 export default async function HubChambre({ chambre }: { chambre: "assemblee" | "senat" | "europarl" }) {
   const seg = CHAMBRE_COURTE[chambre];
@@ -47,7 +53,8 @@ export default async function HubChambre({ chambre }: { chambre: "assemblee" | "
         {"Retrouve la fiche d'une personne, cherche par élu, parti ou groupe, et exporte une équipe en un clic. Mise à jour quotidienne — page générée le " + maj + "."}
       </p>
       <ul className="liste-deps">
-        <li><a href={"/collab/" + seg + "/liste"}>La liste complète des collaborateurs en poste</a></li>
+        <li><a href={"/collab/" + seg + "/liste"}>{"La liste des collaborateurs " + PAR[chambre] + " (liste complète)"}</a></li>
+        <li><a href={"/collab/" + seg + "/trombinoscope"}>{TROMBINO[chambre]}</a> <span className="meta">· la planche de tous les collaborateurs en poste</span></li>
         <li><a href="/parti">Par parti politique</a> <span className="meta">· une fiche par parti : élus et équipes</span></li>
         <li><a href="/groupe">Par groupe parlementaire</a> <span className="meta">· une fiche par groupe : élus et équipes</span></li>
         <li><a href="/collab">Recherche par élu, groupe ou nom</a> <span className="meta">· compte gratuit, export CSV</span></li>
