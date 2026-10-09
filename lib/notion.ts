@@ -59,7 +59,7 @@ function titreDe(p: PageNotion): string {
 const sansAccent = (s: string) => s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
 
 // ── Blocs → corps du communiqué ────────────────────────────────────────
-type Bloc = { type: string; [k: string]: unknown };
+type Bloc = { id: string; type: string; [k: string]: unknown };
 
 function ligneDuBloc(b: Bloc): string | null {
   const rt = (x: any) => texte(x?.rich_text);
