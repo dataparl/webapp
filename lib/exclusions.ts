@@ -1,25 +1,40 @@
-// Exclusions temporaires de mouvements — mesure ponctuelle, à retirer.
-// Le 2026-10-09, une republication des listes du Sénat a généré des « arrivées »
-// datées du jour qui ne sont pas les vraies dates d'arrivée des collaborateurs.
-// On les masque des listes de mouvements, du DataParl' Daily et du DataParl'
-// Weekly le temps de corriger les dates à la source (dépôt collaborateurs).
-// Retirer l'entrée ci-dessous une fois les dates corrigées ; les usages
-// (paramExclusionMvts, mouvementExclu, ajusterJournee) deviennent inactifs
-// dès que la liste est vide.
+// Exclusions de mouvements — filtre permanent + mesures ponctuelles.
+//
+// Filtre permanent : au Parlement européen, les tiers payants et les
+// prestataires de services spécialisés sont le plus souvent des sociétés
+// (ex. ACIEM, SIGNAT'S). Elles restent dans les affectations et leurs pages
+// dédiées (/collab/pe/tiers-payants, /collab/pe/prestataires), mais n'ont pas
+// leur place dans le flux des mouvements ni dans les compteurs de personnes.
+//
+// Exclusions temporaires (à retirer une fois corrigé à la source, dépôt
+// collaborateurs) :
+// - 2026-10-09 (Sénat) : une republication des listes a généré des « arrivées »
+//   datées du jour qui ne sont pas les vraies dates d'arrivée.
+// - 2026-10-09 (europarl) : la reprise du suivi a comparé un état incomplet
+//   (initialisation le 2026-10-08 : 458 affectations) au lendemain (536) :
+//   les 78 « arrivées » sont des artefacts du premier relevé, pas des
+//   mouvements réels.
 export type ExclusionMvt = { chambre: string; type: string; date_event: string };
 
 export const EXCLUSIONS_MVTS: ExclusionMvt[] = [
   { chambre: "senat", type: "arrivee", date_event: "2026-10-09" },
+  { chambre: "europarl", type: "arrivee", date_event: "2026-10-09" },
 ];
 
-export function mouvementExclu(m: { chambre: string; type: string; date_event: string }): boolean {
+// Fonctions du Parlement européen désignant une société, pas une personne.
+export const FONCTIONS_SOCIETES = ["Tiers payant", "Prestataire de services spécialisé"];
+
+export function mouvementExclu(m: { chambre: string; type: string; date_event: string; fonction?: string }): boolean {
+  if (m.chambre === "europarl" && m.fonction && FONCTIONS_SOCIETES.includes(m.fonction)) return true;
   return EXCLUSIONS_MVTS.some((e) => e.chambre === m.chambre && e.type === m.type && e.date_event === m.date_event);
 }
 
-// Paramètre PostgREST (valeur de « not.or ») excluant ces mouvements, ou null.
-export function paramExclusionMvts(): string | null {
-  if (!EXCLUSIONS_MVTS.length) return null;
-  return "(" + EXCLUSIONS_MVTS.map((e) => `and(chambre.eq.${e.chambre},type.eq.${e.type},date_event.eq.${e.date_event})`).join(",") + ")";
+// Paramètre PostgREST (valeur de « not.or ») excluant sociétés et exclusions
+// ponctuelles de toutes les requêtes de mouvements.
+export function paramExclusionMvts(): string {
+  const clauses = EXCLUSIONS_MVTS.map((e) => `and(chambre.eq.${e.chambre},type.eq.${e.type},date_event.eq.${e.date_event})`);
+  clauses.push(`and(chambre.eq.europarl,fonction.in.(${FONCTIONS_SOCIETES.map((f) => `"${f}"`).join(",")}))`);
+  return "(" + clauses.join(",") + ")";
 }
 
 // Ajuste une ligne agrégée de mouvements_par_jour : retire les arrivées

@@ -1,6 +1,6 @@
 import "server-only";
 import { DATA_SUPABASE_KEY, DATA_SUPABASE_URL } from "./env";
-import { paramExclusionMvts } from "./exclusions";
+import { FONCTIONS_SOCIETES, paramExclusionMvts } from "./exclusions";
 import { siglesDe } from "./familles";
 
 // Lecture des données publiques (base dataparl, RLS : select ouvert).
@@ -50,8 +50,7 @@ export async function derniersMouvements(limit = 10, chambre?: Mouvement["chambr
     limit: String(limit),
   });
   if (chambre) p.set("chambre", `eq.${chambre}`);
-  const ex = paramExclusionMvts();
-  if (ex) p.set("not.or", ex);
+  p.set("not.or", paramExclusionMvts());
   return (await dataQuery<Mouvement>("mouvements", p)).rows;
 }
 
@@ -59,6 +58,9 @@ export async function compteAffectations(): Promise<Record<string, number>> {
   const out: Record<string, number> = {};
   for (const chambre of ["assemblee", "senat", "europarl"]) {
     const p = new URLSearchParams({ select: "elu_cle", chambre: `eq.${chambre}`, limit: "1" });
+    // Au PE, on ne compte que les personnes : les sociétés (tiers payants,
+    // prestataires) sont suivies sur leurs pages dédiées, hors des compteurs.
+    if (chambre === "europarl") p.set("fonction", `not.in.(${FONCTIONS_SOCIETES.map((f) => `"${f}"`).join(",")})`);
     out[chambre] = (await dataQuery<unknown>("affectations", p, 3600)).total ?? 0;
   }
   return out;
@@ -159,8 +161,7 @@ export function parametresRecherche(f: Filtres): URLSearchParams | null {
     }
   }
   if (et.length) p.set("and", `(${et.join(",")})`);
-  const ex = paramExclusionMvts();
-  if (ex) p.set("not.or", ex);
+  p.set("not.or", paramExclusionMvts());
   return p;
 }
 
