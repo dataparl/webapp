@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ListeElus, { CHAMBRE_LONG } from "@/app/_components/ListeElus";
-import { elusDeMandature, mandaturesExistantes, type EluMandature, type MandatureExistante } from "@/lib/mandaturesData";
+import { elusDeMandature, mandaturesExistantes, scrutinsExistants, type EluMandature, type MandatureExistante, type ScrutinExistant } from "@/lib/mandaturesData";
 import { groupesExistants } from "@/lib/collectifsData";
 import type { EluCollectif } from "@/lib/collectifsData";
 import { CHAMBRE_COURTE, decomposerSlugGroupe, sansGroupe, slugCollectif, type GroupeExistant } from "@/lib/collectifs";
@@ -12,7 +12,8 @@ import { harmoniserSigle, libelleMandature, mandatureDepuisSlug, RENOUVELLEMENTS
 // une mandature (/groupe/pe-renew/10e, /groupe/an-rn/xvii…). Les renommages
 // sont harmonisés : les élus du FN d'hier figurent sur la fiche RN d'aujourd'hui,
 // avec le groupe de l'époque rappelé. Les mandatures sont déduites des mandats
-// réellement enregistrés (« jusqu'où on a les valeurs »).
+// réellement enregistrés (« jusqu'où on a les valeurs ») ; au Sénat, chaque
+// série pointe vers ses scrutins (/groupe/senat/serie-1/2023…).
 
 export const revalidate = 3600;
 type Props = { params: Promise<{ groupe: string; mandature: string }> };
@@ -31,6 +32,24 @@ function AutresMandatures({ mandatures, chambre, actuelle, prefixe }: { mandatur
         <span key={m.slug}>
           {i > 0 ? " · " : ""}
           <Link href={prefixe + "/" + m.slug}>{m.libelle}</Link>
+        </span>
+      ))}
+    </p>
+  );
+}
+
+// Les scrutins de renouvellement d'une série du Sénat (data-driven).
+function ScrutinsDeSerie({ scrutins, serie, prefixe }: { scrutins: ScrutinExistant[]; serie: number; prefixe: string }) {
+  const liste = scrutins.filter((s) => s.serie === serie);
+  if (!liste.length) return null;
+  return (
+    <p className="meta">
+      {"Par scrutin de renouvellement : "}
+      {liste.map((s, i) => (
+        <span key={s.annee}>
+          {i > 0 ? " · " : ""}
+          <Link href={prefixe + "/" + s.annee}>{s.annee}</Link>
+          <span className="meta"> ({s.elus} élu{s.elus > 1 ? "s" : ""})</span>
         </span>
       ))}
     </p>
@@ -81,9 +100,10 @@ export default async function PageMandature({ params }: Props) {
 async function MandatureChambre({ chambre, slug }: { chambre: string; slug: string }) {
   const valeur = mandatureDepuisSlug(chambre, slug);
   if (valeur === null) return <Introuvable cause={"La mandature « " + slug + " » n'existe pas pour " + CHAMBRE_LONG[chambre] + "."} />;
-  const [elus, mandatures] = await Promise.all([
+  const [elus, mandatures, scrutins] = await Promise.all([
     elusDeMandature(chambre, valeur).catch((): EluMandature[] => []),
     mandaturesExistantes().catch((): MandatureExistante[] => []),
+    scrutinsExistants().catch((): ScrutinExistant[] => []),
   ]);
   if (!elus.length) return <Introuvable cause={"Aucun élu enregistré pour cette mandature — " + (libelleMandature(chambre, valeur) ?? slug) + "."} />;
   const libelle = libelleMandature(chambre, valeur) ?? "mandature";
@@ -113,6 +133,9 @@ async function MandatureChambre({ chambre, slug }: { chambre: string; slug: stri
         <p className="meta">Série {valeur} du Sénat : {RENOUVELLEMENTS_SERIES[valeur]}.</p>
       )}
       <AutresMandatures mandatures={mandatures} chambre={chambre} actuelle={slug} prefixe={"/groupe/" + CHAMBRE_COURTE[chambre]} />
+      {chambre === "senat" && (
+        <ScrutinsDeSerie scrutins={scrutins} serie={valeur} prefixe={"/groupe/" + CHAMBRE_COURTE[chambre] + "/" + slug} />
+      )}
       {liste.map((s) => (
         <section key={s.sigle}>
           <h2>
@@ -149,9 +172,10 @@ async function GroupeMandature({ slugGroupe, slug }: { slugGroupe: string; slug:
   const resolu = sigleDepuisSlug(d.chambre, d.slugSigle, actuels);
   if (!resolu) return <Introuvable cause="Ce groupe n'existe pas (ou plus) dans cette chambre." />;
   const fiche = groupes.find((g) => g.chambre === d.chambre && g.groupe === resolu.actuel);
-  const [elus, mandatures] = await Promise.all([
+  const [elus, mandatures, scrutins] = await Promise.all([
     elusDeMandature(d.chambre, valeur).catch((): EluMandature[] => []),
     mandaturesExistantes().catch((): MandatureExistante[] => []),
+    scrutinsExistants().catch((): ScrutinExistant[] => []),
   ]);
   const duGroupe = elus.filter((e) => !sansGroupe(e.sigleEpoque) && harmoniserSigle(d.chambre, e.sigleEpoque) === resolu.actuel);
   if (!duGroupe.length) return <Introuvable cause={"Aucun élu du groupe " + resolu.actuel + " enregistré pour cette mandature."} />;
@@ -177,6 +201,9 @@ async function GroupeMandature({ slugGroupe, slug }: { slugGroupe: string; slug:
         <p className="meta">Adresse « {slugGroupe} » : ancien nom {resolu.ancien}, fiche d&apos;aujourd&apos;hui {resolu.actuel}.</p>
       )}
       <AutresMandatures mandatures={mandatures} chambre={d.chambre} actuelle={slug} prefixe={"/groupe/" + slugGroupe} />
+      {d.chambre === "senat" && (
+        <ScrutinsDeSerie scrutins={scrutins} serie={valeur} prefixe={"/groupe/" + slugGroupe + "/" + slug} />
+      )}
       <ListeElus elus={duGroupe.map(pourAffichage)} afficher="groupe" />
     </>
   );
