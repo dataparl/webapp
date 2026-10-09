@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Partage from "@/app/_components/Partage";
 import { dateTitre } from "@/lib/daily";
 import { authAdmin } from "@/lib/supabaseAdmin";
-import { liensMd } from "@/lib/lienMd";
+import { texteVersHtml } from "@/lib/gabarit";
 
 export const revalidate = 300;
 type Props = { params: Promise<{ slug: string }> };
@@ -29,9 +29,7 @@ export default async function Communique({ params }: Props) {
       <p className="meta"><a href="/presse/communiques">Communiqués de presse</a> · {dateTitre(c.publie_le.slice(0, 10))}</p>
       <h1>{c.titre}</h1>
       {c.chapo && <p className="lead" style={{ color: "var(--ink)", fontWeight: 600 }}>{c.chapo}</p>}
-      {c.corps.replace(/\r\n/g, "\n").split(/\n{2,}/).filter(Boolean).map((p, i) => (
-        <p key={i}>{p.split("\n").map((l, j) => <span key={j}>{j > 0 && <br />}{liensMd(l)}</span>)}</p>
-      ))}
+      <div dangerouslySetInnerHTML={{ __html: texteVersHtml(c.corps) }} />
       <Partage url={url} titre={c.titre} texte={c.titre} />
       <p className="meta">Contact presse : <a href="mailto:presse@dataparl.fr">presse@dataparl.fr</a>. Réutilisation libre avec la mention « DataParl&apos; (dataparl.fr) ».</p>
     </article>
