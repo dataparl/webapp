@@ -8,6 +8,14 @@ versionnement [SemVer](https://semver.org/lang/fr/).
 
 ### Ajouté
 
+- Pages d'accueil des collaborateurs par chambre (`/collab/an`,
+  `/collab/senat`, `/collab/pe`) : liste complète des
+  collaborateurs en poste de chaque chambre (`/collab/pe/liste`…),
+  entrées par parti (`/parti`) et par groupe (`/groupe`),
+  recherche des équipes, et pour le Parlement européen les tiers payants,
+  les prestataires et le réseau ; VigiParl' et MixiParl' étendus au
+  Parlement européen (`/vigiparl/pe` et `/mixiparl/pe`),
+  classements élu par élu désormais reliés entre les trois chambres.
 - Pages « groupes par mandature » : une chambre pendant une mandature
   (`/groupe/an/xvii`, `/groupe/pe/10e`, `/groupe/senat/serie-1`…)
   et un groupe pendant une mandature (`/groupe/pe-renew/10e`,

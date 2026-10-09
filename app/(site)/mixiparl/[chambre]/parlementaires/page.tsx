@@ -7,21 +7,31 @@ import { equipeEligible, pct, SEGMENT_CHAMBRE, statsElus, tauxMixite } from "@/l
 export const revalidate = 3600;
 type Props = { params: Promise<{ chambre: string }>; searchParams: Promise<{ ordre?: string }> };
 
+// /mixiparl/{an|senat|pe}/parlementaires : le classement de la mixité des
+// équipes de collaborateurs, élu par élu, chambre par chambre.
+const LE_DE: Record<string, string> = { assemblee: "de l'Assemblée nationale", senat: "du Sénat", europarl: "du Parlement européen" };
+const LIBELLE: Record<string, string> = { an: "l'Assemblée nationale", senat: "le Sénat", pe: "le Parlement européen" };
+
+function chambreDuSegment(seg: string): string | null {
+  return SEGMENT_CHAMBRE[seg] ?? (seg === "pe" ? "europarl" : null);
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const seg = (await params).chambre;
-  const c = SEGMENT_CHAMBRE[seg];
+  const c = chambreDuSegment(seg);
   if (!c) return {};
   return {
     title: "Mixité des équipes par élu · " + CHAMBRE_LONG[c],
-    description: "Le taux de mixité de l'équipe de chaque élu " + (c === "assemblee" ? "de l'Assemblée nationale" : "du Sénat") + ".",
+    description: "Le taux de mixité de l'équipe de chaque élu " + (LE_DE[c] ?? CHAMBRE_LONG[c]) + ".",
     alternates: { canonical: "/mixiparl/" + seg + "/parlementaires" },
   };
 }
 
 export default async function Page({ params, searchParams }: Props) {
   const { chambre: seg } = await params;
-  const c = SEGMENT_CHAMBRE[seg];
+  const c = chambreDuSegment(seg);
   if (!c) notFound();
+  const autres = ["an", "senat", "pe"].filter((s) => s !== seg);
   const croissant = (await searchParams).ordre === "moins";
   const tries = (await statsElus().catch(() => []))
     .filter((r) => r.chambre === c && equipeEligible(r))
@@ -31,7 +41,6 @@ export default async function Page({ params, searchParams }: Props) {
   if (croissant) {
     tries.sort((a, b) => (tauxMixite(a.r) ?? 0) - (tauxMixite(b.r) ?? 0) || (b.r.femmes + b.r.hommes) - (a.r.femmes + a.r.hommes) || a.rang - b.rang);
   }
-  const autre = seg === "an" ? "senat" : "an";
   const base = "/mixiparl/" + seg + "/parlementaires";
   const entetes = ["Rang", "Élu", "Groupe", "Équipe", "Femmes", "Hommes", "Part de femmes", "Taux de mixité"];
   const donnees = tries.map(({ r, rang }) => [rang, nomAffiche(r.elu_nom), r.elu_groupe ?? "", r.femmes + r.hommes, r.femmes, r.hommes, pct(r.femmes / (r.femmes + r.hommes)), pct(tauxMixite(r))]);
@@ -48,19 +57,28 @@ export default async function Page({ params, searchParams }: Props) {
         égal, la plus grande équipe passe devant. Équipes de 2 personnes ou plus, toutes de genre déterminé, dans la
         grille DataParl&apos; Sheets (recherche Ctrl+F, export CSV).{" "}
         <a href="/mixiparl/methode#taux-de-mixite">Définition</a> ·{" "}
-        <a href={croissant ? base : base + "?ordre=moins"}>{croissant ? "Les plus mixtes d'abord" : "Les moins mixtes d'abord"}</a> ·{" "}
-        <a href={"/mixiparl/" + autre + "/parlementaires"}>Voir {autre === "an" ? "l'Assemblée nationale" : "le Sénat"}</a>
+        <a href={croissant ? base : base + "?ordre=moins"}>{croissant ? "Les plus mixtes d'abord" : "Les moins mixtes d'abord"}</a> · {"Voir aussi : "}
+        {autres.map((s, i) => (
+          <span key={s}>
+            {i > 0 ? " · " : ""}
+            <a href={"/mixiparl/" + s + "/parlementaires"}>{LIBELLE[s]}</a>
+          </span>
+        ))}
       </p>
-      <Tableur
-        id={"mixiparl-elus-" + seg}
-        titre="Mixité des équipes, élu par élu"
-        description=""
-        provenance="Vue stats_turnover_elus (API DataParl'/Supabase) · méthode MixiParl'"
-        entetes={entetes}
-        donnees={donnees}
-        liens={liens}
-        lectureSeule
-      />
+      {tries.length === 0 ? (
+        <p className="meta">Aucune équipe suivie pour cette chambre pour l&apos;instant : pas encore assez de mois d&apos;historique.</p>
+      ) : (
+        <Tableur
+          id={"mixiparl-elus-" + seg}
+          titre="Mixité des équipes, élu par élu"
+          description=""
+          provenance="Vue stats_turnover_elus (API DataParl'/Supabase) · méthode MixiParl'"
+          entetes={entetes}
+          donnees={donnees}
+          liens={liens}
+          lectureSeule
+        />
+      )}
     </>
   );
 }

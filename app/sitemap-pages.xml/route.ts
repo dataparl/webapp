@@ -54,6 +54,18 @@ export async function GET() {
       }
     } catch { /* sans les mandatures */ }
   }
+  // Une page d'accueil et une liste de collaborateurs par chambre.
+  if (!estInactif("/collab", inactifs)) {
+    try {
+      const { CHAMBRE_COURTE } = await import("@/lib/collectifs");
+      for (const chambre of ["assemblee", "senat", "europarl"]) {
+        const seg = CHAMBRE_COURTE[chambre];
+        if (!seg) continue;
+        urls.push({ loc: `${base}/collab/${seg}`, changefreq: "weekly", priority: "0.6" });
+        urls.push({ loc: `${base}/collab/${seg}/liste`, changefreq: "weekly", priority: "0.6" });
+      }
+    } catch { /* sans les chambres */ }
+  }
   // Une page par structure du Parlement européen (tiers payants, prestataires).
   try {
     const { FONCTIONS_STRUCTURES, slugStructure, structures } = await import("@/lib/structures");

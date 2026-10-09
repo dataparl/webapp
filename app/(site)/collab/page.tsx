@@ -9,6 +9,7 @@ export default function Collabs() {
     <>
       <h1>Les <span className="surligne">collaborateurs</span></h1>
       <p className="lead">Qui travaille pour quel élu, aujourd&apos;hui et depuis 2015. Retrouve la fiche d&apos;une personne, ou cherche par élu, groupe ou chambre et exporte une équipe en un clic.</p>
+      <p className="meta">Par chambre : <a href="/collab/an">Assemblée nationale</a> · <a href="/collab/senat">Sénat</a> · <a href="/collab/pe">Parlement européen</a></p>
       <RechercheGlobale placeholder="Nom d'un collaborateur ou d'un élu" />
       <h2>Les équipes</h2>
       <Equipes />

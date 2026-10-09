@@ -8,7 +8,7 @@ export const PAGES: PageSite[] = [
   { chemin: "/", titre: "Accueil", verrou: "L'accueil ne désactive pas", sitemap: true },
   { chemin: "/mouvements", titre: "Mouvements", dynamique: "une page par chambre", sitemap: true },
   { chemin: "/daily", titre: "DataParl' Daily (jour par jour)", dynamique: "une page par jour publié", sitemap: true },
-  { chemin: "/collab", titre: "Collaborateurs", dynamique: "une fiche par collaborateur", sitemap: true },
+  { chemin: "/collab", titre: "Collaborateurs", dynamique: "une fiche par collaborateur, une page d'accueil et une liste par chambre", sitemap: true },
   { chemin: "/collab/pe/tiers-payants", titre: "Tiers payants du Parlement européen", dynamique: "une fiche par structure", sitemap: true },
   { chemin: "/collab/pe/prestataires", titre: "Prestataires de services du Parlement européen", dynamique: "une fiche par structure", sitemap: true },
   { chemin: "/collab/pe/reseau", titre: "Le réseau des collaborateurs du Parlement européen", sitemap: true },
