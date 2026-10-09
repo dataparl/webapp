@@ -103,7 +103,8 @@ async function ScrutinChambre({ slugMandature, slugAnnee }: { slugMandature: str
     return <Introuvable cause={"Aucun scrutin de la série " + serie + " n'a eu lieu en " + annee + " depuis 2010. Les scrutins connus : " + SCRUTINS_SENAT.filter((s) => s.serie === serie).map((s) => s.annee).join(", ") + "."} />;
   }
   const [elus, scrutins] = await Promise.all([
-    elusDuScrutin(serie, annee).catch((): EluMandature[] => []),
+    // mandatureDepuisSlug valide déjà serie-1 / serie-2 : la série est 1 ou 2.
+    elusDuScrutin(serie as 1 | 2, annee).catch((): EluMandature[] => []),
     scrutinsExistants().catch((): ScrutinExistant[] => []),
   ]);
   if (!elus.length) {
@@ -179,7 +180,8 @@ async function GroupeScrutin({ slugGroupe, slugMandature, slugAnnee }: { slugGro
   if (!resolu) return <Introuvable cause="Ce groupe n'existe pas (ou plus) au Sénat." />;
   const fiche = groupes.find((g) => g.chambre === "senat" && g.groupe === resolu.actuel);
   const [elus, scrutins] = await Promise.all([
-    elusDuScrutin(serie, annee).catch((): EluMandature[] => []),
+    // mandatureDepuisSlug valide déjà serie-1 / serie-2 : la série est 1 ou 2.
+    elusDuScrutin(serie as 1 | 2, annee).catch((): EluMandature[] => []),
     scrutinsExistants().catch((): ScrutinExistant[] => []),
   ]);
   const duGroupe = elus.filter((e) => !sansGroupe(e.sigleEpoque) && harmoniserSigle("senat", e.sigleEpoque) === resolu.actuel);
