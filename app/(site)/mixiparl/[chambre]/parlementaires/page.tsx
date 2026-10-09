@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Tableur from "@/app/_components/Tableur";
+import ClassementTop from "@/app/_components/ClassementTop";
 import { CHAMBRE_LONG, idParlementaire, nomAffiche } from "@/lib/format";
 import { equipeEligible, pct, SEGMENT_CHAMBRE, statsElus, tauxMixite } from "@/lib/stats";
 
@@ -8,7 +9,9 @@ export const revalidate = 3600;
 type Props = { params: Promise<{ chambre: string }>; searchParams: Promise<{ ordre?: string }> };
 
 // /mixiparl/{an|senat|pe}/parlementaires : le classement de la mixité des
-// équipes de collaborateurs, élu par élu, chambre par chambre.
+// équipes de collaborateurs, élu par élu, chambre par chambre. Le top 10 en
+// barres donne le classement d'un coup d'œil ; la grille DataParl' Sheets
+// reste la vue de référence (recherche Ctrl+F, export CSV).
 const LE_DE: Record<string, string> = { assemblee: "de l'Assemblée nationale", senat: "du Sénat", europarl: "du Parlement européen" };
 const LIBELLE: Record<string, string> = { an: "l'Assemblée nationale", senat: "le Sénat", pe: "le Parlement européen" };
 
@@ -38,6 +41,7 @@ export default async function Page({ params, searchParams }: Props) {
     // À taux de mixité égal, l'élu qui a le plus de collaborateurs passe devant.
     .sort((a, b) => (tauxMixite(b) ?? 0) - (tauxMixite(a) ?? 0) || (b.femmes + b.hommes) - (a.femmes + a.hommes) || a.elu_nom.localeCompare(b.elu_nom, "fr"))
     .map((r, i) => ({ r, rang: i + 1 }));
+  const top10 = tries.slice(0, 10);
   if (croissant) {
     tries.sort((a, b) => (tauxMixite(a.r) ?? 0) - (tauxMixite(b.r) ?? 0) || (b.r.femmes + b.r.hommes) - (a.r.femmes + a.r.hommes) || a.rang - b.rang);
   }
@@ -65,6 +69,25 @@ export default async function Page({ params, searchParams }: Props) {
           </span>
         ))}
       </p>
+      <p className="meta">
+        Comment lire le taux de mixité : 100 % pour une équipe paritaire (autant de femmes que d&apos;hommes), 0 % pour
+        une équipe entièrement féminine ou entièrement masculine. Il vaut 1 − |2 × part de femmes − 1| : une équipe
+        comptant 70 % de femmes affiche ainsi 60 %. La part de femmes reste affichée en complément dans la grille.
+      </p>
+      {top10.length > 0 && (
+        <ClassementTop
+          titre="Les 10 équipes les plus mixtes, en un coup d'œil"
+          barre="surligne-mixi"
+          note={<span className="meta">Le classement complet (et l&apos;ordre inverse) suit dans la grille ci-dessous.</span>}
+          items={top10.map(({ r }) => ({
+            nom: nomAffiche(r.elu_nom),
+            lien: "/parlementaires/" + encodeURIComponent(idParlementaire(r.chambre, r.elu_id, r.elu_cle, r.elu_nom)),
+            libelle: r.elu_groupe ?? "",
+            valeur: tauxMixite(r) ?? 0,
+            texte: pct(tauxMixite(r)) + " · " + r.femmes + " femmes, " + r.hommes + " hommes",
+          }))}
+        />
+      )}
       {tries.length === 0 ? (
         <p className="meta">Aucune équipe suivie pour cette chambre pour l&apos;instant : pas encore assez de mois d&apos;historique.</p>
       ) : (
