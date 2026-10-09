@@ -166,8 +166,7 @@ export async function proxy(req: NextRequest) {
       url.pathname = `/media${path}`;
       return NextResponse.rewrite(url);
     }
-    if (path.startsWith("/
-photo-credit")) return vers(req, `www.${DOMAINE}`, "/", 307);
+    if (path.startsWith("/photo-credit")) return vers(req, `www.${DOMAINE}`, "/", 307);
     // media.dataparl.fr/assets/collab/{an,senat,pe}.csv : export CSV brut des
     // collaborateurs d'une chambre, généré par la webapp (app/assets/collab).
     if (/^\/assets\/collab\/(an|senat|pe)(\.csv)?$/.test(path)) return NextResponse.next();
@@ -213,8 +212,7 @@ photo-credit")) return vers(req, `www.${DOMAINE}`, "/", 307);
     return vers(req, `www.${DOMAINE}`, "/", 307);
   }
 
-  // raw.dataparl.fr
- : les fichiers bruts publics (schémas de données
+  // raw.dataparl.fr : les fichiers bruts publics (schémas de données
   // référencés sur data.gouv.fr, servis depuis public/schemas). Le reste du
   // domaine n'existe pas : tout revient vers www.dataparl.fr (même chemin).
   if (host === `raw.${DOMAINE}`) {
