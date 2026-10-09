@@ -73,8 +73,12 @@ export default function TableauCollabs({ rows, mode }: { rows: LigneCollab[]; mo
 
   const totalPages = Math.max(1, Math.ceil(groupeParElu ? parElu.length / PAR_PAGE_ELUS : visibles.length / PAR_PAGE));
   const pageOk = Math.min(page, totalPages);
-  const tranche = groupeParElu
+  // Deux tranches typées séparément : groupes d'élus ou lignes plates.
+  const trancheElus = groupeParElu
     ? parElu.slice((pageOk - 1) * PAR_PAGE_ELUS, pageOk * PAR_PAGE_ELUS)
+    : null;
+  const trancheLignes = groupeParElu
+    ? null
     : visibles.slice((pageOk - 1) * PAR_PAGE, pageOk * PAR_PAGE);
 
   const reset = (f: () => void) => () => { f(); setPage(1); };
@@ -89,11 +93,11 @@ export default function TableauCollabs({ rows, mode }: { rows: LigneCollab[]; mo
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", margin: "16px 0" }}>
         <input
           type="search" value={q} placeholder="Filtrer : nom, élu ou fonction…"
-          onChange={reset((e) => setQ(e.target.value))}
+          onChange={(e) => { setQ(e.target.value); setPage(1); }}
           style={{ flex: "1 1 220px", minWidth: 200, padding: "8px 12px", borderRadius: 8, border: "1px solid #d8d2c4", font: "inherit" }}
         />
         <label style={{ display: "flex", alignItems: "center", gap: 6, font: "inherit", fontSize: 14 }}>
-          <input type="checkbox" checked={groupeParElu} onChange={reset((e) => setGroupeParElu(e.target.checked))} />
+          <input type="checkbox" checked={groupeParElu} onChange={(e) => { setGroupeParElu(e.target.checked); setPage(1); }} />
           Regrouper par élu
         </label>
         <span className="meta">{visibles.length.toLocaleString("fr-FR") + " collaborateur" + (visibles.length > 1 ? "s" : "") + (filt.length !== rows.length ? " (filtrés sur " + rows.length.toLocaleString("fr-FR") + ")" : "")}</span>
@@ -111,8 +115,8 @@ export default function TableauCollabs({ rows, mode }: { rows: LigneCollab[]; mo
         ))}
       </p>
 
-      {groupeParElu ? (
-        tranche.map(({ elu, lignes }) => (
+      {trancheElus ? (
+        trancheElus.map(({ elu, lignes }) => (
           <section key={elu} style={{ marginBottom: 20 }}>
             <h3 style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 17 }}>
               {elu}
@@ -122,9 +126,9 @@ export default function TableauCollabs({ rows, mode }: { rows: LigneCollab[]; mo
           </section>
         ))
       ) : mode === "trombi" ? (
-        <Cartes lignes={tranche} />
+        <Cartes lignes={trancheLignes ?? []} />
       ) : (
-        <Tableau lignes={tranche} tri={tri} boutonTri={boutonTri} />
+        <Tableau lignes={trancheLignes ?? []} tri={tri} boutonTri={boutonTri} />
       )}
 
       {totalPages > 1 && (
