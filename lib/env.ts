@@ -40,9 +40,12 @@ export const APPLIXIR_API_KEY = process.env.NEXT_PUBLIC_APPLIXIR_API_KEY ?? "";
 export const APPLIXIR_SDK = "https://cdn.applixir.com/applixir.app.v6.1.0.js";
 export const DUREE_DEBLOCAGE_H = 24;
 
+export const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID ?? "";
+
+// Base Notion des communiqués de presse (CMS headless) — voir lib/notion.ts.
 type Secret =
   | "AUTH_SUPABASE_SERVICE_ROLE_KEY" | "DATA_SUPABASE_SERVICE_ROLE_KEY" | "RESEND_API_KEY" | "CONSENT_SALT"
-  | "ADMIN_VAULT_KEY" | "ADMIN_OTP_SECRET" | "RESEND_WEBHOOK_SECRET" | "APPLIXIR_SECRET" | "CRON_SECRET";
+  | "ADMIN_VAULT_KEY" | "ADMIN_OTP_SECRET" | "RESEND_WEBHOOK_SECRET" | "APPLIXIR_SECRET" | "CRON_SECRET" | "NOTION_TOKEN";
 
 export function secret(name: Secret): string {
   const v = process.env[name];

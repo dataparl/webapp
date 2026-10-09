@@ -101,13 +101,29 @@ function Editeur({ id, retour }: { id: string | null; retour: () => void }) {
 
 export default function Communiques() {
   const { data, err, recharger } = useRessource<{ communiques: Resume[] }>("/api/admin/communication/communiques");
+  const { api } = useAdmin();
+  const [sync, setSync] = useState<string | null>(null);
+  const [occupe, setOccupe] = useState(false);
+  async function depuisNotion() {
+    setOccupe(true); setSync(null);
+    try {
+      const r = await api<{ publies: number; misAJour: number; retires: number; erreurs: string[] }>("/api/admin/communication/communiques", { method: "POST", body: { action: "sync-notion" } });
+      setSync(r.publies + " publié(s), " + r.misAJour + " mis à jour, " + r.retires + " retiré(s)" + (r.erreurs.length ? " — " + r.erreurs[0] : ""));
+      recharger();
+    } catch (e) { setSync((e as Error).message); }
+    finally { setOccupe(false); }
+  }
   const [edition, setEdition] = useState<string | null | undefined>(undefined); // undefined : liste ; null : nouveau
   if (edition !== undefined) return <><h1>Communiqués de presse</h1><Onglets /><Editeur id={edition} retour={() => { setEdition(undefined); recharger(); }} /></>;
   return (
     <>
       <h1>Communiqués de presse</h1>
       <Onglets />
-      <p><button onClick={() => setEdition(null)}>Nouveau communiqué</button></p>
+      <p className="actions">
+        <button onClick={() => setEdition(null)}>Nouveau communiqué</button>
+        <button className="secondaire" disabled={occupe} onClick={depuisNotion}>{occupe ? "Synchronisation…" : "Synchroniser depuis Notion"}</button>
+      </p>
+      {sync && <p className="meta">{sync}</p>}
       {err && <p className="erreur">{err}</p>}
       {data && (
         <div className="defile"><table className="stats">

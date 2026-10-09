@@ -3,6 +3,7 @@ import { audit } from "@/lib/adminAuth";
 import { avecAdmin, corps, erreur } from "@/lib/adminRoute";
 import { randomBytes } from "node:crypto";
 import { corpsCommunique, dejaServis, envoyerCommunique, MAX_DESTINATAIRES, slugDe, suiviEnvois, type Communique } from "@/lib/communication";
+import { synchroniserCommuniquesNotion } from "@/lib/notion";
 import { LIENS_BASE } from "@/lib/env";
 import { gabarit } from "@/lib/gabarit";
 import { authAdmin } from "@/lib/supabaseAdmin";
@@ -40,6 +41,7 @@ const Action = z.discriminatedUnion("action", [
   z.object({ action: z.literal("test"), id: z.string().uuid() }),
   z.object({ action: z.literal("envoyer"), id: z.string().uuid(), contacts: z.array(z.string().uuid()).max(5000).optional() }),
   z.object({ action: z.literal("supprimer"), id: z.string().uuid() }),
+  z.object({ action: z.literal("sync-notion") }),
 ]);
 
 export async function POST(req: Request) {
@@ -61,7 +63,12 @@ export async function POST(req: Request) {
       await audit(a, "communique.creation", d.titre);
       return { ok: true, id: data.id };
     }
-    const { data: c } = await db.from("communiques").select(COLS).eq("id", d.id).maybeSingle();
+    if (d.action === "sync-notion") {
+  const r = await synchroniserCommuniquesNotion(db, a.userId);
+  await audit(a, "communique.sync_notion", r.publies + " publié(s), " + r.misAJour + " mis à jour, " + r.retires + " retiré(s)");
+  return { ok: r.erreurs.length === 0, ...r };
+}
+const { data: c } = await db.from("communiques").select(COLS).eq("id", d.id).maybeSingle();
     if (!c) return erreur(404, "communiqué introuvable");
     if (d.action === "enregistrer") {
       await db.from("communiques").update({ titre: d.titre, chapo: d.chapo, corps: d.corps, maj_le: new Date().toISOString() }).eq("id", d.id);
