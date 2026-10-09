@@ -26,7 +26,6 @@ import { estInactif } from "./lib/pagesRegistre";
 //   survey.dataparl.fr     / -> /enquete (questionnaire d'avis, jeton ?j=) ; le reste -> www
 //   drive.dataparl.fr      ancien domaine du tableur -> media (308)
 // Sur www, tout /jobs part vers jobs.dataparl.fr (sans le préfixe)
-.
 // Sur www : une page désactivée dans l'admin (Plan du site) répond 404.
 // Anciens domaines (cavaparlement.eu, dataparl.com) : redirection 308 vers la
 // même adresse sur dataparl.fr. Exceptions, servies telles quelles pendant la
@@ -76,8 +75,7 @@ function vers(req: NextRequest, host: string, pathname: string, status: 307 | 30
 function protege(res: NextResponse): NextResponse {
   res.headers.set("X-Robots-Tag", "noindex, nofollow");
   res.headers.set("X-Frame-Options", "DENY");
-  res.headers.set("Referrer-Pol
-icy", "no-referrer");
+  res.headers.set("Referrer-Policy", "no-referrer");
   res.headers.set("X-Content-Type-Options", "nosniff");
   return res;
 }
@@ -130,8 +128,7 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // ma
-il.cavaparlement.eu : uniquement les versions en ligne des emails.
+  // mail.cavaparlement.eu : uniquement les versions en ligne des emails.
   if (host === `mail.${DOMAINE}`) {
     if (path.startsWith("/lire/")) return protege(NextResponse.next());
     return vers(req, `www.${DOMAINE}`, "/", 307);

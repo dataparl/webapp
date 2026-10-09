@@ -63,7 +63,7 @@ function ListeOrganes({ items }: { items: Appartenance[] }) {
   return (
     <ul className="organes">
       {items.map((a, i) => (
-        <li key={`${a.code}-${a.debut}-${i}`>
+        <li key={`${a.code}-${a.debut}-${i}`}>
           {a.libelle}
           {a.fonction && a.fonction.toLowerCase() !== "membre" && <span className="puce">{a.fonction}</span>}
           <span className="meta"> · {a.fin ? `${moisAnnee(a.debut)} à ${moisAnnee(a.fin)}` : `depuis ${moisAnnee(a.debut)}`}</span>
@@ -228,7 +228,7 @@ export default async function Parlementaire({ params }: { params: Promise<{ id: 
         {chrono.map(({ mandat: m, gouvern: g }, i) => {
           if (g) {
             return (
-              <li key={`gouv-${g.debut}-${i}`>
+              <li key={`gouv-${g.debut}-${i}`}>
                 <p className="parcours-titre">
                   <strong>{g.fonction}</strong>
                   <span className="meta">
@@ -246,7 +246,7 @@ export default async function Parlementaire({ params }: { params: Promise<{ id: 
           const organes = fusionner(pendant.filter((a) => a.type !== "groupe")).filter((a) => !m.fin || !a.fin || chevauche(a, a, 15));
           const fiche = fiches.find((x) => x.chambre === m.chambre);
           return (
-            <li key={`${m.chambre}-${m.debut}-${i}`>
+            <li key={`${m.chambre}-${m.debut}-${i}`}>
               <p className="parcours-titre">
                 <strong>{m.libelle}</strong>
                 {m.circonscription && m.chambre !== "europarl" ? ` · ${m.circonscription}` : ""}
