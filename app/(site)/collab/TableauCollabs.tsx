@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
 // Liste interactive de collaborateurs d'une chambre : recherche instantanée,
 // filtre par initiale, tri par colonne, groupement par élu et pagination.
@@ -63,7 +63,7 @@ export default function TableauCollabs({ rows, mode }: { rows: LigneCollab[]; mo
 
   const parElu = useMemo(() => {
     const m = new Map<string, LigneCollab[]>();
-    for (const r of visites(visibles)) {
+    for (const r of visibles) {
       const l = m.get(r.elu) ?? [];
       l.push(r);
       m.set(r.elu, l);
@@ -78,7 +78,7 @@ export default function TableauCollabs({ rows, mode }: { rows: LigneCollab[]; mo
     : visibles.slice((pageOk - 1) * PAR_PAGE, pageOk * PAR_PAGE);
 
   const reset = (f: () => void) => () => { f(); setPage(1); };
-  const boutonTri = (colonne: "nom" | "elu" | "fonction", libelle: string) => (
+  const boutonTri = (colonne: "nom" | "elu" | "fonction", libelle: string): ReactNode => (
     <button type="button" onClick={reset(() => setTri(colonne))} style={{ all: "unset", cursor: "pointer", font: "inherit" }}>
       {libelle}{tri === colonne ? " ▾" : ""}
     </button>
@@ -116,7 +116,7 @@ export default function TableauCollabs({ rows, mode }: { rows: LigneCollab[]; mo
           <section key={elu} style={{ marginBottom: 20 }}>
             <h3 style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 17 }}>
               {elu}
-              <span className="meta">· {lignes.length} collaborateur{lignes.length > 1 ? "s" : ""}</span>
+              <span className="meta">{"· " + lignes.length + " collaborateur" + (lignes.length > 1 ? "s" : "")}</span>
             </h3>
             {mode === "trombi" ? <Cartes lignes={lignes} /> : <Tableau lignes={lignes} tri={tri} boutonTri={boutonTri} />}
           </section>
@@ -139,8 +139,6 @@ export default function TableauCollabs({ rows, mode }: { rows: LigneCollab[]; mo
   );
 }
 
-function visites<T>(x: T[]): T[] { return x; }
-
 function Cartes({ lignes }: { lignes: LigneCollab[] }) {
   return (
     <ul style={{ listStyle: "none", padding: 0, margin: "8px 0", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: 8 }}>
@@ -158,7 +156,7 @@ function Cartes({ lignes }: { lignes: LigneCollab[] }) {
   );
 }
 
-function Tableau({ lignes, tri, boutonTri }: { lignes: LigneCollab[]; tri: string; boutonTri: (c: "nom" | "elu" | "fonction", l: string) => React.ReactNode }) {
+function Tableau({ lignes, tri, boutonTri }: { lignes: LigneCollab[]; tri: string; boutonTri: (c: "nom" | "elu" | "fonction", l: string) => ReactNode }) {
   return (
     <div style={{ overflowX: "auto" }}>
       <table className="stats">
