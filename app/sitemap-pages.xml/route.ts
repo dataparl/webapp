@@ -24,6 +24,8 @@ export async function GET() {
       changefreq: QUOTIDIENNES.has(c) ? "daily" : c.startsWith("/informations-legales") ? "yearly" : "weekly",
       priority: c === "/" ? "1.0" : QUOTIDIENNES.has(c) ? "0.9" : c.startsWith("/informations-legales") ? "0.2" : c === "/senatoriales2026" ? "0.8" : "0.6",
     }));
+  // Pages d'informations légales publiées (hors registre éditorial).
+  urls.push({ loc: `${base}/informations-legales/cgu-chat`, changefreq: "yearly", priority: "0.2" });
   // Une page par département renouvelé aux sénatoriales 2026 (données du référentiel).
   if (!estInactif("/senatoriales2026", inactifs)) {
     try {
