@@ -47,23 +47,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500});`,
           }}
         />
-        {/* Google Analytics 4 (gtag.js, G-GC1JD019GY) : mesure d'audience,
-            chargée après les défauts de consentement ci-dessus — tant que le
-            visiteur n'a pas accepté, GA4 ne dépose aucun cookie (Consent Mode v2). */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-GC1JD019GY" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `gtag('js', new Date());
-gtag('config', 'G-GC1JD019GY');`,
-          }}
-        />
         {/* Google AdSense (ca-pub-6168263680630864) : PAS chargé ici. Le script
             publicitaire n'est injecté qu'après un consentement publicitaire
             explicite (lib/consentement.ts, appelé par le bandeau) — jamais pour
             un visiteur qui n'a pas répondu ou a tout refusé, conformément à la
             promesse du bandeau. Cela allège aussi le chargement des pages
             (~220 Ko de scripts publicitaires évités par défaut). */}
-        {/* Google Tag Manager (GTM-KW3MJMTK) : le plus haut possible dans le head. */}
+        {/* Google Tag Manager (GTM-KW3MJMTK) : le plus haut possible dans le
+            head. Seul script de mesure chargé : GA4 (G-GC1JD019GY) est déployé
+            via une balise du conteneur GTM, pas via gtag.js en direct — fin de la
+            double mesure (~450 Ko de scripts en moins au chargement). */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
