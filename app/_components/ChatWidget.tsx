@@ -231,7 +231,8 @@ export default function ChatWidget() {
               <p style={{ margin: 0 }}>
                 Vos questions sont transmises à Mistral AI (UE) pour générer les
                 réponses ; les échanges restent en mémoire locale, vidés à la
-                fermeture, sans stockage serveur.
+                fermeture. Les questions sont journalisées (statistiques et
+                qualité), sans identification, cf. CGU.
               </p>
               <p style={{ margin: 0 }}>
                 Pour utiliser le Chat, acceptez les{" "}
