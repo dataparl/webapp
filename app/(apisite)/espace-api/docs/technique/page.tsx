@@ -18,12 +18,15 @@ export default function Technique() {
           <tr><td><code>type</code></td><td><code>arrivee</code>, <code>depart</code>, <code>transfert</code></td><td>tous</td></tr>
           <tr><td><code>source</code></td><td><code>suivi</code> (quotidien), <code>archives</code> (historique)</td><td>toutes</td></tr>
           <tr><td><code>depuis</code>, <code>jusqua</code></td><td>date <code>AAAA-MM-JJ</code>, bornes incluses</td><td>aucune</td></tr>
-          <tr><td><code>elu</code></td><td>identifiant de l&apos;élu : <code>PA…</code> (AN), matricule (Sénat)</td><td>aucun</td></tr>
+          <tr><td><code>elu</code></td><td>identifiant de l&apos;élu : <code>PA…</code> (AN), matricule (Sénat), identifiant PE</td><td>aucun</td></tr>
+          <tr><td><code>collab</code></td><td>nom ou prénom du collaborateur, correspondance partielle, accents facultatifs</td><td>aucun</td></tr>
+          <tr><td><code>groupe</code></td><td>code(s) de groupe politique, séparés par des virgules (ex. <code>GEST,LR</code>) — cible et origine</td><td>aucun</td></tr>
           <tr><td><code>limit</code></td><td>1 à 500</td><td>100</td></tr>
           <tr><td><code>offset</code></td><td>entier positif</td><td>0</td></tr>
         </tbody>
       </table>
-      <p>Les résultats sont triés du plus récent au plus ancien. Pour tout parcourir, augmente <code>offset</code> de <code>limit</code> jusqu&apos;à dépasser <code>total</code>.</p>
+      <p>Tous ces filtres se <strong>combinent</strong> (ET). Exemple : <code>?chambre=senat&amp;type=arrivee&amp;depuis=2026-01-01</code>.</p>
+      <p>Les résultats sont triés du plus récent au plus ancien. Pour tout parcourir, augmente <code>offset</code> de <code>limit</code> jusqu&apos;à dépasser <code>total</code>. Pour essayer sans écrire de code, utilise le <a href="/docs/playground">playground</a>.</p>
 
       <h2>Réponse</h2>
       <pre>{`{
@@ -50,6 +53,20 @@ export default function Technique() {
         <li><code>contexte</code> vaut <code>elu_sortant</code> ou <code>elu_entrant</code> quand le mouvement accompagne un changement d&apos;élu (renouvellement, fin de mandat).</li>
         <li><code>confiance=faible</code> signale une date approximative (période sans archive).</li>
       </ul>
+
+      <h2><code>GET /v1/status</code></h2>
+      <p>Public, sans clé. Fraîcheur et volumes des données, pour synchroniser ou afficher un état :</p>
+      <pre>{`{
+  "statut": "ok",
+  "version": "v1",
+  "jour": "2026-10-10",
+  "derniere_collecte": "2026-10-10",
+  "mouvements_du_jour": 38,
+  "mouvements_total": 128400,
+  "affectations_actives": { "assemblee": 1250, "senat": 410, "europarl": 96 },
+  "licence": "ODbL 1.0"
+}`}</pre>
+      <p><code>mouvements_total</code> est une estimation ; <code>mouvements_du_jour</code> peut être <code>null</code> si le compteur n&apos;est pas disponible. Les prochains endpoints (équipes, parcours, agrégats) sont spécifiés sur la <a href="/docs/feuille-de-route">feuille de route</a>.</p>
 
       <h2>Quotas et erreurs</h2>
       <table>

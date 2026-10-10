@@ -26,4 +26,4 @@ export const reponseXml = (xml: string, duree = 3600) =>
   new Response(xml, { headers: { "Content-Type": "application/xml; charset=utf-8", "Cache-Control": `public, s-maxage=${duree}` } });
 
 // Pages publiques du site de l'API (api.dataparl.fr).
-export const PAGES_API = ["/", "/docs", "/docs/metiers", "/docs/technique", "/docs/sdk", "/docs/machine", "/docs/mcp", "/donnees", "/reutilisations", "/request-access", "/sitemap"];
+export const PAGES_API = ["/", "/docs", "/docs/metiers", "/docs/technique", "/docs/playground", "/docs/sdk", "/docs/machine", "/docs/mcp", "/docs/feuille-de-route", "/donnees", "/reutilisations", "/request-access", "/sitemap"];

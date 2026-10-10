@@ -4,7 +4,7 @@ const spec = {
   openapi: "3.1.0",
   info: {
     title: "API DataParl'",
-    version: "1.0.0",
+    version: "1.1.0",
     description: "Mouvements des collaborateurs parlementaires français. Données sous licence ODbL 1.0.",
     termsOfService: "https://www.dataparl.fr/informations-legales/cgu-api",
   },
@@ -36,13 +36,16 @@ const spec = {
     "/v1/mouvements": {
       get: {
         summary: "Rechercher des mouvements",
+        description: "Tous les filtres se combinent (ET).",
         parameters: [
           { name: "chambre", in: "query", schema: { type: "string", enum: ["assemblee", "senat", "europarl"] } },
           { name: "type", in: "query", schema: { type: "string", enum: ["arrivee", "depart", "transfert"] } },
           { name: "source", in: "query", schema: { type: "string", enum: ["suivi", "archives"] } },
           { name: "depuis", in: "query", schema: { type: "string", format: "date" } },
           { name: "jusqua", in: "query", schema: { type: "string", format: "date" } },
-          { name: "elu", in: "query", schema: { type: "string" } },
+          { name: "elu", in: "query", schema: { type: "string", description: "Identifiant de l'élu : PA… (AN), matricule (Sénat), identifiant PE" } },
+          { name: "collab", in: "query", schema: { type: "string", description: "Nom ou prénom du collaborateur, correspondance partielle, sans accents nécessaire" } },
+          { name: "groupe", in: "query", schema: { type: "string", description: "Code(s) de groupe politique, séparés par des virgules (cible et origine)" } },
           { name: "limit", in: "query", schema: { type: "integer", minimum: 1, maximum: 500, default: 100 } },
           { name: "offset", in: "query", schema: { type: "integer", minimum: 0, default: 0 } },
         ],
@@ -69,6 +72,38 @@ const spec = {
           "400": { description: "Paramètre invalide" },
           "401": { description: "Clé absente, invalide ou révoquée" },
           "429": { description: "Quota du jour atteint" },
+        },
+      },
+    },
+    "/v1/status": {
+      get: {
+        summary: "Fraîcheur et volumes des données",
+        description: "Public, sans clé. Pour synchroniser ou afficher l'état de la collecte.",
+        security: [],
+        responses: {
+          "200": {
+            description: "État de la collecte",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    statut: { type: "string", enum: ["ok"] },
+                    version: { type: "string" },
+                    jour: { type: "string", format: "date" },
+                    derniere_collecte: { type: ["string", "null"], format: "date", description: "Date du dernier mouvement constaté (suivi quotidien)" },
+                    mouvements_du_jour: { type: ["integer", "null"] },
+                    mouvements_total: { type: ["integer", "null"], description: "Estimation" },
+                    affectations_actives: { type: "object", additionalProperties: { type: "integer" } },
+                    documentation: { type: "string" },
+                    licence: { type: "string" },
+                    attribution: { type: "string" },
+                  },
+                },
+              },
+            },
+          },
+          "503": { description: "Données momentanément indisponibles" },
         },
       },
     },
