@@ -5,6 +5,7 @@ import { COLONNES_PUBLIQUES, dataQuery, type Mouvement } from "@/lib/data";
 // GET https://api.dataparl.fr/v1/mouvements
 //   ?chambre=assemblee|senat|europarl  ?type=arrivee|depart|transfert
 //   ?depuis=AAAA-MM-JJ  ?jusqua=AAAA-MM-JJ  ?elu=<identifiant de l'élu>
+//   ?groupe=<code ou codes séparés par virgules> (elu_groupe / elu_origine_groupe)
 //   ?source=suivi|archives  ?limit=1..500  ?offset=0..
 
 const CHAMBRES = new Set(["assemblee", "senat", "europarl"]);
@@ -12,6 +13,7 @@ const TYPES = new Set(["arrivee", "depart", "transfert"]);
 // Les sources internes sont exposées sous deux noms publics.
 const SOURCES: Record<string, string> = { suivi: "eq.live", archives: "in.(regardscitoyens,wayback)" };
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
+const GROUPE = /^[\p{L}\p{N} .'-]{1,40}$(?:,[\p{L}\p{N} .'-]{1,40})*$/u;
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -43,6 +45,12 @@ export async function GET(req: Request) {
   if (type) { if (!TYPES.has(type)) return erreur("type"); p.set("type", `eq.${type}`); }
   const source = q.get("source");
   if (source) { if (!(source in SOURCES)) return erreur("source"); p.set("source", SOURCES[source]); }
+  const groupe = q.get("groupe");
+  if (groupe) {
+    if (!GROUPE.test(groupe)) return erreur("groupe");
+    const liste = groupe.split(",").map((g) => `"${g.replace(/"/g, "")}"`).join(",");
+    p.set("or", `(elu_groupe.in.(${liste}),elu_origine_groupe.in.(${liste}))`);
+  }
   const depuis = q.get("depuis"), jusqua = q.get("jusqua");
   if (depuis && !DATE.test(depuis)) return erreur("depuis");
   if (jusqua && !DATE.test(jusqua)) return erreur("jusqua");
@@ -54,6 +62,7 @@ export async function GET(req: Request) {
     if (!/^[\p{L}\p{N} .'-]{1,80}$/u.test(elu)) return erreur("elu");
     p.set("or", `(elu_cle.eq."${elu}",elu_id.eq."${elu}")`);
   }
+  if (groupe && elu) return erreur("groupe+elu (filtres combinés non supportés)");
 
   try {
     const { rows, total } = await dataQuery<Mouvement>("mouvements", p, 300);
