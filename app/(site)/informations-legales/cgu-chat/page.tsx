@@ -50,9 +50,16 @@ export default function CguChat() {
       <h2>4. Données personnelles et confidentialité</h2>
       <p>
         Les questions posées au Chat sont transmises à Mistral AI (hébergement dans
-        l&apos;Union européenne) uniquement pour générer les réponses. Aucune conversation
-        n&apos;est stockée côté serveur : l&apos;historique des échanges est conservé en mémoire
-        locale du navigateur et vidé à la fermeture de la fenêtre du Chat. Le compte
+        l&apos;Union européenne) pour générer les réponses. L&apos;historique des échanges est
+        conservé en mémoire locale du navigateur et vidé à la fermeture de la fenêtre
+        du Chat. À des fins de statistiques d&apos;usage, de suivi de la qualité et de
+        détection des dysfonctionnements, chaque question posée — ainsi que des
+        informations techniques associées (heure, durée de traitement, nombre
+        d&apos;interrogations de la base, survenue d&apos;une erreur) — est journalisée de
+        manière automatisée, sans identification de l&apos;utilisateur. La réponse
+        associée est conservée de façon éphémère à la même fin. Ces journaux sont
+        conservés pendant une durée raisonnable et ne font l&apos;objet d&apos;aucun
+        profilage. Le compte
         n&apos;est utilisé que pour l&apos;authentification d&apos;accès au service ; il ne donne
         lieu à aucun profilage. Le Chat ne dépose aucun cookie propre. Les données
         personnelles sont traitées conformément à la politique de confidentialité du site,
