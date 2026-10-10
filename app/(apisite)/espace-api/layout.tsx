@@ -19,6 +19,8 @@ export default function ApiLayout({ children }: { children: React.ReactNode }) {
           </a>
           <nav className="nav-principal" aria-label="Navigation de l'API">
             <a href="/docs">Documentation</a>
+            <a href="/donnees">Données</a>
+            <a href="/reutilisations">Réutilisations</a>
             <a href="/mon-espace-api">Mon espace API</a>
             <a href="https://www.dataparl.fr/">Le site</a>
           </nav>
@@ -27,6 +29,8 @@ export default function ApiLayout({ children }: { children: React.ReactNode }) {
             <summary aria-label="Ouvrir le menu de navigation">☰</summary>
             <nav aria-label="Navigation de l'API mobile">
               <a href="/docs">Documentation</a>
+              <a href="/donnees">Données</a>
+              <a href="/reutilisations">Réutilisations</a>
               <a href="/mon-espace-api">Mon espace API</a>
               <a href="https://www.dataparl.fr/">Le site</a>
             </nav>
