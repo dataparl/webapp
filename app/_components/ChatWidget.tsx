@@ -15,26 +15,94 @@ const RELAIS = process.env.NEXT_PUBLIC_DPCHAT_URL ?? "https://chat.dataparl.fr/a
 const CGU_URL = "/informations-legales/cgu-chat";
 
 type Message = { role: "user" | "assistant"; content: string };
-type Porte = "verification" | "non-connecte" | "cgu" | "ouvert";
 
-// Rendu minimaliste du markdown des réponses : **gras**, [liens](url).
+// Rendu markdown minimaliste : **gras**, *italique*, [liens](url),
+// titres (##, ###), listes (- et 1.), tableaux |…|.
 function Md({ texte }: { texte: string }) {
-  const parties = texte.split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g);
-  return (
-    <>
-      {parties.map((p, i) => {
-        if (p.startsWith("**") && p.endsWith("**")) return <strong key={i}>{p.slice(2, -2)}</strong>;
-        const lien = p.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
-        if (lien) return <a key={i} href={lien[2]}>{lien[1]}</a>;
-        return <span key={i}>{p}</span>;
-      })}
-    </>
-  );
+  const lignes = texte.split(/\n/);
+  const blocs: React.ReactNode[] = [];
+  let i = 0;
+  let cle = 0;
+
+  const enLigne = (s: string): React.ReactNode[] => {
+    const parties = s.split(/(\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^)]+\))/g);
+    return parties.map((p, j) => {
+      if (p.startsWith("**") && p.endsWith("**")) return <strong key={j}>{p.slice(2, -2)}</strong>;
+      if (p.startsWith("*") && p.endsWith("*") && p.length > 2) return <em key={j}>{p.slice(1, -1)}</em>;
+      const lien = p.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+      if (lien) return <a key={j} href={lien[2]}>{lien[1]}</a>;
+      return <span key={j}>{p}</span>;
+    });
+  };
+
+  while (i < lignes.length) {
+    const l = lignes[i].trim();
+
+    // Tableau : lignes |…|…| consécutives (la 2e ligne de séparateur est ignorée)
+    if (l.startsWith("|") && l.endsWith("|") && l.length > 2) {
+      const lignesTab: string[] = [];
+      while (i < lignes.length && lignes[i].trim().startsWith("|")) {
+        if (!/^\|[\s:|-]+\|$/.test(lignes[i].trim())) lignesTab.push(lignes[i].trim());
+        i++;
+      }
+      const cellules = (r: string) => r.slice(1, -1).split("|").map((c) => c.trim());
+      const entetes = lignesTab.length ? cellules(lignesTab[0]) : [];
+      blocs.push(
+        <div key={cle++} style={{ overflowX: "auto", margin: "6px 0" }}>
+          <table style={{ borderCollapse: "collapse", fontSize: ".85rem", width: "100%" }}>
+            <thead>
+              <tr>{entetes.map((h, c) => (
+                <th key={c} style={{ border: "1px solid var(--line)", background: "var(--bg)", padding: "5px 8px", textAlign: "left", fontWeight: 600 }}>{enLigne(h)}</th>
+              ))}</tr>
+            </thead>
+            <tbody>
+              {lignesTab.slice(1).map((r, ri) => (
+                <tr key={ri}>{cellules(r).map((c, ci) => (
+                  <td key={ci} style={{ border: "1px solid var(--line)", padding: "5px 8px" }}>{enLigne(c)}</td>
+                ))}</tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+      continue;
+    }
+
+    // Titres
+    const titre = l.match(/^(#{2,4})\s+(.*)$/);
+    if (titre) {
+      blocs.push(<strong key={cle++} style={{ display: "block", margin: "8px 0 2px", fontSize: ".92rem" }}>{enLigne(titre[2])}</strong>);
+      i++;
+      continue;
+    }
+
+    // Listes
+    if (/^[-*•]\s+/.test(l) || /^\d+\.\s+/.test(l)) {
+      const items: string[] = [];
+      while (i < lignes.length && (/^[-*•]\s+/.test(lignes[i].trim()) || /^\d+\.\s+/.test(lignes[i].trim()))) {
+        items.push(lignes[i].trim().replace(/^([-*•]|\d+\.)\s+/, ""));
+        i++;
+      }
+      blocs.push(
+        <ul key={cle++} style={{ margin: "4px 0", paddingLeft: 18 }}>
+          {items.map((it, k) => <li key={k} style={{ marginBottom: 2 }}>{enLigne(it)}</li>)}
+        </ul>
+      );
+      continue;
+    }
+
+    // Paragraphe vide → séparateur
+    if (!l) { i++; continue; }
+
+    blocs.push(<p key={cle++} style={{ margin: "0 0 6px" }}>{enLigne(l)}</p>);
+    i++;
+  }
+  return <>{blocs}</>;
 }
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
-  const [porte, setPorte] = useState<Porte>("verification");
+  const [porte, setPorte] = useState<"verification" | "non-connecte" | "cgu" | "ouvert">("verification");
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -189,10 +257,10 @@ export default function ChatWidget() {
                       background: m.role === "user" ? "var(--ink)" : "var(--bg)",
                       color: m.role === "user" ? "var(--bg)" : "var(--ink)",
                       border: m.role === "user" ? "1px solid var(--ink)" : "1px solid var(--line)",
-                      padding: "8px 12px",
+                      padding: m.role === "user" ? "8px 12px" : "10px 12px",
                       borderRadius: "10px",
-                      maxWidth: "88%",
-                      whiteSpace: "pre-wrap",
+                      maxWidth: "95%",
+                      whiteSpace: "normal",
                     }}
                   >
                     <Md texte={m.content} />
