@@ -76,7 +76,7 @@ const spec = {
         type: "object",
         required: ["total", "limit", "offset", "mouvements", "licence", "attribution"],
         properties: {
-          total: { type: ["integer", "null"], description: "Nombre total de résultats. ESTIMATION (comptage PostgREST) : peut être null ou légèrement imprécise sur les grands ensembles. Ne pas s'appuyer dessus pour bortrer la pagination : s'arrêter quand la réponse contient moins de limit mouvements." },
+          total: { type: ["integer", "null"], description: "Nombre total de résultats. ESTIMATION (comptage PostgREST) : peut être null ou légèrement imprécise sur les grands ensembles. Ne pas s'appuyer dessus pour borner la pagination : s'arrêter quand la réponse contient moins de limit mouvements." },
           limit: { type: "integer" },
           offset: { type: "integer" },
           mouvements: { type: "array", items: { $ref: "#/components/schemas/Mouvement" } },
