@@ -19,6 +19,7 @@ export default function Docs() {
         <li>Historique : Sénat depuis mai 2015, Assemblée nationale depuis février 2017.</li>
         <li>La date d&apos;un mouvement est celle à laquelle il a été constaté, pas celle du contrat de travail.</li>
         <li>Données sous licence ODbL : cite la source, partage à l&apos;identique toute base dérivée.</li>
+        <li>La <a href="/donnees">fiche du jeu de données</a> réunit description, producteur, licence, couverture et schéma ; les <a href="/reutilisations">réutilisations</a> montrent ce que l&apos;on fait déjà de ces données.</li>
       </ul>
     </>
   );
