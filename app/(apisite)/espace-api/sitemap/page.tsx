@@ -12,6 +12,8 @@ const PAGES_API: Lien[] = [
   { href: "/docs/sdk", libelle: "Documentation · SDK", desc: "Python et JavaScript/TypeScript." },
   { href: "/docs/machine", libelle: "Documentation · machine à machine", desc: "Clés, en-têtes, pagination." },
   { href: "/docs/mcp", libelle: "Documentation · MCP", desc: "Serveur MCP pour les assistants et agents." },
+  { href: "/donnees", libelle: "Jeu de données", desc: "Fiche complète : producteur, licence ODbL, couverture, schéma." },
+  { href: "/reutilisations", libelle: "Réutilisations", desc: "Ce que l'on fait des données, et comment partager la tienne." },
   { href: "/request-access", libelle: "Demander une clé", desc: "Gratuite, immédiate, une par compte." },
   { href: "/mon-espace-api", libelle: "Mon espace API", desc: "Clés, quotas, journal des appels." },
 ];
@@ -23,7 +25,7 @@ export default function PlanDuSiteApi() {
   return (
     <div className="etroit">
       <h1>Plan du <span className="surligne">site</span></h1>
-      <p className="lead">Toutes les pages publiques d'<span className="mono">api.dataparl.fr</span>, le site de l&apos;API DataParl&apos;.</p>
+      <p className="lead">Toutes les pages publiques d&apos;<span className="mono">api.dataparl.fr</span>, le site de l&apos;API DataParl&apos;.</p>
       <ul className="sommaire">
         {PAGES_API.map((l) => (
           <li key={l.href}>
