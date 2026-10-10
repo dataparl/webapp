@@ -1,11 +1,12 @@
 "use client";
 
 // DataParl' Chat : pop-up question-réponse, moteur hébergé dans le dépôt
-// dataparl/dpchat (relais Mistral + outil dataparl_query sur l'API v1).
+// dataparl/dpchat (relais Mistral + outil dataparl_query sur l'API v1),
+// servi sur https://chat.dataparl.fr.
 
 import { useState, useRef, useEffect } from "react";
 
-const RELAIS = process.env.NEXT_PUBLIC_DPCHAT_URL ?? "https://dpchat-chi.vercel.app/api/chat";
+const RELAIS = process.env.NEXT_PUBLIC_DPCHAT_URL ?? "https://chat.dataparl.fr/api/chat";
 
 type Message = { role: "user" | "assistant"; content: string };
 
