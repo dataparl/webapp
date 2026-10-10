@@ -4,6 +4,7 @@ import PiedDePageRoute from "./jobs/_components/FooterJobs";
 import RetourHaut from "../_components/RetourHaut";
 import CrayonPage from "../_components/CrayonPage";
 import EnqueteInvite from "../_components/EnqueteInvite";
+import ChatWidget from "../_components/ChatWidget";
 
 // La réécriture du proxy (jobs.dataparl.fr/ -> /jobs) est transparente :
 // usePathname() côté client voit l'URL publique ("/"), jamais le chemin
@@ -19,6 +20,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <RetourHaut />
       <CrayonPage />
       <EnqueteInvite />
+      <ChatWidget />
     </div>
   );
 }
