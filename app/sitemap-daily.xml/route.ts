@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import { aujourdhuiParis, decaler } from "@/lib/alertes";
 import { joursPublies } from "@/lib/daily";
 import { cheminsInactifs } from "@/lib/pagesEtat";
@@ -8,9 +7,12 @@ export const revalidate = 3600;
 
 // Plan des pages daily : les ~90 derniers jours avec au moins un mouvement
 // (au-delà, les pages restent accessibles mais ne sont pas poussées).
+// Sans lecture de headers() : la vérification d'hôte rendait la route
+// dynamique et annulait le revalidate (chaque crawl relançait la requête
+// des jours publiés). Les <loc> sont en dur sur www.dataparl.fr ; les
+// aperçus Vercel serviraient ce plan sans dommage (robots.txt y interdit
+// l'indexation).
 export async function GET() {
-  const host = ((await headers()).get("host") ?? "").split(":")[0].toLowerCase();
-  if (host !== "www.dataparl.fr") return new Response("Not found", { status: 404 });
   const base = "https://www.dataparl.fr";
   let jours: { date: string }[] = [];
   if (!estInactif("/daily", await cheminsInactifs())) try { jours = await joursPublies(decaler(aujourdhuiParis(), -90)); } catch { /* plan vide plutôt qu'une erreur */ }

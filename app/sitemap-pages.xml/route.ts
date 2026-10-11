@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import { aujourdhuiParis } from "@/lib/alertes";
 import { cheminsInactifs } from "@/lib/pagesEtat";
 import { estInactif, PAGES } from "@/lib/pagesRegistre";
@@ -7,13 +6,18 @@ import { authAdmin } from "@/lib/supabaseAdmin";
 
 export const revalidate = 3600;
 
+// Sans lecture de headers() : la vérification d'hôte rendait la route
+// dynamique et annulait le revalidate (chaque crawl relançait toutes les
+// requêtes : sénatoriales, groupes, mandatures, départements, partis,
+// communiqués…). Les <loc> sont en dur sur www.dataparl.fr ; les aperçus
+// Vercel serviraient ce plan sans dommage (robots.txt y interdit
+// l'indexation).
+
 const QUOTIDIENNES = new Set(["/", "/mouvements", "/daily", "/vigiparl", "/mixiparl"]);
 const CHAMBRES = ["/mouvements/parlement", "/mouvements/assemblee", "/mouvements/senat", "/mouvements/europarl"];
 
 // Pages éditoriales actives (d'après le Plan du site de l'admin) et communiqués publiés.
 export async function GET() {
-  const host = ((await headers()).get("host") ?? "").split(":")[0].toLowerCase();
-  if (host !== "www.dataparl.fr") return new Response("Not found", { status: 404 });
   const base = "https://www.dataparl.fr";
   const inactifs = await cheminsInactifs();
   const jour = aujourdhuiParis();
