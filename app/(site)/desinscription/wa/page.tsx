@@ -15,7 +15,7 @@ async function valider(formData: FormData) {
   redirect(ok ? "/desinscription/wa?etat=ok" : "/desinscription/wa?etat=invalide");
 }
 
-export default function DesinscriptionWa({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+export default async function DesinscriptionWa({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const { jeton, etat } = await searchParams;
   if (etat === "ok") {
     return (
