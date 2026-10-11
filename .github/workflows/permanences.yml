@@ -32,5 +32,10 @@ jobs:
             echo "Rien à committer."
           else
             git commit -m "Permanences : mise à jour $(date +%F)"
+            # Resynchroniser avant de pousser : d'autres commits peuvent avoir
+            # été poussés sur main pendant la collecte (30+ min) — un push
+            # direct serait rejeté. Rebase sur l'état distant (les fichiers
+            # de permanences ne changent que par ce workflow).
+            git pull --rebase origin main
             git push
           fi
