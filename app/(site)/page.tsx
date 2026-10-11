@@ -21,13 +21,15 @@ export default async function Accueil() {
   } catch {
     indisponible = true;
   }
+  const peInconnu = (comptes.europarl ?? 0) === 0; // suivi PE repris le 8 octobre 2026
 
   return (
     <>
       <h1>Qui travaille pour <span className="surligne">vos élus</span> ?</h1>
       <p className="lead">
         Chaque matin, DataParl&apos; relit les listes officielles des collaborateurs parlementaires et signale
-        les arrivées, les départs et les transferts.
+        les arrivées, les départs et les transferts. Parce que les mouvements des équipes en disent
+        souvent plus long que les déclarations.
       </p>
 
       <RechercheGlobale placeholder="Rechercher un élu ou un collaborateur" />
@@ -36,9 +38,17 @@ export default async function Accueil() {
         <div className="principal"><strong>{((comptes.assemblee ?? 0) + (comptes.senat ?? 0) + (comptes.europarl ?? 0)).toLocaleString("fr-FR")}</strong><span>collaborateurs parlementaires aujourd&apos;hui</span></div>
         <div><strong>{(comptes.assemblee ?? 0).toLocaleString("fr-FR")}</strong><span>à l&apos;Assemblée</span></div>
         <div><strong>{(comptes.senat ?? 0).toLocaleString("fr-FR")}</strong><span>au Sénat</span></div>
-        <div><strong>{(comptes.europarl ?? 0).toLocaleString("fr-FR")}</strong><span>au Parlement européen</span></div>
+        {peInconnu ? (
+          <div><strong>–</strong><span>au Parlement européen (suivi repris le 8 octobre 2026)</span></div>
+        ) : (
+          <div><strong>{(comptes.europarl ?? 0).toLocaleString("fr-FR")}</strong><span>au Parlement européen</span></div>
+        )}
         {fiches > 0 && <div><strong>{fiches.toLocaleString("fr-FR")}</strong><span>parcours reconstitués depuis 2015</span></div>}
       </div>
+      <p className="meta" style={{ marginTop: -8 }}>
+        L&apos;effectif du Sénat tient compte du renouvellement partiel des sénatoriales 2026
+        {peInconnu && " ; le suivi quotidien des équipes du Parlement européen a repris le 8 octobre 2026"}.
+      </p>
 
       <h2>Les derniers mouvements</h2>
       {indisponible && <p className="erreur">Les données sont momentanément indisponibles.</p>}
@@ -65,7 +75,7 @@ export default async function Accueil() {
         <li><a href="/senatoriales2026"><strong>Sénatoriales 2026</strong><span>Les nouveaux sénateurs, département par département →</span></a></li>
         <li><a href="/vigiparl"><strong>Vigi<span className="surligne-vigi">Parl&apos;</span></strong><span>Le renouvellement des équipes, élu par élu →</span></a></li>
         <li><a href="/mixiparl"><strong>Mixi<span className="surligne-mixi">Parl&apos;</span></strong><span>La mixité femmes-hommes des équipes →</span></a></li>
-        <li><a href="/alertes"><strong>Alertes</strong><span>Être prévenu(e) des mouvements qui t&apos;intéressent →</span></a></li>
+        <li><a href="/alertes"><strong>Alertes</strong><span>Être prévenu(e) des mouvements qui vous intéressent →</span></a></li>
       </ul>
     </>
   );
