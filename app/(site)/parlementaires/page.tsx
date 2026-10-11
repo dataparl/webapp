@@ -41,6 +41,7 @@ export default async function Parlementaires() {
       <ul className="sommaire">
         <li><a href="/groupe"><strong>Par groupe politique</strong><span>La fiche de chaque groupe des trois chambres →</span></a></li>
         <li><a href="/departement"><strong>Par département</strong><span>Où siège chaque parlementaire, département par département →</span></a></li>
+        <li><a href="/parlementaires/map"><strong>La carte des permanences</strong><span>Toutes les adresses de permanences des élus, sur une carte →</span></a></li>
         <li><a href="/senatoriales2026"><strong>Sénatoriales 2026</strong><span>Les nouveaux sénateurs, département par département →</span></a></li>
         <li><a href="/vigiparl/an/parlementaires"><strong>Classement VigiParl&apos; — Assemblée</strong><span>Le renouvellement des équipes, élu par élu →</span></a></li>
         <li><a href="/vigiparl/senat/parlementaires"><strong>Classement VigiParl&apos; — Sénat</strong><span>Le renouvellement des équipes, élu par élu →</span></a></li>
