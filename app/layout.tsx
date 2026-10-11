@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans, Spectral } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import BandeauCookies from "./_components/BandeauCookies";
+import PageTrace from "./_components/PageTrace";
 import "./globals.css";
 
 // Polices auto-hébergées par next/font : préchargées, avec une police de
@@ -19,12 +20,12 @@ export const metadata: Metadata = {
   openGraph: { siteName: "DataParl'", locale: "fr_FR", type: "website" },
   // Cartes de partage (X, LinkedIn, Bluesky, Facebook, messageries) : grande image par défaut.
   twitter: { card: "summary_large_image" },
-  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large" } },
   formatDetection: { telephone: false },
   // Favicons : ICO (32), SVG vectoriel, et icône tactile iOS 180 (app/apple-icon.tsx).
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "32", type: "image/x-icon" },
+      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
       { url: "/icon.svg", type: "image/svg+xml" },
     ],
     apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
@@ -67,9 +68,8 @@ gtag('config', 'G-GC1JD019GY');`,
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-KW3MJMTK');`,
+j=d.createElement(s),dl=l!=''?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KW3MJMTK');`,
           }}
         />
       </head>
@@ -88,6 +88,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         {/* Vercel Analytics : pages vues sans cookie ni identificateur
             cross-site, cohérent avec la promesse « sans pistage ». */}
         <Analytics />
+        {/* Parcours des comptes connectés (route seule, 90 jours, admin
+            uniquement) : voir app/_components/PageTrace.tsx. */}
+        <PageTrace />
       </body>
     </html>
   );
