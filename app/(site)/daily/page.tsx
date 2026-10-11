@@ -73,6 +73,25 @@ export default async function DailyIndex({ searchParams }: Props) {
       </p>
       {indisponible && <p className="erreur">Les données sont momentanément indisponibles.</p>}
 
+      <h2>Recevoir le Daily</h2>
+      <p>
+        Le récapitulatif de chaque matin, directement chez vous. S&apos;il n&apos;y a aucun mouvement, aucun message.
+      </p>
+      <ul className="jours">
+        <li>
+          <a href="https://t.me/dataparl_daily" target="_blank" rel="noopener noreferrer">
+            <strong>Telegram — @dataparl_daily</strong>
+            <span>Le canal officiel : publication automatique chaque matin vers 7h45.</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://whatsapp.com/channel/0029VbEDOKCCXC3R26cJIf1P" target="_blank" rel="noopener noreferrer">
+            <strong>WhatsApp — canal DataParl&apos; Daily</strong>
+            <span>Le même récapitulatif, publié dans notre canal WhatsApp.</span>
+          </a>
+        </li>
+      </ul>
+
       <h2>Les 7 derniers jours publiés</h2>
       <ul className="jours">
         {recents.map((j) => (
