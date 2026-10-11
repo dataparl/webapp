@@ -1,0 +1,36 @@
+name: Permanences
+
+# Collecte hebdomadaire des adresses de permanences (AN + Sénat), géocodage
+# BAN, commit du fichier généré lib/permanences.ts + du cache.
+# Les cas douteux sont listés dans le log du run (jamais tranchés seuls) ;
+# les garde-fous du script font échouer la collecte si le rendement s'effondre.
+
+on:
+  schedule:
+    - cron: "37 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  collecte:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Collecte et géocodage
+        run: node scripts/permanences.mjs
+      - name: Commit si changements
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/permanences.ts data/permanences-geocache.json
+          if git diff --cached --quiet; then
+            echo "Rien à committer."
+          else
+            git commit -m "Permanences : mise à jour $(date +%F)"
+            git push
+          fi
