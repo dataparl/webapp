@@ -6,7 +6,6 @@
 // /api/chat-telegram avec le token du bot) : aucun compte DataParl' requis.
 // Même moteur que le chat du site (chat.dataparl.fr, dpchat) et mêmes CGU
 // (acceptation à chaque ouverture, historique en mémoire uniquement).
-// Sur le web, cette page renvoie au site : le chat y existe déjà (bouton 💬).
 
 import { useState, useRef, useEffect, useCallback } from "react";
 
@@ -15,16 +14,6 @@ const CGU_URL = "/informations-legales/cgu-chat/tm-bot";
 
 type Message = { role: "user" | "assistant"; content: string };
 type TgWebApp = { ready: () => void; expand: () => void; initData: string; platform: string };
-
-// Message d'erreur selon le code renvoyé par le relais, avec le détail
-// technique en dessous : diagnostiquer plutôt que masquer.
-const ERREURS: Record<string, string> = {
-  non_configuré: "Le Chat n’est pas encore configuré côté serveur (variable TELEGRAM_BOT_TOKEN absente sur Vercel).",
-  accès_refusé: "Impossible de vérifier votre identité Telegram. Fermez et rouvrez la Mini App.",
-  session_expirée: "Session Telegram expirée. Fermez et rouvrez la Mini App.",
-  messages_invalides: "Question trop longue. Raccourcissez-la.",
-  moteur_indisponible: "Le moteur du Chat est indisponible. Réessayez dans quelques minutes.",
-};
 
 // Rendu markdown minimaliste : **gras**, *italique*, [liens](url), titres,
 // listes et tableaux — même sous-ensemble que le ChatWidget du site.
@@ -157,8 +146,33 @@ export default function PageChat() {
       });
       const data = await res.json().catch(() => ({ error: "moteur_indisponible" }));
       if (!res.ok) {
-        const humain = ERREURS[data.error] ?? `Erreur inconnue (${data.error ?? res.status}). Réessayez plus tard.`;
-        setErreur(data.detail ? `${humain} [${data.detail}]` : humain);
+        let msg: string;
+        switch (data.error) {
+          case "non_configuré":
+            msg = "Le Chat n’est pas encore configuré côté serveur (variable TELEGRAM_BOT_TOKEN absente sur Vercel).";
+            break;
+          case "accès_refusé": {
+            const emp = data.empreinte;
+            msg = "Impossible de vérifier votre identité Telegram. Fermez et rouvrez la Mini App.";
+            // Diagnostic : l'id du token côté serveur — à comparer à
+            // l'id du bot dans BotFather (getMe). Un écart désigne un
+            // mauvais token dans la variable Vercel.
+            if (emp?.token_id) msg += ` (token serveur : bot ${emp.token_id}, ${emp.token_taille} caractères)`;
+            break;
+          }
+          case "session_expirée":
+            msg = "Session Telegram expirée. Fermez et rouvrez la Mini App.";
+            break;
+          case "messages_invalides":
+            msg = "Question trop longue. Raccourcissez-la.";
+            break;
+          case "moteur_indisponible":
+            msg = "Le moteur du Chat est indisponible. Réessayez dans quelques minutes.";
+            break;
+          default:
+            msg = `Erreur inconnue (${data.error ?? res.status}). Réessayez plus tard.`;
+        }
+        setErreur(msg);
         return;
       }
       setMessages([...history, { role: "assistant", content: data.reply ?? "Désolé, une erreur est survenue. Réessayez plus tard." }]);
