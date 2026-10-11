@@ -16,8 +16,8 @@ const CGU_URL = "/informations-legales/cgu-chat/tm-bot";
 type Message = { role: "user" | "assistant"; content: string };
 type TgWebApp = { ready: () => void; expand: () => void; initData: string; platform: string };
 
-// Message d'erreur selon le code renvoyé par le relais : diagnostiquer
-// plutôt que masquer.
+// Message d'erreur selon le code renvoyé par le relais, avec le détail
+// technique en dessous : diagnostiquer plutôt que masquer.
 const ERREURS: Record<string, string> = {
   non_configuré: "Le Chat n’est pas encore configuré côté serveur (variable TELEGRAM_BOT_TOKEN absente sur Vercel).",
   accès_refusé: "Impossible de vérifier votre identité Telegram. Fermez et rouvrez la Mini App.",
@@ -157,9 +157,8 @@ export default function PageChat() {
       });
       const data = await res.json().catch(() => ({ error: "moteur_indisponible" }));
       if (!res.ok) {
-        // Cause précise affichée à l'utilisateur, la question reste
-        // visible dans l'historique.
-        setErreur(ERREURS[data.error] ?? `Erreur inconnue (${data.error ?? res.status}). Réessayez plus tard.`);
+        const humain = ERREURS[data.error] ?? `Erreur inconnue (${data.error ?? res.status}). Réessayez plus tard.`;
+        setErreur(data.detail ? `${humain} [${data.detail}]` : humain);
         return;
       }
       setMessages([...history, { role: "assistant", content: data.reply ?? "Désolé, une erreur est survenue. Réessayez plus tard." }]);

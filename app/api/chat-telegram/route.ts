@@ -13,11 +13,15 @@ const FRAICHEUR_MAX_S = 24 * 3600;
 
 // Validation du initData selon la spécification Telegram :
 // https://core.telegram.org/bots/webapps#validating-data-received-via-the-mini-app
-function initDataValide(initData: string): boolean {
+// Renvoie [ok, detail] — detail sert uniquement au diagnostic (jamais de
+// secret : longueur, étape échouée).
+function initDataValide(initData: string): [boolean, string] {
+  if (!TOKEN_BOT) return [false, "token_absent"];
+  if (!initData) return [false, "initData_vide"];
   try {
     const params = new URLSearchParams(initData);
     const hash = params.get("hash");
-    if (!hash) return false;
+    if (!hash) return [false, "hash_absent"];
     const dataCheckString = [...params.entries()]
       .filter(([k]) => k !== "hash")
       .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
@@ -25,9 +29,12 @@ function initDataValide(initData: string): boolean {
       .join("\n");
     const secret = crypto.createHmac("sha256", TOKEN_BOT).update("WebAppData").digest();
     const calcule = crypto.createHmac("sha256", secret).update(dataCheckString).digest("hex");
-    return calcule === hash;
+    if (calcule === hash) return [true, ""];
+    // Hash différent : quasi toujours un token de bot différent de celui
+    // qui a ouvert la Mini App (ancien token, copie tronquée, autre bot).
+    return [false, `hash_different (token ${TOKEN_BOT.length} caractères ; attendu celui du bot qui ouvre la Mini App)`];
   } catch {
-    return false;
+    return [false, "initData_invalide"];
   }
 }
 
@@ -46,8 +53,9 @@ export async function POST(req: Request) {
   const initData = corps.initData ?? "";
   const messages = Array.isArray(corps.messages) ? corps.messages : null;
 
-  if (!initDataValide(initData)) {
-    return NextResponse.json({ error: "accès_refusé" }, { status: 403 });
+  const [valide, detail] = initDataValide(initData);
+  if (!valide) {
+    return NextResponse.json({ error: "accès_refusé", detail }, { status: 403 });
   }
 
   // Fraîcheur : le initData doit dater de moins de 24 h (un initData peut
@@ -76,7 +84,7 @@ export async function POST(req: Request) {
   });
   const data = await res.json().catch(() => ({ reply: null }));
   if (!res.ok) {
-    return NextResponse.json({ error: "moteur_indisponible" }, { status: 502 });
+    return NextResponse.json({ error: "moteur_indisponible", detail: `dpchat ${res.status}` }, { status: 502 });
   }
   return NextResponse.json({ reply: data.reply ?? null });
 }
