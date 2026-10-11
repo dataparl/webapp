@@ -6,5 +6,6 @@ insert into public.liens (code, destination, titre, actif) values
   ('daily',     'https://www.dataparl.fr/daily/', 'Le Daily — mouvements jour par jour', true),
   ('daily-x',   'https://www.dataparl.fr/daily/', 'Le Daily — partage sur X', true),
   ('daily-bsky', 'https://www.dataparl.fr/daily/', 'Le Daily — partage sur Bluesky', true),
-  ('daily-wa',  'https://www.dataparl.fr/daily/', 'Le Daily — partage WhatsApp', true)
+  ('daily-wa',  'https://www.dataparl.fr/daily/', 'Le Daily — partage WhatsApp', true),
+  ('daily-tm',  'https://www.dataparl.fr/daily/', 'Le Daily — canal Telegram', true)
 on conflict (code) do nothing;
