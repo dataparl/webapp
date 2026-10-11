@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useHoteJobs } from "../../_components/useHoteJobs";
+import { useHoteJobs } from "@/app/_components/useHoteJobs";
 
 // Pied de page du site www : sur DataParl' Jobs (pages /jobs et sous-domaine
 // jobs.dataparl.fr), le footer Jobs remplace le footer standard. L'hôte est
