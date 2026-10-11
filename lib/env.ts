@@ -42,6 +42,9 @@ export const DUREE_DEBLOCAGE_H = 24;
 
 export const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID ?? "";
 
+// Canal Telegram du DataParl' Daily (page /daily/tm) — identifiant public.
+export const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? "dataparl_daily";
+
 // Base Notion des communiqués de presse (CMS headless) — voir lib/notion.ts.
 type Secret =
   | "AUTH_SUPABASE_SERVICE_ROLE_KEY" | "DATA_SUPABASE_SERVICE_ROLE_KEY" | "RESEND_API_KEY" | "CONSENT_SALT"
