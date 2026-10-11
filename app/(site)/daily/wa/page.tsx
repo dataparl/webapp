@@ -26,7 +26,7 @@ async function inscrire(formData: FormData) {
   }
 }
 
-export default function DailyWa({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+export default async function DailyWa({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const { etat, jeton } = await searchParams;
 
   if (etat === "ok") {
