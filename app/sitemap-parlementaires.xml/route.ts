@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import { prenomNom } from "@/lib/format";
 import { photoAbsolue } from "@/lib/media";
 import { cheminsInactifs } from "@/lib/pagesEtat";
@@ -9,9 +8,12 @@ import { reponseXml, urlset, type Url } from "@/lib/sitemaps";
 export const revalidate = 86400;
 
 // Une fiche par parlementaire (anciens compris), avec sa photo pour les élus en fonction.
+// Sans lecture de headers() : la vérification d'hôte rendait la route
+// dynamique et annulait le revalidate (chaque crawl relançait tout le
+// référentiel). Les <loc> sont de toute façon en dur sur www.dataparl.fr ;
+// les aperçus Vercel serviraient ce plan sans dommage (robots.txt y
+// interdit l'indexation).
 export async function GET() {
-  const host = ((await headers()).get("host") ?? "").split(":")[0].toLowerCase();
-  if (host !== "www.dataparl.fr") return new Response("Not found", { status: 404 });
   let elus: Awaited<ReturnType<typeof tousLesParlementaires>> = [];
   if (!estInactif("/parlementaires", await cheminsInactifs())) try { elus = await tousLesParlementaires(); } catch { /* plan vide plutôt qu'une erreur */ }
   return reponseXml(urlset(elus.flatMap((e) => {
