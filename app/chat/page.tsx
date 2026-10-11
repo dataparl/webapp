@@ -16,6 +16,16 @@ const CGU_URL = "/informations-legales/cgu-chat/tm-bot";
 type Message = { role: "user" | "assistant"; content: string };
 type TgWebApp = { ready: () => void; expand: () => void; initData: string; platform: string };
 
+// Message d'erreur selon le code renvoyé par le relais : diagnostiquer
+// plutôt que masquer.
+const ERREURS: Record<string, string> = {
+  non_configuré: "Le Chat n’est pas encore configuré côté serveur (variable TELEGRAM_BOT_TOKEN absente sur Vercel).",
+  accès_refusé: "Impossible de vérifier votre identité Telegram. Fermez et rouvrez la Mini App.",
+  session_expirée: "Session Telegram expirée. Fermez et rouvrez la Mini App.",
+  messages_invalides: "Question trop longue. Raccourcissez-la.",
+  moteur_indisponible: "Le moteur du Chat est indisponible. Réessayez dans quelques minutes.",
+};
+
 // Rendu markdown minimaliste : **gras**, *italique*, [liens](url), titres,
 // listes et tableaux — même sous-ensemble que le ChatWidget du site.
 function Md({ texte }: { texte: string }) {
@@ -145,11 +155,16 @@ export default function PageChat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ initData: initDataRef.current, messages: history.map((m) => ({ role: m.role, content: m.content })) }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "erreur");
+      const data = await res.json().catch(() => ({ error: "moteur_indisponible" }));
+      if (!res.ok) {
+        // Cause précise affichée à l'utilisateur, la question reste
+        // visible dans l'historique.
+        setErreur(ERREURS[data.error] ?? `Erreur inconnue (${data.error ?? res.status}). Réessayez plus tard.`);
+        return;
+      }
       setMessages([...history, { role: "assistant", content: data.reply ?? "Désolé, une erreur est survenue. Réessayez plus tard." }]);
     } catch {
-      setErreur("Connexion impossible. Réessayez dans un instant.");
+      setErreur("Connexion au serveur impossible. Réessayez dans un instant.");
     } finally {
       setBusy(false);
     }
@@ -240,7 +255,7 @@ export default function PageChat() {
               <div style={{ alignSelf: "flex-start", background: "var(--card)", border: "1px solid var(--line)", color: "var(--muted)", padding: "8px 12px", borderRadius: "10px" }}>…</div>
             )}
             {erreur && (
-              <div style={{ alignSelf: "center", color: "var(--muted)", fontSize: ".85rem", textAlign: "center" }}>{erreur}</div>
+              <div style={{ alignSelf: "center", color: "var(--muted)", fontSize: ".85rem", textAlign: "center", maxWidth: "90%", lineHeight: 1.45 }}>{erreur}</div>
             )}
             <div ref={endRef} />
           </div>
