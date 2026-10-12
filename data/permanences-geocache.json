@@ -1948,5 +1948,17 @@
   "lon": -1.434319,
   "score": 0.97,
   "ville": "La Roche-sur-Yon"
+ },
+ "121 rue gabriel péri 93200 saint-denis": {
+  "lat": 48.937786,
+  "lon": 2.356149,
+  "score": 0.98,
+  "ville": "Saint-Denis"
+ },
+ "13 place barthelon 05200 embrun": {
+  "lat": 44.564098,
+  "lon": 6.495566,
+  "score": 0.96,
+  "ville": "Embrun"
  }
 }
