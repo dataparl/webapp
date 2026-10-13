@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 const absente = (raison?: string) => new Response("Photo introuvable", {
   status: 404,
-  headers: { "Cache-Control": "public, s-maxage=300", ...(raison ? { "X-Gouv-Debug": raison } : {}) },
+  headers: { "Cache-Control": "public, s-maxage=300", ...(raison ? { "X-Gouv-Debug": raison.slice(0, 100) } : {}) },
 });
 
 export async function GET(_req: Request, { params }: { params: Promise<{ fichier: string }> }) {
@@ -23,21 +23,21 @@ export async function GET(_req: Request, { params }: { params: Promise<{ fichier
   if (!m) return absente();
   const slug = m[1];
   const taille = Number(m[3]);
+  let rows: { infogouv_photo: string | null; infogouv_credit: string | null }[] = [];
   try {
-    const { rows } = await dataQuery<{ infogouv_photo: string | null; infogouv_credit: string | null }>(
+    rows = (await dataQuery<{ infogouv_photo: string | null; infogouv_credit: string | null }>(
       "ministres",
       new URLSearchParams({ select: "infogouv_photo,infogouv_credit", infogouv_slug: "eq." + slug, limit: "1" }),
       3600,
-    );
-    const photo = rows[0]?.infogouv_photo;
-    if (!photo) return absente("base");
-    const credit = rows[0]?.infogouv_credit?.slice(0, 120) ?? null;
-    let reponse: Response;
-    try {
-      reponse = await fetch(photo, { headers: { "User-Agent": "DataParl (https://www.dataparl.fr)" }, signal: AbortSignal.timeout(8000) });
-    } catch {
-      return absente("connexion");
-    }
+    )).rows;
+  } catch (e) {
+    return absente("db:" + String((e as Error).message ?? e));
+  }
+  const photo = rows[0]?.infogouv_photo;
+  if (!photo) return absente("base");
+  const credit = rows[0]?.infogouv_credit?.slice(0, 120) ?? null;
+  try {
+    const reponse = await fetch(photo, { headers: { "User-Agent": "DataParl (https://www.dataparl.fr)" }, signal: AbortSignal.timeout(8000) });
     if (!reponse.ok) return absente("http" + reponse.status);
     if (!(reponse.headers.get("content-type") ?? "").startsWith("image/")) return absente("type");
     const brut = Buffer.from(await reponse.arrayBuffer());
@@ -51,7 +51,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ fichier
         "Access-Control-Allow-Origin": "*", "X-Robots-Tag": "noarchive",
       },
     });
-  } catch {
-    return absente("autre");
+  } catch (e) {
+    return absente("img:" + String((e as Error).message ?? e));
   }
 }
