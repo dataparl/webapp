@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Photo from "@/app/_components/Photo";
 import { prenomNom } from "@/lib/format";
-import { ORDRE_FONCTION, categorieFonction, finEffective, periode, slugGouvernement, type MembreCabinet } from "@/lib/gouvTypes";
-import { autresMandats, cabinetsDuMinistre, ficheMinistre, ficheParlementaireDe, photoMinistreDe, photosDesPersonnes } from "@/lib/gouv";
+import { ORDRE_FONCTION, categorieFonction, finEffective, periode, slugGouvernement, type MembreCabinet } from "@/lib/gouvernementTypes";
+import { autresMandats, cabinetsDuMinistre, ficheMinistre, ficheParlementaireDe, photoMinistreDe, photosDesPersonnes } from "@/lib/gouvernement";
 import { collaborateursParId } from "@/lib/referentiel";
 
 export const revalidate = 3600;

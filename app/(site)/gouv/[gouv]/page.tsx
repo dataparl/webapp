@@ -3,11 +3,11 @@ import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import Photo from "@/app/_components/Photo";
 import { dateLongue, prenomNom } from "@/lib/format";
-import { listeGouvernements, mandatsEtCabinets, photoMinistreDe, photosDesPersonnes, type Gouvernement, type PhotoMinistre } from "@/lib/gouv";
+import { listeGouvernements, mandatsEtCabinets, photoMinistreDe, photosDesPersonnes, type Gouvernement, type PhotoMinistre } from "@/lib/gouvernement";
 import {
   LIBELLE_STATUT, libelleRang, ordreRang, periode, rattachementDe, slugMinistre, statutCabinet,
   type MandatMinistre, type MembreCabinet,
-} from "@/lib/gouvTypes";
+} from "@/lib/gouvernementTypes";
 
 export const revalidate = 3600;
 type Props = { params: Promise<{ gouv: string }> };

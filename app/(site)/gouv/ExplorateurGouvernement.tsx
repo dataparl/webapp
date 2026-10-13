@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { prenomNom } from "@/lib/format";
-import { LIBELLE_FONCTION, LIBELLE_STATUT, categorieFonction, enPoste, finEffective, normaliseNom, periode, slugGouvernement, statutCabinet, type MandatMinistre, type MembreCabinet } from "@/lib/gouvTypes";
+import { LIBELLE_FONCTION, LIBELLE_STATUT, categorieFonction, enPoste, finEffective, normaliseNom, periode, slugGouvernement, statutCabinet, type MandatMinistre, type MembreCabinet } from "@/lib/gouvernementTypes";
 
 const hrefM = (id: string) => "/gouv/m/" + encodeURIComponent(id);
 // L'état des filtres vit dans l'URL (deep linking) : un lien partagé rouvre la même vue.

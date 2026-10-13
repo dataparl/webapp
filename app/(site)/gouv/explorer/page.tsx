@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { dateLongue } from "@/lib/format";
-import { dernierReleve, listeGouvernements, mandatsEtCabinets } from "@/lib/gouv";
+import { dernierReleve, listeGouvernements, mandatsEtCabinets } from "@/lib/gouvernement";
 import ExplorateurGouvernement from "../ExplorateurGouvernement";
 import { collaborateursParId } from "@/lib/referentiel";
 

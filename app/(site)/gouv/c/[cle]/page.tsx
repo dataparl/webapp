@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { prenomNom } from "@/lib/format";
-import { enPoste, finEffective, periode } from "@/lib/gouvTypes";
-import { ministresParIds, parcoursCabinet } from "@/lib/gouv";
+import { enPoste, finEffective, periode } from "@/lib/gouvernementTypes";
+import { ministresParIds, parcoursCabinet } from "@/lib/gouvernement";
 import { collaborateursParId } from "@/lib/referentiel";
 
 export const revalidate = 3600;

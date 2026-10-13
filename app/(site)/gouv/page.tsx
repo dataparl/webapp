@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { mandatsEtCabinets } from "@/lib/gouv";
-import { slugGouvernement } from "@/lib/gouvTypes";
+import { mandatsEtCabinets } from "@/lib/gouvernement";
+import { slugGouvernement } from "@/lib/gouvernementTypes";
 
 export const revalidate = 3600;
 
