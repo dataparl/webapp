@@ -1,0 +1,49 @@
+{
+  "$schema": "https://specs.frictionlessdata.io/table-schema.json",
+  "name": "collaborateurs-senat",
+  "title": "Collaborateurs des sénateurs (en poste)",
+  "description": "Collaborateurs parlementaires en poste auprès des sénateurs : une ligne par couple collaborateur-élu, avec la fonction et la date de début. Mise à jour quotidienne d'après la liste annuelle des collaborateurs des sénateurs publiée par le Sénat. L'historique complet (anciennes affectations) est consultable sur dataparl.fr. Producteur : DataParl'.",
+  "homepage": "https://www.dataparl.fr/collab/senat/liste",
+  "licenses": [
+    {
+      "name": "ODbL-1.0",
+      "path": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "title": "Open Database License (ODbL) v1.0"
+    }
+  ],
+  "fields": [
+    {
+      "name": "collaborateur",
+      "type": "string",
+      "title": "Collaborateur",
+      "description": "Prénom et nom du collaborateur parlementaire."
+    },
+    {
+      "name": "elu",
+      "type": "string",
+      "title": "Élu employeur",
+      "description": "Nom du sénateur employeur."
+    },
+    {
+      "name": "fonction",
+      "type": "string",
+      "title": "Fonction",
+      "description": "Fonction exercée auprès de l'élu ; vide si non précisée par la source."
+    },
+    {
+      "name": "chambre",
+      "type": "string",
+      "title": "Chambre",
+      "description": "« senat » pour cet export."
+    },
+    {
+      "name": "debut",
+      "type": "date",
+      "title": "Début",
+      "description": "Date de début de la période en cours (AAAA-MM-JJ) ; vide si inconnue."
+    }
+  ],
+  "missingValues": [
+    ""
+  ]
+}
