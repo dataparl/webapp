@@ -288,7 +288,7 @@ export async function servirCSV(req: Request, file: string, exportsDisponibles: 
   const user = await utilisateur(req);
   if (!user) {
     const suite = "/assets/" + prefixe + "/" + encodeURIComponent(file);
-    return Response.redirect("https://www.dataparl.fr/connexion?suite=" + encodeURIComponent(suite), 302);
+    return Response.redirect("https://www.dataparl.fr/acces-ressource?suite=" + encodeURIComponent(suite), 302);
   }
   const slug = decodeURIComponent(file).replace(/\.csv$/i, "");
   const def = exportsDisponibles[slug];
