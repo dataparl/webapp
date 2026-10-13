@@ -22,10 +22,9 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large" } },
   formatDetection: { telephone: false },
-  // Favicons : ICO (32), SVG vectoriel, et icône tactile iOS 180 (app/apple-icon.tsx).
+  // Favicons : SVG vectoriel et icône tactile iOS 180 (app/apple-icon.tsx) — monogramme Σ'.
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
       { url: "/icon.svg", type: "image/svg+xml" },
     ],
     apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
