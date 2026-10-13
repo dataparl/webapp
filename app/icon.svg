@@ -1,13 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Favicon DataParl' : monogramme D' — or #FFD23F, bleu #164DFF (même identité que apple-icon). -->
-  <rect width="64" height="64" rx="14" fill="#FFD23F"/>
-  <g fill="#164DFF">
-    <rect x="15.5" y="12" width="8" height="34" rx="1"/>
-    <rect x="14" y="10.6" width="11" height="2.8" rx="1"/>
-    <rect x="14" y="44.6" width="11" height="2.8" rx="1"/>
-    <path fill-rule="evenodd" clip-path="url(#panse)" d="M5 29.25a18 17.25 0 1 0 36 0 18 17.25 0 1 0 -36 0ZM11.5 29.25a11.5 10.75 0 1 0 23 0 11.5 10.75 0 1 0 -23 0Z"/>
-    <ellipse cx="46" cy="19.5" rx="3.4" ry="3.6"/>
-    <polygon points="42.9,19 49.1,19 47.3,12 44.7,12"/>
-  </g>
-  <defs><clipPath id="panse"><rect x="16.5" width="47.5" height="64"/></clipPath></defs>
+  <!-- Favicon DataParl' : monogramme Σ' — blanc sur bleu encre #071A41, identique sur tous les domaines et sous-domaines. -->
+  <rect width="64" height="64" rx="14" fill="#071A41"/>
+  <path d="M11 15 H43 L28 32 L43 49 H11" fill="none" stroke="#FFFFFF" stroke-width="6.5" stroke-linejoin="miter"/>
+  <ellipse cx="52" cy="16.5" rx="3.2" ry="3.4" fill="#FFFFFF"/>
+  <polygon points="48.9,16 55.1,16 53.3,9 50.7,9" fill="#FFFFFF"/>
 </svg>
