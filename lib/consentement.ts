@@ -1,4 +1,5 @@
 import { cookieStorage } from "./cookieStorage";
+import { CLARITY_ID } from "./env";
 
 // Consentement Google (Consent Mode v2), piloté par le bandeau du site —
 // pas par une bannière Google. Les signaux sont envoyés à GTM et AdSense.
@@ -12,6 +13,7 @@ declare global {
   interface Window {
     dataLayer?: unknown[];
     gtag?: (...args: unknown[]) => void;
+    clarity?: (...args: unknown[]) => void;
   }
 }
 
@@ -46,6 +48,21 @@ export function chargerPub() {
   s.async = true;
   s.crossOrigin = "anonymous";
   s.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6168263680630864";
+  document.head.appendChild(s);
+}
+
+// Charge Microsoft Clarity (mesure comportementale : heatmaps, replays),
+// une seule fois, uniquement après un consentement de mesure d'audience.
+// Sans accord, le script n'est jamais injecté — même promesse que la pub.
+// Clarity masque par défaut les zones de saisie dans les replays ; sans
+// identifiant configuré (lib/env.ts), la fonction ne fait rien.
+export function chargerClarity() {
+  if (typeof document === "undefined" || !CLARITY_ID) return;
+  if (document.getElementById("clarity-dataparl")) return;
+  const s = document.createElement("script");
+  s.id = "clarity-dataparl";
+  s.type = "text/javascript";
+  s.text = `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","${CLARITY_ID}");`;
   document.head.appendChild(s);
 }
 

@@ -1,14 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { cookieStorage } from "@/lib/cookieStorage";
-import { appliquer, chargerPub, enregistrer, lire } from "@/lib/consentement";
+import { appliquer, chargerClarity, chargerPub, enregistrer, lire } from "@/lib/consentement";
 
 // Bandeau de consentement maison (pas une bannière Google) : recueille l'accord
 // pour la mesure d'audience et la publicité, et transmet les signaux Consent
-// Mode v2 à GTM. C'est aussi ici que le script Google AdSense est injecté —
-// uniquement si la publicité est acceptée (jamais avant). Trois choix en bas :
-// « Autoriser », « Gérer les options » et « Tout refuser » (accessible sans
-// ouvrir les options).
+// Mode v2 à GTM. C'est aussi ici que les scripts AdSense (si publicité
+// acceptée) et Microsoft Clarity (si mesure d'audience acceptée) sont
+// injectés — jamais avant. Trois choix en bas : « Autoriser », « Gérer les
+// options » et « Tout refuser » (accessible sans ouvrir les options).
 
 export default function BandeauCookies() {
   const [visible, setVisible] = useState(false);
@@ -21,12 +21,14 @@ export default function BandeauCookies() {
       // Déjà choisi : appliquer à chaque page (les défauts « denied » du layout
       // s'appliquent avant GTM ; ici on réactualise avec le choix mémorisé).
       appliquer(c);
+      if (c.mesure) chargerClarity();
       if (c.pub) chargerPub();
     } else setVisible(true);
   }, []);
 
   function valider(c: { mesure: boolean; pub: boolean }) {
     enregistrer({ ...c, date: new Date().toISOString().slice(0, 10) });
+    if (c.mesure) chargerClarity();
     if (c.pub) chargerPub();
     setVisible(false);
   }
@@ -45,7 +47,7 @@ export default function BandeauCookies() {
         <strong>publicité</strong> (annonces Google adaptées à tes centres d&apos;intérêt).
         Rien n&apos;est activé sans ton accord, et tu peux refuser les deux.
       </p>
-      <p><a href="/informations-legales/cookies">Lire la politique cookies</a></p>
+      <p><a href="/informations-legales/cookies">Lire la politique cookie</a></p>
 
       {options ? (
         <>

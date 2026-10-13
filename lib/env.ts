@@ -36,6 +36,11 @@ export const EXPEDITEURS = ["hello@dataparl.fr", "contact@dataparl.fr", "presse@
 export const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? "ca-pub-6168263680630864";
 export const ADSENSE_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT ?? "2498344789"; // bloc « fiches-dataparl »
 
+// Microsoft Clarity (mesure comportementale : heatmaps, replays de session).
+// Identifiant public du projet ; vide = Clarity désactivé. Le script n'est
+// chargé qu'après un consentement de mesure d'audience (lib/consentement.ts).
+export const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID ?? "";
+
 export const APPLIXIR_API_KEY = process.env.NEXT_PUBLIC_APPLIXIR_API_KEY ?? "";
 export const APPLIXIR_SDK = "https://cdn.applixir.com/applixir.app.v6.1.0.js";
 export const DUREE_DEBLOCAGE_H = 24;
