@@ -20,7 +20,7 @@
     "allowImportingTsExtensions": true,
     "plugins": [
       {
-        "name": "next"
+        "next"
       }
     ],
     "paths": {
@@ -37,6 +37,7 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "checks"
   ]
 }
