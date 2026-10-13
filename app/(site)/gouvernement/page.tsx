@@ -61,7 +61,6 @@ export default async function Gouvernement() {
     if (!ordres.has(g) || m.debut > ordres.get(g)!) ordres.set(g, m.debut);
   }
   const gouvernements = [...ordres.keys()].sort((a, b) => (ordres.get(b)!).localeCompare(ordres.get(a)!));
-  let nbCabinets = 0;
 
   return (
     <>
@@ -78,7 +77,6 @@ export default async function Gouvernement() {
             <ul className="gouvernement">
               {duGouvernement.map((m) => {
                 const equipe = parMinistre.get(m.id) ?? [];
-                nbCabinets += equipe.length;
                 return (
                   <li key={m.id}>
                     <h3>
@@ -92,7 +90,7 @@ export default async function Gouvernement() {
                         {equipe.map((c, i) => (
                           <li key={i}>
                             {c.collab_id ? (
-                              <a href={`/collab/k/${c.collab_cle}`}>{c.collab_prenom} {c.collab_nom}</a>
+                              <a href={`/collab/k/${encodeURIComponent(c.collab_cle)}`}>{c.collab_prenom} {c.collab_nom}</a>
                             ) : (
                               <>{c.collab_prenom} {c.collab_nom}</>
                             )}{" "}
