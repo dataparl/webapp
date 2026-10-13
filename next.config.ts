@@ -12,6 +12,8 @@ const config: NextConfig = {
   poweredByHeader: false,
   async redirects() {
     return [
+      { source: "/gouvernement", destination: "/gouv", permanent: true },
+      { source: "/gouvernement/:chemin*", destination: "/gouv/:chemin*", permanent: true },
       { source: "/collabs", destination: "/collab", permanent: true },
       { source: "/collaborateurs", destination: "/collab", permanent: true },
       { source: "/collaborateur", destination: "/collab", permanent: true },
