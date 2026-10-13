@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 const securityHeaders = [
@@ -28,4 +29,9 @@ const config: NextConfig = {
   },
 };
 
-export default config;
+// Sentry : build instrumenté (source maps uploadables plus tard, silencieux sans DSN)
+export default Sentry.withSentryConfig(config, {
+  silent: true,
+  // Le DSN est lu dans l'environnement ; sans lui, Sentry reste inactif.
+  disable: !process.env.NEXT_PUBLIC_SENTRY_DSN,
+});
