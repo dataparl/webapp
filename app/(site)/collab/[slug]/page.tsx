@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: nom,
     description: claim,
     alternates: { canonical: "/collab/" + c.slug },
-    openGraph: { title: nom + " sur DataParl’", description: claim },
+    openGraph: { siteName: "DataParl'", title: nom + " sur DataParl’", description: claim },
   };
 }
 

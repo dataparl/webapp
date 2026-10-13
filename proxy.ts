@@ -155,7 +155,13 @@ export async function proxy(req: NextRequest) {
       const accept = req.headers.get("accept") ?? "";
       let interne = false;
       try { const r = new URL(req.headers.get("referer") ?? ""); interne = r.hostname === DOMAINE || r.hostname.endsWith(`.${DOMAINE}`); } catch { /* pas de Referer */ }
-      if (accept.includes("text/html") && !interne) {
+      // Les robots d'aperçu des réseaux (facebookexternalhit, Discordbot,
+      // X, Telegram, WhatsApp, Slack, LinkedIn…) réclament l'og:image avec un
+      // Accept « text/html » : leur servir la page de crédit casserait l'aperçu
+      // (photo manquante sur Facebook, Discord, LinkedIn…). Seul un navigateur
+      // humain voit la page de crédit.
+      const robotApercu = /bot|crawl|spider|preview|facebookexternalhit|whatsapp|telegram|discord|slack|linkedin|pinterest|skype|validator|headless|curl|wget|python/i.test(req.headers.get("user-agent") ?? "");
+      if (accept.includes("text/html") && !interne && !robotApercu) {
         url.pathname = "/photo-credit";
         url.search = `?img=${encodeURIComponent(path.slice(1))}`;
         const res = NextResponse.rewrite(url);

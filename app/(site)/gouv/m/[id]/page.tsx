@@ -4,6 +4,7 @@ import Photo from "@/app/_components/Photo";
 import { prenomNom } from "@/lib/format";
 import { ORDRE_FONCTION, categorieFonction, finEffective, periode, slugGouvernement, type MembreCabinet } from "@/lib/gouvernementTypes";
 import { autresMandats, cabinetsDuMinistre, ficheMinistre, ficheParlementaireDe, photoMinistreDe, photosDesPersonnes } from "@/lib/gouvernement";
+import { photoAbsolue } from "@/lib/media";
 import { collaborateursParId } from "@/lib/referentiel";
 
 export const revalidate = 3600;
@@ -17,10 +18,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const m = await ficheMinistre(id).catch(() => null);
   if (!m) return {};
   const nom = prenomNom(m.prenom, m.nom);
+  // Photo officielle info.gouv.fr en aperçu (media.dataparl.fr/gouv/<slug>_gouv_400.png) ;
+  // carte « summary » (carrée) comme les fiches parlementaires.
+  const photo = m.infogouv_slug ? photoAbsolue("gouvernement", m.infogouv_slug, 400) : null;
+  const description = "Mandats de " + nom + " (" + (m.portefeuille || m.fonction) + ", gouvernement " + m.gouvernement + ") et composition de son cabinet ministériel d'après le Journal officiel.";
   return {
     title: nom + " : ministre, portefeuille et cabinet",
-    description: "Mandats de " + nom + " (" + (m.portefeuille || m.fonction) + ", gouvernement " + m.gouvernement + ") et composition de son cabinet ministériel d'après le Journal officiel.",
+    description,
     alternates: { canonical: "/gouv/m/" + encodeURIComponent(m.id) },
+    openGraph: { siteName: "DataParl'", title: nom + " : ministre, portefeuille et cabinet", description, type: "profile", images: photo ? [{ url: photo, width: 400, height: 400, alt: "Photo officielle de " + nom }] : undefined },
+    twitter: { card: photo ? "summary" : "summary_large_image", title: nom + " · DataParl'", description, images: photo ? [photo] : undefined },
   };
 }
 

@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     return {
       title: `${nom}${f.groupe ? ` (${f.groupe})` : ""} : ses collaborateurs, bio et mandats`, description,
       alternates: { canonical: url },
-      openGraph: { title: `${nom} · DataParl'`, description, url, type: "profile", images: photo ? [{ url: photo, width: 400, height: 400, alt: `Photo officielle de ${nom}` }] : undefined },
+      openGraph: { siteName: "DataParl'", title: `${nom} · DataParl'`, description, url, type: "profile", images: photo ? [{ url: photo, width: 400, height: 400, alt: `Photo officielle de ${nom}` }] : undefined },
       twitter: { card: "summary", title: `${nom} · DataParl'`, description, images: photo ? [photo] : undefined },
     };
   }

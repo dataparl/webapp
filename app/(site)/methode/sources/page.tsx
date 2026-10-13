@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   description: "La liste des sources de DataParl' : publications parlementaires et électorales, contenu utilisé, fréquence de relevé et licence. Chaque chiffre du site renvoie à l'une de ces sources.",
   alternates: { canonical: "/methode/sources" },
   openGraph: {
+    siteName: "DataParl'",
     title: "Sources · DataParl'",
     description: "Les publications officielles derrière chaque chiffre de DataParl'.",
     url: "https://www.dataparl.fr/methode/sources",

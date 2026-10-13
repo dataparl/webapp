@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: titre, description,
     alternates: { canonical: `/daily/${date}` },
-    openGraph: { title: `${titre} | DataParl'`, description, url: `/daily/${date}`, type: "article" },
+    openGraph: { siteName: "DataParl'", title: `${titre} | DataParl'`, description, url: `/daily/${date}`, type: "article" },
     robots: n ? undefined : { index: false, follow: true },
   };
 }

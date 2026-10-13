@@ -17,7 +17,7 @@ async function lire(slug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const c = await lire((await params).slug).catch(() => null);
   if (!c) return {};
-  return { title: c.titre, description: c.chapo.slice(0, 200) || undefined, alternates: { canonical: `/presse/communiques/${c.slug}` }, openGraph: { title: c.titre, description: c.chapo.slice(0, 200), type: "article" } };
+  return { title: c.titre, description: c.chapo.slice(0, 200) || undefined, alternates: { canonical: `/presse/communiques/${c.slug}` }, openGraph: { siteName: "DataParl'", title: c.titre, description: c.chapo.slice(0, 200), type: "article" } };
 }
 
 export default async function Communique({ params }: Props) {

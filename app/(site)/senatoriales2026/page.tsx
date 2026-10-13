@@ -11,6 +11,7 @@ export const metadata: Metadata = {
     "Résultats des sénatoriales 2026 : les nouveaux sénateurs élus et les sortants, pour chaque département renouvelé (métropole et outre-mer). Leur groupe politique, leur fiche, leur équipe de collaborateurs.",
   alternates: { canonical: "/senatoriales2026" },
   openGraph: {
+    siteName: "DataParl'",
     title: "Sénatoriales 2026 : les nouveaux sénateurs",
     description: "Nouveaux sénateurs et sortants, département par département, avec leurs groupes et leurs équipes.",
     url: "https://www.dataparl.fr/senatoriales2026",

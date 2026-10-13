@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: titre, description,
     alternates: { canonical: `/senatoriales2026/${d.slug}` },
-    openGraph: { title: `${titre} · DataParl'`, description, url: `https://www.dataparl.fr/senatoriales2026/${d.slug}`, type: "article" },
+    openGraph: { siteName: "DataParl'", title: `${titre} · DataParl'`, description, url: `https://www.dataparl.fr/senatoriales2026/${d.slug}`, type: "article" },
   };
 }
 

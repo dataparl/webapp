@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   description: "Les étapes de DataParl' : sources officielles, synchronisation nocturne, compléments manuels vérifiés, indicateurs (VigiParl', MixiParl') et contrôle qualité — tout ce qui sépare une donnée brute d'une donnée utilisable.",
   alternates: { canonical: "/methode" },
   openGraph: {
+    siteName: "DataParl'",
     title: "Méthode DataParl'",
     description: "Des publications officielles aux fiches publiées : collecte, croisement, vérification.",
     url: "https://www.dataparl.fr/methode",

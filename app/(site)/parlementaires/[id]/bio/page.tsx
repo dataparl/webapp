@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${nom} : biographie et parcours parlementaire`,
     description,
     alternates: { canonical: `/parlementaires/${encodeURIComponent(f.slug)}/bio` },
-    openGraph: { title: `${nom} : biographie · DataParl'`, description, url: `https://www.dataparl.fr/parlementaires/${encodeURIComponent(f.slug)}/bio`, type: "profile" },
+    openGraph: { siteName: "DataParl'", title: `${nom} : biographie · DataParl'`, description, url: `https://www.dataparl.fr/parlementaires/${encodeURIComponent(f.slug)}/bio`, type: "profile" },
   };
 }
 
