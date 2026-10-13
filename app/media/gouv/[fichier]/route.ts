@@ -12,7 +12,10 @@ import { dataQuery } from "@/lib/data";
 // l'en-tête X-Credit.
 export const dynamic = "force-dynamic";
 
-const absente = () => new Response("Photo introuvable", { status: 404, headers: { "Cache-Control": "public, s-maxage=3600" } });
+const absente = (raison?: string) => new Response("Photo introuvable", {
+  status: 404,
+  headers: { "Cache-Control": "public, s-maxage=300", ...(raison ? { "X-Gouv-Debug": raison } : {}) },
+});
 
 export async function GET(_req: Request, { params }: { params: Promise<{ fichier: string }> }) {
   const { fichier } = await params;
@@ -27,12 +30,18 @@ export async function GET(_req: Request, { params }: { params: Promise<{ fichier
       3600,
     );
     const photo = rows[0]?.infogouv_photo;
-    if (!photo) return absente();
+    if (!photo) return absente("base");
     const credit = rows[0]?.infogouv_credit?.slice(0, 120) ?? null;
-    const r = await fetch(photo, { headers: { "User-Agent": "DataParl (https://www.dataparl.fr)" }, signal: AbortSignal.timeout(8000) });
-    if (!r.ok || !(r.headers.get("content-type") ?? "").startsWith("image/")) return absente();
-    const brut = Buffer.from(await r.arrayBuffer());
-    if (brut.length > 8_000_000) return absente();
+    let reponse: Response;
+    try {
+      reponse = await fetch(photo, { headers: { "User-Agent": "DataParl (https://www.dataparl.fr)" }, signal: AbortSignal.timeout(8000) });
+    } catch {
+      return absente("connexion");
+    }
+    if (!reponse.ok) return absente("http" + reponse.status);
+    if (!(reponse.headers.get("content-type") ?? "").startsWith("image/")) return absente("type");
+    const brut = Buffer.from(await reponse.arrayBuffer());
+    if (brut.length > 8_000_000) return absente("taille");
     const png = await sharp(brut).resize(taille, taille, { fit: "cover", position: "top" }).png({ compressionLevel: 9, palette: true }).toBuffer();
     return new Response(new Uint8Array(png), {
       headers: {
@@ -43,6 +52,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ fichier
       },
     });
   } catch {
-    return absente();
+    return absente("autre");
   }
 }
