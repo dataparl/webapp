@@ -1,18 +1,18 @@
 import sharp from "sharp";
 import { CREDIT } from "@/lib/media";
+import { dataQuery } from "@/lib/data";
 
 // Portrait officiel d'une personnalité du Gouvernement, servi par DataParl' :
 // /media/gouv/<slug>_gouv_<taille>.png (media.dataparl.fr/gouv/…), où <slug>
-// est le profil info.gouv.fr (ex. philippe-tabarot). La photo est lue à la
-// volée sur la page officielle ; le crédit du photographe publié sous
-// l'image (« Source : … ») est transmis dans l'en-tête X-Credit.
+// est le profil info.gouv.fr (ex. philippe-tabarot). Les pages HTML d'info.gouv.fr
+// sont protégées par un défi Cloudflare illisible depuis Vercel : l'URL de
+// l'image officielle et le crédit du photographe sont donc recensés dans la
+// table ministres (colonnes infogouv_photo / infogouv_credit) et l'image est
+// lue sur le CDN d'info.gouv.fr, lui, accessible. Le crédit est transmis dans
+// l'en-tête X-Credit.
 export const dynamic = "force-dynamic";
 
 const absente = () => new Response("Photo introuvable", { status: 404, headers: { "Cache-Control": "public, s-maxage=3600" } });
-
-const hoteOfficiel = (u: string) => {
-  try { const h = new URL(u, "https://www.info.gouv.fr").hostname; return h === "www.info.gouv.fr" || h.endsWith(".gouv.fr"); } catch { return false; }
-};
 
 export async function GET(_req: Request, { params }: { params: Promise<{ fichier: string }> }) {
   const { fichier } = await params;
@@ -21,24 +21,15 @@ export async function GET(_req: Request, { params }: { params: Promise<{ fichier
   const slug = m[1];
   const taille = Number(m[3]);
   try {
-    const page = await fetch("https://www.info.gouv.fr/personnalite/" + slug, {
-      headers: { "User-Agent": "DataParl (https://www.dataparl.fr)" },
-      signal: AbortSignal.timeout(10000),
-    });
-    if (!page.ok) return absente();
-    const html = await page.text();
-    // Image de la page : og:image, twitter:image, ou visuel du profil.
-    const candidates = [
-      ...html.matchAll(/<meta[^>]+(?:property|name)="(?:og:image[^"]*|twitter:image)"[^>]+content="([^"]+)"/g),
-      ...html.matchAll(/<meta[^>]+content="([^"]+)"[^>]+(?:property|name)="(?:og:image[^"]*|twitter:image)"/g),
-      ...html.matchAll(/<img[^>]+src="([^"]*upload[^"]*)"/g),
-    ].map((x) => x[1]).filter(Boolean);
-    const image = candidates.find(hoteOfficiel);
-    if (!image) return absente();
-    // Crédit photographe publié sur la page (« Source : … »).
-    const credit = /Source\s*:\s*([^<"\n]+)/i.exec(html)?.[1]?.trim().slice(0, 120) ?? null;
-    const source = image.startsWith("http") ? image : "https://www.info.gouv.fr" + image;
-    const r = await fetch(source, { headers: { "User-Agent": "DataParl (https://www.dataparl.fr)" }, signal: AbortSignal.timeout(8000) });
+    const { rows } = await dataQuery<{ infogouv_photo: string | null; infogouv_credit: string | null }>(
+      "ministres",
+      new URLSearchParams({ select: "infogouv_photo,infogouv_credit", infogouv_slug: "eq." + slug, limit: "1" }),
+      3600,
+    );
+    const photo = rows[0]?.infogouv_photo;
+    if (!photo) return absente();
+    const credit = rows[0]?.infogouv_credit?.slice(0, 120) ?? null;
+    const r = await fetch(photo, { headers: { "User-Agent": "DataParl (https://www.dataparl.fr)" }, signal: AbortSignal.timeout(8000) });
     if (!r.ok || !(r.headers.get("content-type") ?? "").startsWith("image/")) return absente();
     const brut = Buffer.from(await r.arrayBuffer());
     if (brut.length > 8_000_000) return absente();
