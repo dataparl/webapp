@@ -3,8 +3,10 @@ import { dataQueryTout } from "@/lib/data";
 // Export CSV brut des collaborateurs d'une chambre, servi sur
 // media.dataparl.fr/assets/collab/{an,senat,pe}.csv (règle ajoutée dans
 // proxy.ts). Une ligne par collaborateur-élu en poste : nom, élu employeur,
-// fonction, chambre, dates. Mis en cache une heure — même fraîcheur que les
-// pages publiques. Publié aussi sur data.gouv.fr (jeu de données DataParl').
+// fonction, chambre, date de début. Périodes en cours uniquement : l'historique
+// complet (anciennes affectations) reste consultable sur dataparl.fr. Mis en
+// cache une heure — même fraîcheur que les pages publiques. Publié aussi sur
+// data.gouv.fr (jeu de données DataParl').
 type Periode = { collab_id: string; elu_nom: string; fonction: string; en_cours: boolean; debut: string | null; fin: string | null };
 type Collab = { collab_id: string; nom: string; prenom: string };
 
@@ -20,11 +22,11 @@ export async function GET(_req: Request, ctx: { params: Promise<{ file: string }
   let rows: Periode[] = [];
   try {
     rows = await dataQueryTout<Periode>("periodes",
-      new URLSearchParams({ select: "collab_id,elu_nom,fonction,en_cours,debut,fin", chambre: "eq." + chambre, order: "elu_nom" }), 3600);
+      new URLSearchParams({ select: "collab_id,elu_nom,fonction,en_cours,debut,fin", chambre: "eq." + chambre, en_cours: "eq.true", order: "elu_nom" }), 3600);
   } catch {
     try {
       const mini = await dataQueryTout<{ collab_id: string; elu_nom: string; fonction: string; en_cours: boolean }>("periodes",
-        new URLSearchParams({ select: "collab_id,elu_nom,fonction,en_cours", chambre: "eq." + chambre, order: "elu_nom" }), 3600);
+        new URLSearchParams({ select: "collab_id,elu_nom,fonction,en_cours", chambre: "eq." + chambre, en_cours: "eq.true", order: "elu_nom" }), 3600);
       rows = mini.map((r) => ({ ...r, debut: null, fin: null }));
     } catch {
       rows = [];
@@ -38,8 +40,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ file: string }
     const s = String(v ?? "");
     return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   };
-  const entetes = ["collaborateur", "elu", "fonction", "chambre", "en_poste", "debut", "fin"];
-  const lignes = rows.map((r) => [noms.get(r.collab_id) ?? "", r.elu_nom, r.fonction, chambre, r.en_cours ? "oui" : "non", r.debut, r.fin].map(esc).join(","));
+  const entetes = ["collaborateur", "elu", "fonction", "chambre", "debut"];
+  const lignes = rows.map((r) => [noms.get(r.collab_id) ?? "", r.elu_nom, r.fonction, chambre, r.debut].map(esc).join(","));
   // BOM UTF-8 : ouverture propre dans Excel.
   const csv = "\uFEFF" + entetes.join(",") + "\n" + (lignes.length ? lignes.join("\n") + "\n" : "");
 

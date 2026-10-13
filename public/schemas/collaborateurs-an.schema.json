@@ -1,8 +1,8 @@
 {
   "$schema": "https://specs.frictionlessdata.io/table-schema.json",
   "name": "collaborateurs-an",
-  "title": "Collaborateurs des députés de l'Assemblée nationale",
-  "description": "Collaborateurs parlementaires des députés de l'Assemblée nationale : une ligne par couple collaborateur-élu, avec la fonction, la chambre, le statut en poste et les dates de début et de fin de période. Sources : liste des collaborateurs par député publiée par l'Assemblée nationale. Producteur : DataParl'.",
+  "title": "Collaborateurs des députés de l'Assemblée nationale (en poste)",
+  "description": "Collaborateurs parlementaires en poste auprès des députés de l'Assemblée nationale : une ligne par couple collaborateur-élu, avec la fonction et la date de début. Mise à jour quotidienne d'après la liste officielle des collaborateurs publiée par l'Assemblée nationale. L'historique complet (anciennes affectations) est consultable sur dataparl.fr. Producteur : DataParl'.",
   "homepage": "https://www.dataparl.fr/collab/an/liste",
   "licenses": [
     {
@@ -37,22 +37,10 @@
       "description": "« assemblee » pour cet export."
     },
     {
-      "name": "en_poste",
-      "type": "string",
-      "title": "En poste",
-      "description": "« oui » si la période est en cours, « non » sinon."
-    },
-    {
       "name": "debut",
       "type": "date",
       "title": "Début",
-      "description": "Date de début de la période (AAAA-MM-JJ) ; vide si inconnue."
-    },
-    {
-      "name": "fin",
-      "type": "date",
-      "title": "Fin",
-      "description": "Date de fin de la période (AAAA-MM-JJ) ; vide si la période est en cours ou inconnue."
+      "description": "Date de début de la période en cours (AAAA-MM-JJ) ; vide si inconnue."
     }
   ],
   "missingValues": [
