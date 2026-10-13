@@ -131,6 +131,12 @@ export async function proxy(req: NextRequest) {
   // mail.cavaparlement.eu : uniquement les versions en ligne des emails.
   if (host === `mail.${DOMAINE}`) {
     if (path.startsWith("/lire/")) return protege(NextResponse.next());
+    // Favicon du domaine : Σ' blanc sur rouge, servi depuis /mail/*.
+    if (path === "/icon.svg" || path === "/apple-icon") {
+      const url = req.nextUrl.clone();
+      url.pathname = `/mail${path}`;
+      return protege(NextResponse.rewrite(url));
+    }
     return vers(req, `www.${DOMAINE}`, "/", 307);
   }
 
@@ -184,6 +190,12 @@ export async function proxy(req: NextRequest) {
     if (path === "/assets/collab-reseau" || path === "/assets/collab-reseau.svg") {
       return vers(req, host, "/assets/pe/reseau", 308);
     }
+    // Favicon du domaine : Σ' bleu encre sur blanc, servi depuis /media/*.
+    if (path === "/icon.svg" || path === "/apple-icon") {
+      const url = req.nextUrl.clone();
+      url.pathname = `/media${path}`;
+      return NextResponse.rewrite(url);
+    }
     const autorise =
       path === "/sheets" || path.startsWith("/sheets/") ||
       path === "/search" ||
@@ -217,6 +229,12 @@ export async function proxy(req: NextRequest) {
   // domaine n'existe pas : tout revient vers www.dataparl.fr (même chemin).
   if (host === `raw.${DOMAINE}`) {
     if (path.startsWith("/schemas/") && path.endsWith(".json")) return NextResponse.next();
+    // Favicon du domaine : Σ' bleu encre sur blanc, servi depuis /raw/*.
+    if (path === "/icon.svg" || path === "/apple-icon") {
+      const url = req.nextUrl.clone();
+      url.pathname = `/raw${path}`;
+      return NextResponse.rewrite(url);
+    }
     return vers(req, `www.${DOMAINE}`, path, 308);
   }
 
@@ -234,6 +252,12 @@ export async function proxy(req: NextRequest) {
       const res = protege(NextResponse.rewrite(url));
       res.headers.set("X-Robots-Tag", "noindex");
       return res;
+    }
+    // Favicon du domaine : Σ' bleu encre sur blanc, servi depuis /enquete/*.
+    if (path === "/icon.svg" || path === "/apple-icon") {
+      const url = req.nextUrl.clone();
+      url.pathname = `/enquete${path}`;
+      return protege(NextResponse.rewrite(url));
     }
     return vers(req, `www.${DOMAINE}`, "/", 308);
   }
