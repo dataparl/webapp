@@ -94,12 +94,12 @@ export default function Connexion() {
     // session ; la navigation simple serait rejetée (boucle de redirection).
     // On les récupère avec le jeton, on déclenche le téléchargement, puis on
     // rejoint le menu des feuilles téléchargeables (media.dataparl.fr/sheets).
-    if (suite.startsWith("/assets/collab/")) {
+    if (/^\/assets\/(collab|parl)\//.test(suite)) {
       try {
         const r = await fetch("https://media.dataparl.fr" + suite, { headers: { Authorization: "Bearer " + token } });
         if (r.ok) {
           const blob = await r.blob();
-          const nomFichier = "collaborateurs_" + (suite.split("/").pop() ?? "export").replace(/\.csv$/i, "") + ".csv";
+          const nomFichier = "dataparl_" + (suite.split("/").pop() ?? "export").replace(/\.csv$/i, "") + ".csv";
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;

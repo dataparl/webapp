@@ -1,0 +1,73 @@
+{
+  "$schema": "https://specs.frictionlessdata.io/table-schema.json",
+  "name": "collaborateurs-par-genre",
+  "title": "Collaborateurs par genre et mixité des équipes",
+  "description": "Collaborateurs en poste avec le genre de chacun et la composition de l'équipe de leur élu employeur : femmes, hommes, indéterminés et part de femmes (méthode MixiParl' : dataparl.fr). Sources : publications officielles de l'Assemblée nationale, du Sénat et du Parlement européen. Producteur : DataParl'. Téléchargement réservé aux comptes DataParl' (gratuit) : dataparl.fr/connexion.",
+  "homepage": "https://www.dataparl.fr/mixiparl",
+  "licenses": [
+    {
+      "name": "ODbL-1.0",
+      "path": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "title": "Open Database License (ODbL) v1.0"
+    }
+  ],
+  "fields": [
+    {
+      "name": "collaborateur",
+      "type": "string",
+      "title": "Collaborateur",
+      "description": "Prénom et nom du collaborateur parlementaire."
+    },
+    {
+      "name": "genre",
+      "type": "string",
+      "title": "Genre",
+      "description": "« H », « F » ou « X » (indéterminé)."
+    },
+    {
+      "name": "elu",
+      "type": "string",
+      "title": "Élu employeur",
+      "description": "Nom du parlementaire employeur."
+    },
+    {
+      "name": "chambre",
+      "type": "string",
+      "title": "Chambre",
+      "description": "« assemblee », « senat » ou « europarl »."
+    },
+    {
+      "name": "debut",
+      "type": "date",
+      "title": "Début",
+      "description": "Date de début de la période en cours (AAAA-MM-JJ) ; vide si inconnue."
+    },
+    {
+      "name": "femmes_equipe",
+      "type": "integer",
+      "title": "Femmes dans l'équipe",
+      "description": "Nombre de membres de genre féminin dans l'équipe de l'élu."
+    },
+    {
+      "name": "hommes_equipe",
+      "type": "integer",
+      "title": "Hommes dans l'équipe",
+      "description": "Nombre de membres de genre masculin dans l'équipe de l'élu."
+    },
+    {
+      "name": "indetermines_equipe",
+      "type": "integer",
+      "title": "Indéterminés dans l'équipe",
+      "description": "Nombre de membres de genre indéterminé dans l'équipe de l'élu."
+    },
+    {
+      "name": "part_femmes_equipe",
+      "type": "string",
+      "title": "Part de femmes",
+      "description": "Part de femmes dans l'équipe, en pourcentage (ex. « 60 % »)."
+    }
+  ],
+  "missingValues": [
+    ""
+  ]
+}

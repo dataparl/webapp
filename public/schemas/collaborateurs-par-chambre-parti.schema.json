@@ -1,0 +1,55 @@
+{
+  "$schema": "https://specs.frictionlessdata.io/table-schema.json",
+  "name": "collaborateurs-par-chambre-parti",
+  "title": "Collaborateurs par chambre et par parti",
+  "description": "Croisement chambre × parti : collaborateurs en poste regroupés par chambre et par parti de l'élu employeur (ex. collaborateurs d'élus RN à l'Assemblée nationale). Sources : publications officielles de l'Assemblée nationale, du Sénat et du Parlement européen. Producteur : DataParl'. Téléchargement réservé aux comptes DataParl' (gratuit) : dataparl.fr/connexion.",
+  "homepage": "https://www.dataparl.fr/collab/an/liste",
+  "licenses": [
+    {
+      "name": "ODbL-1.0",
+      "path": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "title": "Open Database License (ODbL) v1.0"
+    }
+  ],
+  "fields": [
+    {
+      "name": "chambre",
+      "type": "string",
+      "title": "Chambre",
+      "description": "« assemblee », « senat » ou « europarl »."
+    },
+    {
+      "name": "parti",
+      "type": "string",
+      "title": "Parti",
+      "description": "Sigle du parti / groupe de rattachement de l'élu employeur."
+    },
+    {
+      "name": "parti_nom",
+      "type": "string",
+      "title": "Nom du parti",
+      "description": "Nom complet du parti ou du groupe."
+    },
+    {
+      "name": "collaborateur",
+      "type": "string",
+      "title": "Collaborateur",
+      "description": "Prénom et nom du collaborateur parlementaire."
+    },
+    {
+      "name": "elu",
+      "type": "string",
+      "title": "Élu employeur",
+      "description": "Nom du parlementaire employeur."
+    },
+    {
+      "name": "debut",
+      "type": "date",
+      "title": "Début",
+      "description": "Date de début de la période en cours (AAAA-MM-JJ) ; vide si inconnue."
+    }
+  ],
+  "missingValues": [
+    ""
+  ]
+}

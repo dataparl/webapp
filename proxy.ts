@@ -175,7 +175,11 @@ export async function proxy(req: NextRequest) {
     if (path.startsWith("/photo-credit")) return vers(req, `www.${DOMAINE}`, "/", 307);
     // media.dataparl.fr/assets/collab/{an,senat,pe}.csv : export CSV brut des
     // collaborateurs d'une chambre, généré par la webapp (app/assets/collab).
-    if (/^\/assets\/collab\/(an|senat|pe)(\.csv)?$/.test(path)) return NextResponse.next();
+    // media.dataparl.fr/assets/{collab,parl}/<slug>.csv : exports CSV bruts publiés sur
+// data.gouv.fr (jeux « Collaborateurs parlementaires » et « Parlementaires
+// français »), générés par la webapp (app/assets/{collab,parl}) — verrouillés
+// par compte dans les routes elles-mêmes.
+if (/^\/assets\/(collab|parl)\/[a-z0-9-]+(\.csv)?$/.test(path)) return NextResponse.next();
     // media.dataparl.fr/assets/pe/reseau : export SVG du réseau des
     // structures et de leurs eurodéputés (généré par la webapp, avec logo).
     if (path === "/assets/pe/reseau" || path === "/assets/pe/reseau.svg") {
