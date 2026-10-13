@@ -78,11 +78,11 @@ export function cheminLogoGroupe(chambre: string, sigle: string): string | null 
 
 // « dem-an-XVIIe.png » -> { sigle: "dem", chambre: "assemblee", romain: "XVIIe" }
 export function analyserLogoGroupe(fichier: string): { sigle: string; chambre: string; romain: string } | null {
-  const m = /^([a-z0-9-]{1,20})-(an|senat|pe)-(\[IVXLC]+)e\.png$/.exec(fichier);
+  const m = /^([a-z0-9-]{1,20})-(an|senat|pe)-([IVXLC]+)e\.png$/.exec(fichier);
   if (!m) return null;
   const chambre = CHAMBRE_DE_CODE[m[2]];
   if (!chambre) return null;
   const leg = LEGISLATURES[chambre];
   if (!leg || m[3] !== leg.romain.replace(/e$/, "")) return null;
-  return { sigle: m[1], chambre, romain: m[3] + "e" };
+  return { sigle: m[1], chambre, romain: m[3] };
 }
