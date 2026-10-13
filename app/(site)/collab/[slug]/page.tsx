@@ -17,10 +17,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const c = await collaborateurDepuisSlug((await params).slug).catch(() => null);
   if (!c) return { title: "Collaborateur" };
   const nom = prenomNom(c.prenom, c.nom);
+  // Claims Google (brief) : title « Nom | DataParl' » (template du layout racine),
+  // description « Parcours de Nom sur DataParl' — élus, mouvements et historique
+  // depuis 2015. », og:title « Nom sur DataParl' » (og:site_name vient du layout).
+  const claim = "Parcours de " + nom + " sur DataParl’ — élus, mouvements et historique depuis 2015.";
   return {
-    title: nom + " : parcours de collaborateur parlementaire",
-    description: "Parcours de " + nom + " : postes de collaborateur parlementaire (fonction, élu, chambre, périodes), d'après les listes officielles de l'Assemblée nationale et du Sénat.",
+    title: nom,
+    description: claim,
     alternates: { canonical: "/collab/" + c.slug },
+    openGraph: { title: nom + " sur DataParl’", description: claim },
   };
 }
 
