@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prenomNom } from "@/lib/format";
-import { ORDRE_FONCTION, categorieFonction, finEffective, periode } from "@/lib/gouvernementTypes";
+import { ORDRE_FONCTION, categorieFonction, finEffective, periode, slugGouvernement } from "@/lib/gouvernementTypes";
 import { autresMandats, cabinetsDuMinistre, ficheMinistre } from "@/lib/gouvernement";
 
 export const revalidate = 3600;
@@ -39,7 +39,12 @@ export default async function FicheMinistre({ params }: Props) {
   return (
     <>
       <p className="meta" style={{ marginBottom: 0 }}>
-        {m.gouvernement} · <a href="/gouvernement">tous les gouvernements</a>
+        {m.gouvernement ? (
+          <>
+            <a href={"/gouvernement/" + slugGouvernement(m.gouvernement)}>{m.gouvernement}</a> ·{" "}
+          </>
+        ) : null}
+        <a href="/gouvernement/explorer">tous les gouvernements</a>
       </p>
       <h1>{nom}</h1>
       <p className="lead">

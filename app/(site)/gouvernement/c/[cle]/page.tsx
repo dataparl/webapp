@@ -43,7 +43,7 @@ export default async function FicheMembreCabinet({ params }: Props) {
     <>
       <p className="meta" style={{ marginBottom: 0 }}>
         {postes.length} poste{postes.length > 1 ? "s" : ""} en cabinet ministériel · {nMinistres} ministre{nMinistres > 1 ? "s" : ""} ·{" "}
-        <a href="/gouvernement">tous les gouvernements</a>
+        <a href="/gouvernement/explorer">tous les gouvernements</a>
       </p>
       <h1>{nom}</h1>
       <p className="lead">

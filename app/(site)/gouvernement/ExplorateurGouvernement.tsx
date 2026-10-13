@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { prenomNom } from "@/lib/format";
-import { LIBELLE_FONCTION, LIBELLE_STATUT, categorieFonction, enPoste, finEffective, normaliseNom, periode, statutCabinet, type MandatMinistre, type MembreCabinet } from "@/lib/gouvernementTypes";
+import { LIBELLE_FONCTION, LIBELLE_STATUT, categorieFonction, enPoste, finEffective, normaliseNom, periode, slugGouvernement, statutCabinet, type MandatMinistre, type MembreCabinet } from "@/lib/gouvernementTypes";
 
 const hrefM = (id: string) => "/gouvernement/m/" + encodeURIComponent(id);
 const hrefC = (cle: string) => "/gouvernement/c/" + encodeURIComponent(cle);
@@ -53,7 +53,7 @@ export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats
     if (gouv) p.set("gouvernement", gouv);
     if (statut) p.set("statut", statut);
     const s = p.toString();
-    window.history.replaceState(null, "", s ? "/gouvernement?" + s : "/gouvernement");
+    window.history.replaceState(null, "", s ? "/gouvernement/explorer?" + s : "/gouvernement/explorer");
   }, [q, cat, gouv, statut]);
 
   const jetons = normaliseNom(q).split(" ").filter(Boolean).slice(0, 6);
@@ -67,7 +67,8 @@ export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats
         if (statut === "anciens" && !m.fin) return false;
         if (!cherche) return true;
         const sable = normaliseNom([m.prenom, m.nom, m.portefeuille, m.fonction, m.gouvernement].join(" "));
-        return jetons.every((j) => sable.includes(j));
+        const sableJoint = sable.replace(/ /g, "");
+        return jetons.every((j) => sable.includes(j) || sableJoint.includes(j.replace(/ /g, "")));
       }).sort((a, b) => a.nom.localeCompare(b.nom, "fr"))
     : [];
 
@@ -80,7 +81,8 @@ export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats
         if (statut === "anciens" && enPoste(c.fin, m?.fin ?? null)) return false;
         if (!cherche) return true;
         const sable = normaliseNom([c.collab_prenom, c.collab_nom, c.fonction, m?.prenom, m?.nom, m?.portefeuille, m?.gouvernement].join(" "));
-        return jetons.every((j) => sable.includes(j));
+        const sableJoint = sable.replace(/ /g, "");
+        return jetons.every((j) => sable.includes(j) || sableJoint.includes(j.replace(/ /g, "")));
       }).sort((a, b) => a.collab_nom.localeCompare(b.collab_nom, "fr"))
     : [];
 
@@ -128,7 +130,7 @@ export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats
             </button>
           )}
         </p>
-        <p className="meta">L’URL reflète vos filtres : copiez-la pour partager exactement cette vue.</p>
+        <p className="meta">L'URL reflète vos filtres : copiez-la pour partager exactement cette vue.</p>
       </div>
 
       {filtre ? (
@@ -136,7 +138,7 @@ export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats
           <h2>Résultats</h2>
           {aucun && (
             <p className="meta">
-              Aucun résultat. Essayez un nom de famille seul, ou vérifiez l’orthographe : les nominations sont publiées au JORF
+              Aucun résultat. Essayez un nom de famille seul, ou vérifiez l'orthographe : les nominations sont publiées au JORF
               sous le nom exact de la personne.
             </p>
           )}
@@ -178,7 +180,10 @@ export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats
         </>
       ) : (
         <>
-          <p className="meta">Ouvrez un gouvernement pour voir ses ministres, puis le cabinet de chacun. Chaque nom ouvre une fiche.</p>
+          <p className="meta">
+            Ouvrez un gouvernement pour voir ses ministres, puis le cabinet de chacun. Chaque gouvernement a aussi{" "}
+            <a href="/gouvernement">sa page dédiée</a> (trombinoscope, ordre protocolaire). Chaque nom ouvre une fiche.
+          </p>
           {gouvernements.map((g, i) => {
             const duGouvernement = mandats
               .filter((m) => (m.gouvernement || "Autres mandats") === g)
@@ -188,7 +193,11 @@ export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats
             return (
               <details key={g} open={i === 0}>
                 <summary>
-                  <h2 style={{ display: "inline" }}>{g}</h2>{" "}
+                  <h2 style={{ display: "inline" }}>
+                    {g !== "Autres mandats" ? (
+                      <a href={"/gouvernement/" + slugGouvernement(g)} style={{ color: "inherit" }}>{g}</a>
+                    ) : g}
+                  </h2>{" "}
                   <span className="meta">
                     — {duGouvernement.length} ministre{duGouvernement.length > 1 ? "s" : ""} · {membres} membre{membres > 1 ? "s" : ""} identifié{membres > 1 ? "s" : ""}
                     {nonDocumentes > 0 ? " · " + nonDocumentes + " cabinet" + (nonDocumentes > 1 ? "s" : "") + " sans publication identifiée" : ""}
@@ -216,7 +225,7 @@ export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats
                         ) : (
                           <p className="meta">
                             {st === "verification"
-                              ? "Mandat récent — recensement en cours : aucune nomination identifiée à ce jour au JORF (les décrets paraissent au fil de l’eau)."
+                              ? "Mandat récent — recensement en cours : aucune nomination identifiée à ce jour au JORF (les décrets paraissent au fil de l'eau)."
                               : "Publication non retrouvée au JORF pour ce mandat — cabinet non documenté ici, pas nécessairement inexistant."}
                           </p>
                         )}
