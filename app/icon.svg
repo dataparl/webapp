@@ -1,7 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Favicon DataParl' : monogramme Σ' — blanc sur bleu encre #071A41, identique sur tous les domaines et sous-domaines. -->
+  <!-- Favicon DataParl' : monogramme Σ' en Georgia — #FFFFFF sur fond #071A41, même rendu que apple-icon. -->
   <rect width="64" height="64" rx="14" fill="#071A41"/>
-  <path d="M11 15 H43 L28 32 L43 49 H11" fill="none" stroke="#FFFFFF" stroke-width="6.5" stroke-linejoin="miter"/>
-  <ellipse cx="52" cy="16.5" rx="3.2" ry="3.4" fill="#FFFFFF"/>
-  <polygon points="48.9,16 55.1,16 53.3,9 50.7,9" fill="#FFFFFF"/>
+  <text x="33" y="46" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="38" font-weight="700" fill="#FFFFFF">&#931;&#39;</text>
 </svg>
