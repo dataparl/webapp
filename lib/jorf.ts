@@ -23,9 +23,10 @@ export type MesureJORF = {
   civilite: "M." | "Mme";
   prenom: string;
   nom: string;
-  fonction: string; // fonction telle que citée (ex. « directeur de cabinet »)
-  portefeuille: string; // portefeuille du ministre (ex. « de l'industrie »)
-  ministre: { prenom: string; nom: string } | null; // ministre de rattachement (cabinets)
+  fonction: string; // fonction telle que citée (ex. « directeur de cabinet », « conseiller parlementaire »)
+  portefeuille: string; // titre ministériel complet (ex. « ministre des sports »)
+  ministre: { prenom: string; nom: string } | null; // ministre de rattachement nommé dans le décret
+  cabinet_titre: string; // intitulé du cabinet (« Premier ministre », « ministre délégué…, chargé… »), vide sinon
   extrait: string; // phrase nominative, pour l'audit
 };
 
@@ -96,25 +97,85 @@ function personnesDuTexte(metaSm: string): { civilite: "M." | "Mme"; prenom: str
   return out;
 }
 
-// Fonctions de cabinet : telles qu'elles apparaissent dans les décrets.
-const FONCTIONS_CABINET = [
-  "directeur adjoint de cabinet", "directrice adjointe de cabinet",
-  "adjoint au directeur de cabinet", "adjointe au directeur de cabinet",
-  "directeur de cabinet", "directrice de cabinet",
-  "chef de cabinet", "cheffe de cabinet",
-  "conseiller", "conseillère",
-  "conseiller technique", "conseillère technique",
-  "chef adjoint de cabinet", "cheffe adjointe de cabinet",
-  "chargé de mission", "chargée de mission",
+// ---------------------------------------------------------------------------
+// 3. Qualification : qui est nommé, et où ?
+// ---------------------------------------------------------------------------
+// Fonctions de cabinet citées dans les décrets, avec leurs adjectifs usuels
+// (« conseiller parlementaire », « conseillère technique presse »…). La
+// correspondance la plus longue gagne : c'est elle qui devient la fonction
+// enregistrée — plus de « conseiller » générique qui noie les titres réels.
+const ADJECTIFS_FONCTION = "(?:\\s+(?:technique[s]?|parlementaire[s]?|social(?:e|es)?|spéciale?|politique[s]?|numérique|digitale|de\\s+presse|communication|territoriale[s]?|européen(?:ne|nes)?|agricole|juridique))*";
+const FONCTION_CABINET_RX = new RegExp(
+  "\\b(adjoint(?:e)?\\s+au\\s+directeur(?:\\s+d(?:e|u)\\s+cabinet)?|direct(?:eur|rice)(?:\\s+adjoint(?:e)?)?\\s+d(?:e|u)\\s+cabinet|chef(?:fe)?(?:\\s+adjoint(?:e)?)?\\s+d(?:e|u)\\s+cabinet|charg[ée]e?\\s+de\\s+mission|conseill(?:er|ère))" + ADJECTIFS_FONCTION,
+  "gi");
+
+function fonctionCabinet(autour: string): string | null {
+  let meilleur: string | null = null;
+  for (const m of autour.matchAll(FONCTION_CABINET_RX)) {
+    const f = m[0].trim();
+    if (!meilleur || f.length > meilleur.length) meilleur = f;
+  }
+  return meilleur;
+}
+
+// Intitulé ministériel complet (« Premier ministre », « ministre délégué
+// auprès du Premier ministre, chargé des relations avec le Parlement »…) :
+// jusqu'à la fin de la phrase, borné pour ne pas avaler le décret entier.
+const TITRE_MINISTERIEL = "(?:(?:Premier\\s+)?ministre|secrétaire\\s+d'[ée]tat|garde\\s+des\\s+sceaux)\\b[^.;]{0,200}";
+
+// Trois façons de désigner le cabinet de rattachement :
+//   « au cabinet du Premier ministre »
+//   « conseillère … du ministre délégué auprès du Premier ministre, chargé … »
+//   « conseiller auprès du ministre de l'intérieur »
+const CIBLES: RegExp[] = [
+  new RegExp(`\\bcabinet\\s+(?:du|de\\s+la|de\\s+l')\\s*(${TITRE_MINISTERIEL})`, "iu"),
+  new RegExp(`\\b(?:conseill(?:er|ère)|direct(?:eur|rice)|chef|cheffe|charg[ée]e?|adjoint(?:e)?)\\b[^.;]{0,60}?\\b(?:du|de\\s+la|de\\s+l')\\s*(${TITRE_MINISTERIEL})`, "iu"),
+  new RegExp(`\\bauprès\\s+(?:du|de\\s+la|de\\s+l')\\s*(${TITRE_MINISTERIEL})`, "iu"),
 ];
 
+// Nettoyage de l'intitulé capté : on tronque au premier greffon parasite —
+// la fonction du nommé si elle suit l'intitulé, les compléments de lieu ou
+// de durée. NB : \b ne fonctionne pas après une lettre accentuée (« chargé »
+// finit par un « é », non-mot en JS), on exige donc une espace ou une fin.
+const echappe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
+const nettoyerTitre = (s: string, fonction: string | null): string => {
+  let t = s;
+  const coupe = (rx: RegExp) => { const m = rx.exec(t); if (m) t = t.slice(0, m.index); };
+  if (fonction) coupe(new RegExp(`\\s+${echappe(fonction)}(?:\\s|$)`, "i"));
+  coupe(/:/);
+  coupe(/\s+(?:au|aux|dans|en\s+qualité|à\s+compter|pour\s+une\s+durée)\s/i);
+  return t.replace(/[\s,:;]+$/, "").replace(/\s+/g, " ").trim();
+};
+
+// Ministre de rattachement nommé dans le décret — et immédiatement qualifié :
+// « directeur du cabinet de Mme Marina FERRARI, ministre des sports ». Sans
+// qualification on refuse : c'est en attrapant des « M. X » croisés dans un
+// arrêté quelconque que des rattachements fantômes étaient créés.
+const MINISTRE_NOMME = /(?:auprès|chez|cabinet)\s+d(?:e\s+la|e|u|')\s*(?:M\.|Mme|Madame|Monsieur)\s+([A-ZÉÈ][\p{L}'’-]+)\s+([A-ZÉÈ][\p{L}'’-]+(?:\s+[A-ZÉÈ][\p{L}'’-]+)?),?\s*(?=(?:(?:Premier\s+)?ministre|secrétaire\s+d'[ée]tat|garde\s+des\s+sceaux))/u;
+
+// Titre ministériel directement après le nom d'une personne : la seule
+// preuve qu'on a affaire à un membre du Gouvernement — « Mme FERRARI,
+// ministre des sports », « M. LECORNU, Premier ministre », « est nommé
+// secrétaire d'État à… ». Les mentions d'un ministre dans la signature ou
+// l'exposé d'un arrêté préfectoral ne qualifient plus la personne.
+const QUALIFIE_MINISTRE = /(?:^|[,;]\s*|\b(?:est\s+)?nomm(?:é(?:e)?)\s+(?:en\s+qualité\s+(?:de|du)\s+)?|\ben\s+qualité\s+(?:de|du)\s+)((?:(?:Premier\s+)?ministre|secrétaire\s+d'[ée]tat|garde\s+des\s+sceaux)\b[^,;]{0,150})/i;
+
 const nomApostrophe = (prenom: string, nom: string): RegExp => {
-  const echappe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/[\s]+/g, "\\s+");
-  return new RegExp(`${echappe(nom)}\\s*[,«]?\\s*${echappe(prenom)}|${echappe(prenom)}\\s+${echappe(nom)}`, "i");
+  const e = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/[\s]+/g, "\\s+");
+  return new RegExp(`${e(nom)}\\s*[,«]?\\s*${e(prenom)}|${e(prenom)}\\s+${e(nom)}`, "i");
 };
 
 // Analyse d'un document JORF (un ou plusieurs <TEXTE>) : rend les mesures
 // nominatives concernant les ministres et les cabinets ministériels.
+//
+// Garde-fous (2026-10-13) : une mesure n'est retenue que si le décret
+// qualifie explicitement la personne — titre ministériel directement après
+// son nom pour un ministre, intitulé de cabinet cité ou ministre nommé et
+// qualifié pour un membre de cabinet. Les nominations préfectorales («
+// directeur de cabinet du préfet de… »), de l'Élysée (« …du président de la
+// République »), de la police, des assemblées ou des décorations ne sont
+// plus attrapées : elles aboutissaient à de faux membres de cabinets
+// ministériels (cf. corrections des cabinets Panifous / Lecornu II).
 export function analyserJORF(xml: string, dateDefaut?: string): MesureJORF[] {
   const out: MesureJORF[] = [];
   const blocs = xml.match(/<TEXTE\b[\s\S]*?<\/TEXTE>/gi) ?? [xml];
@@ -134,51 +195,59 @@ export function analyserJORF(xml: string, dateDefaut?: string): MesureJORF[] {
     for (const p of personnes) {
       // La phrase autour du nom : c'est elle qui dit s'il s'agit d'un ministre
       // ou d'un membre de cabinet, et auprès de qui.
-      const autour = (() => {
-        const m = nomApostrophe(p.prenom, p.nom).exec(texte);
-        if (!m) return texte.slice(0, 400);
-        return texte.slice(Math.max(0, m.index - 260), Math.min(texte.length, m.index + 420));
-      })();
-      const rMinistre = /(ministre d[e']\s?[ÉEa-zéèêàâ\s,'-]{3,80}|ministre chargé[e]? de[^,.;]{3,80}|Premier ministre|secrétaire d[ée]?tat [àa][^,.;]{3,60})/i.exec(autour);
-      const rCabinet = FONCTIONS_CABINET.map((f) => new RegExp(f, "i").exec(autour)).find(Boolean);
-      const role: MesureJORF["role"] = rCabinet && !/ministre\s/i.test(autour.slice(0, 40)) ? "cabinet" : rMinistre ? "ministre" : rCabinet ? "cabinet" : "ministre";
-      // Ministre de rattachement : « directeur de cabinet de M./Mme <Prénom NOM>, ministre de … ».
-      const ministre = (() => {
-        if (role !== "cabinet") return null;
-        const m = /(?:auprès|chez|cabinet)\s+d[e']?\s*(?:M\.|Mme|Madame|Monsieur)\s+([A-ZÉÈ][\p{L}'’-]+)\s+([A-ZÉÈ][\p{L}'’-]+(?:\s+[A-ZÉÈ][\p{L}'’-]+)?)/u.exec(autour);
-        if (m) {
-          // Dans le JORF : « M. FERRACCI Marc » (NOM Prénom) ou parfois l'inverse :
-          // le nom de famille est en capitales.
-          const nom = m[1] === m[1].toUpperCase() ? m[1] : m[2];
-          const prenom = m[1] === m[1].toUpperCase() ? m[2] : m[1];
-          return { prenom, nom };
-        }
-        // « directeur de cabinet du/de la ministre de X » : on rattache au portefeuille.
-        return null;
-      })();
+      const m = nomApostrophe(p.prenom, p.nom).exec(texte);
+      const autour = m ? texte.slice(Math.max(0, m.index - 260), Math.min(texte.length, m.index + 420)) : texte.slice(0, 400);
+      const fonctionCab = fonctionCabinet(autour);
+      const cible = CIBLES.map((rx) => rx.exec(autour)?.[1] ?? null).find(Boolean) ?? null;
+      const cabinetTitre = cible ? nettoyerTitre(cible, fonctionCab) : "";
+      const nomme = MINISTRE_NOMME.exec(autour);
+      const ministre = nomme
+        ? (nomme[1] === nomme[1].toUpperCase()
+          ? { prenom: nomme[2], nom: nomme[1] }
+          : { prenom: nomme[1], nom: nomme[2] })
+        : null;
+      const apres = m ? texte.slice(m.index + m[0].length, m.index + m[0].length + 220) : "";
+      const qualifie = QUALIFIE_MINISTRE.exec(apres)?.[1]?.trim() ?? "";
+      let role: MesureJORF["role"] | null = null;
+      let fonction = "";
+      if (fonctionCab && (cabinetTitre || ministre)) { role = "cabinet"; fonction = fonctionCab; }
+      else if (qualifie) { role = "ministre"; fonction = qualifie; }
+      if (!role) continue; // ni ministre ni cabinet ministériel identifiable : on ignore
       out.push({
         id_texte: id, date, nature, titre, type, role,
         civilite: p.civilite, prenom: p.prenom, nom: p.nom,
-        fonction: (rCabinet?.[0] ?? rMinistre?.[0] ?? "").trim(),
-        portefeuille: role === "ministre" ? (rMinistre?.[0] ?? "").replace(/^ministre\s*/i, "").trim() : "",
-        ministre,
+        fonction,
+        portefeuille: role === "ministre" ? fonction : "",
+        ministre: role === "cabinet" ? ministre : null,
+        cabinet_titre: role === "cabinet" ? cabinetTitre : "",
         extrait: autour.replace(/\s+/g, " ").slice(0, 400),
       });
     }
-    // Sans métadonnées nominatives (anciens numéros), recherche dans le texte.
+    // Sans métadonnées nominatives (anciens numéros), recherche dans le
+    // texte, avec les mêmes garde-fous.
     if (!personnes.length) {
       for (const m of texte.matchAll(/(?:M\.|Mme)\s+([A-ZÉÈ][\p{L}'’-]+)\s+([A-ZÉÈ][\p{L}'’-]+(?:\s+[A-ZÉÈ][\p{L}'’-]+){0,2})/gu)) {
         const autour = texte.slice(Math.max(0, m.index - 100), m.index + 320);
-        if (!/(cabinet|ministre|secrétaire d[ée]?tat)/i.test(autour)) continue;
+        const fonctionCab = fonctionCabinet(autour);
+        const cible = CIBLES.map((rx) => rx.exec(autour)?.[1] ?? null).find(Boolean) ?? null;
+        const cabinetTitre = cible ? nettoyerTitre(cible, fonctionCab) : "";
+        const apres = texte.slice(m.index + m[0].length, m.index + m[0].length + 220);
+        const qualifie = QUALIFIE_MINISTRE.exec(apres)?.[1]?.trim() ?? "";
+        let role: MesureJORF["role"] | null = null;
+        let fonction = "";
+        if (fonctionCab && (cabinetTitre || MINISTRE_NOMME.test(autour))) { role = "cabinet"; fonction = fonctionCab ?? ""; }
+        else if (qualifie) { role = "ministre"; fonction = qualifie; }
+        if (!role) continue;
         out.push({
           id_texte: id, date, nature, titre,
           type: /(cessation|révocation|fin de fonctions)/i.test(titre) ? "cessation" : "nomination",
-          role: /cabinet|conseiller/i.test(autour) && !/ministre\s/i.test(autour.slice(0, 40)) ? "cabinet" : "ministre",
+          role,
           civilite: m[0].startsWith("Mme") ? "Mme" : "M.",
           prenom: m[1], nom: m[2],
-          fonction: FONCTIONS_CABINET.map((f) => new RegExp(f, "i").exec(autour)).find(Boolean)?.[0] ?? (/ministre/i.test(autour) ? "ministre" : ""),
-          portefeuille: (/(ministre d[e']?\s?[a-zéèêàâ\s,'-]{3,80})/i.exec(autour)?.[0] ?? "").replace(/^ministre\s*/i, "").trim(),
+          fonction,
+          portefeuille: role === "ministre" ? fonction : "",
           ministre: null,
+          cabinet_titre: role === "cabinet" ? cabinetTitre : "",
           extrait: autour,
         });
       }

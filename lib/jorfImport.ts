@@ -9,6 +9,18 @@ import { dataAdmin } from "./supabaseAdmin";
 // + 2026-10-04_jorf_releves), avec suivi des jours balayés dans `jorf_releves`.
 // Les écritures passent par la clé service_role (dataAdmin) ; la lecture du
 // référentiel (rapprochement parlementaires / collaborateurs) reste publique.
+//
+// Rattachement des cabinets (2026-10-13) : strict, en deux voies seulement.
+// Soit le décret nomme le ministre et le qualifie (« directeur du cabinet de
+// Mme Marina FERRARI, ministre des sports »), soit il désigne le cabinet par
+// son intitulé (« au cabinet du Premier ministre », « du ministre délégué
+// auprès du Premier ministre, chargé des relations avec le Parlement »), et
+// l'intitulé est rapproché des mandats ministériels en cours — la « charge »
+// (sports, relations avec le Parlement, porte-parole, égalité…) départage
+// les cabinets « auprès du Premier ministre ». Sans rattachement certain, la
+// mesure est rejetée : c'est l'ancien nom+date approximatif qui versait des
+// nominations préfectorales, de l'Élysée ou de la police dans les cabinets
+// ministériels (cf. corrections Panifous / Lecornu II d'octobre 2026).
 
 export type JourJORF = { date: string; nb: number; ministres: number; cabinets: number; erreurs: string[] };
 
@@ -36,6 +48,48 @@ async function chercherMinistre(prenom: string, nom: string): Promise<string | n
   const { rows } = await dataQuery<{ id: string }>("ministres",
     new URLSearchParams({ select: "id", or, order: "debut.desc", limit: "1" }), 3600);
   return rows[0]?.id ?? null;
+}
+
+// Normalisation pour la comparaison d'intitulés (accents, ponctuation).
+const normTitre = (s: string): string =>
+  " " + s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ").trim() + " ";
+
+// Mots vides d'un intitulé : seuls les mots distinctifs (« sports »,
+// « relations », « parlement », « égalité »…) départagent les cabinets
+// « auprès du Premier ministre » entre eux.
+const MOTS_VIDES = new Set(["premier", "ministre", "ministres", "secretaire", "etat", "delegue", "deleguee", "charge", "chargee", "gouvernement", "president"]);
+
+// Rattachement d'un intitulé de cabinet au mandat ministériel en cours à la
+// date de la mesure. Ambiguïté ou intitulé sans charge distinctive → null :
+// on ne devine plus, la mesure sera rejetée avec un message d'erreur.
+async function chercherMinistreParTitre(titre: string, date: string): Promise<string | null> {
+  const t = normTitre(titre);
+  let rows: { id: string; prenom: string; nom: string; fonction: string; portefeuille: string }[] = [];
+  try {
+    const r = await dataQuery<{ id: string; prenom: string; nom: string; fonction: string; portefeuille: string }>("ministres",
+      new URLSearchParams({ select: "id,prenom,nom,fonction,portefeuille", debut: `lte.${date}`, or: `(fin.is.null,fin.gte.${date})`, order: "debut.desc", limit: "200" }), 300);
+    rows = r.rows ?? [];
+  } catch {
+    return null;
+  }
+  if (!rows.length) return null;
+  // Le cabinet du Premier ministre lui-même.
+  if (/^ premier ministre/.test(t) && !/ delegue| aupres/.test(t)) {
+    return rows.find((r) => normTitre(r.portefeuille) === " premier ministre " || normTitre(r.fonction).startsWith(" premier ministre"))?.id ?? null;
+  }
+  const mots = [...t.matchAll(/[a-z]{5,}/g)].map((m) => m[0]).filter((w) => !MOTS_VIDES.has(w));
+  if (!mots.length) return null;
+  let meilleur: { id: string; couverts: number } | null = null;
+  let ambigu = false;
+  for (const r of rows) {
+    const jetons = new Set(normTitre(`${r.fonction} ${r.portefeuille}`).trim().split(" "));
+    const couverts = mots.filter((w) => jetons.has(w)).length;
+    if (couverts < Math.ceil(mots.length * 0.6)) continue;
+    if (!meilleur || couverts > meilleur.couverts) { meilleur = { id: r.id, couverts }; ambigu = false; }
+    else if (couverts === meilleur.couverts) ambigu = true;
+  }
+  return ambigu ? null : meilleur?.id ?? null;
 }
 
 // Le nom du gouvernement (« Gouvernement Borne »…) quand il est cité.
@@ -66,23 +120,42 @@ export async function importerJour(date: string): Promise<JourJORF> {
         }
         out.ministres++;
       } else {
-        // Membre de cabinet : il faut le ministre de rattachement.
-        const ref = m.ministre ?? { prenom: "", nom: "" };
-        let ministreId = ref.nom ? await chercherMinistre(ref.prenom, ref.nom).catch(() => null) : null;
-        if (!ministreId && ref.nom) {
+        // Membre de cabinet : rattachement strict — le décret désigne le
+        // cabinet par son intitulé ou nomme le ministre qualifié. Sinon la
+        // mesure est rejetée : les approximations nom+date d'avant
+        // versaient des nominations préfectorales ou de l'Élysée dans les
+        // cabinets ministériels.
+        const ref = m.ministre ?? null;
+        let ministreId = ref ? await chercherMinistre(ref.prenom, ref.nom).catch(() => null) : null;
+        let rattachement = ref ? `${ref.prenom} ${ref.nom}` : m.cabinet_titre;
+        if (!ministreId && m.cabinet_titre) {
+          ministreId = await chercherMinistreParTitre(m.cabinet_titre, m.date).catch(() => null);
+          rattachement = m.cabinet_titre;
+        }
+        if (!ministreId && ref && /(?:(?:Premier )?ministre|secrétaire d'[ée]tat|garde des sceaux)/i.test(m.extrait)) {
+          // Ministre nommé dans le décret mais absent de la base (nouveau
+          // mandat) : création seulement quand l'extrait le qualifie.
           const id = idMinistre(ref.nom, m.date);
           await db.from("ministres").upsert({
             id, personne_id: null, civilite: "M.", prenom: ref.prenom, nom: ref.nom,
             fonction: "ministre", portefeuille: "", gouvernement: gouvernementDu(m.extrait), rang: "",
             debut: m.date, fin: null, source: `JORF ${m.id_texte} (rattachement de cabinet)`, confiance: "officiel",
           }).then(() => { ministreId = id; });
+          rattachement += " (mandat créé)";
         }
-        if (!ministreId) { out.erreurs.push(`${m.prenom} ${m.nom} : ministre de rattachement introuvable`); continue; }
+        if (!ministreId) { out.erreurs.push(`${m.prenom} ${m.nom} : cabinet « ${rattachement || "intitulé absent"} » non résolu`); continue; }
         const cle = cleNom(m.prenom, m.nom);
         const collab = await chercherCollaborateur(m.prenom, m.nom).catch(() => null);
         if (m.type === "cessation") {
-          await db.from("cabinets_ministeriels").update({ fin: m.date, synced_at: new Date().toISOString() }).eq("collab_cle", cle).is("fin", null);
+          // Clôture ciblée chez le ministre identifié (et non plus toutes
+          // les lignes ouvertes au nom, homonymies comprises).
+          await db.from("cabinets_ministeriels").update({ fin: m.date, synced_at: new Date().toISOString() })
+            .eq("collab_cle", cle).is("fin", null).eq("ministre_id", ministreId);
         } else {
+          // Mouvement : on clôture un éventuel rattachement ouvert chez un
+          // autre ministre — c'est ce qui empêche les doubles affectations.
+          await db.from("cabinets_ministeriels").update({ fin: m.date, synced_at: new Date().toISOString() })
+            .eq("collab_cle", cle).is("fin", null).neq("ministre_id", ministreId);
           const personneId = collab ? null : await chercherParlementaire(m.prenom, m.nom).catch(() => null);
           await db.from("cabinets_ministeriels").upsert({
             id: idCabinet(ministreId, m.prenom, m.nom), ministre_id: ministreId,
