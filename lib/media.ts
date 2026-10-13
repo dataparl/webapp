@@ -1,9 +1,11 @@
 // Photos des élus servies par DataParl' : media.dataparl.fr/<chambre>/<id>_<credit>_<taille>.png
 // (aussi sous www.dataparl.fr/media/…). `credit` nomme le détenteur de l'image :
-// an (Assemblée nationale), senat (Sénat), pe (Parlement européen). Sans dépendance (testé).
-export const CODE_CHAMBRE: Record<string, "an" | "senat" | "pe"> = { assemblee: "an", senat: "senat", europarl: "pe" };
-export const CHAMBRE_DE_CODE: Record<string, "assemblee" | "senat" | "europarl"> = { an: "assemblee", senat: "senat", pe: "europarl" };
-export const CREDIT: Record<string, string> = { an: "Assemblée nationale", senat: "Sénat", pe: "Parlement européen" };
+// an (Assemblée nationale), senat (Sénat), pe (Parlement européen), gouv
+// (Gouvernement, d'après info.gouv.fr — le photographe est crédité sur la page).
+// Sans dépendance (testé).
+export const CODE_CHAMBRE: Record<string, "an" | "senat" | "pe" | "gouv"> = { assemblee: "an", senat: "senat", europarl: "pe", gouvernement: "gouv" };
+export const CHAMBRE_DE_CODE: Record<string, "assemblee" | "senat" | "europarl" | "gouvernement"> = { an: "assemblee", senat: "senat", pe: "europarl", gouv: "gouvernement" };
+export const CREDIT: Record<string, string> = { an: "Assemblée nationale", senat: "Sénat", pe: "Parlement européen", gouv: "Gouvernement (info.gouv.fr)" };
 export const TAILLES = [96, 200, 400] as const;
 
 export const MEDIA_BASE = (process.env.NEXT_PUBLIC_MEDIA_BASE ?? "https://media.dataparl.fr").replace(/\/$/, "");
@@ -13,6 +15,7 @@ export const INSTITUTION: Record<string, { libelle: string; contact: string; cou
   an: { libelle: "Assemblée nationale (direction de l'information multimédia)", contact: "dim@assemblee-nationale.fr", courriel: "dim@assemblee-nationale.fr" },
   senat: { libelle: "Sénat", contact: "l'adresse officielle fournie par le Sénat" },
   pe: { libelle: "Parlement européen", contact: "l'adresse officielle fournie par le Parlement européen" },
+  gouv: { libelle: "info.gouv.fr (photographie officielle du Gouvernement)", contact: "le formulaire de contact de info.gouv.fr" },
 };
 
 export function cheminPhoto(chambre: string, slug: string, taille: (typeof TAILLES)[number] = 200): string | null {
@@ -28,7 +31,7 @@ export const photoAbsolue = (chambre: string, slug: string, taille: (typeof TAIL
 
 // « sido_bruno01058x_senat_200.png » -> { id, credit, taille } (l'identifiant peut contenir des « _ »).
 export function analyserFichier(fichier: string): { id: string; credit: string; taille: number } | null {
-  const m = /^([\p{L}\p{N}_-]{1,80})_(an|senat|pe)_(\d{2,4})\.png$/u.exec(fichier);
+  const m = /^([\p{L}\p{N}_-]{1,80})_(an|senat|pe|gouv)_(\d{2,4})\.png$/u.exec(fichier);
   if (!m || !(TAILLES as readonly number[]).includes(Number(m[3]))) return null;
   return { id: m[1], credit: m[2], taille: Number(m[3]) };
 }
@@ -37,7 +40,7 @@ export function analyserFichier(fichier: string): { id: string; credit: string; 
 export function sourceAutorisee(url: string): boolean {
   try {
     const u = new URL(url);
-    return u.protocol === "https:" && ["www.assemblee-nationale.fr", "www2.assemblee-nationale.fr", "www.senat.fr", "www.europarl.europa.eu"].includes(u.hostname);
+    return u.protocol === "https:" && ["www.assemblee-nationale.fr", "www2.assemblee-nationale.fr", "www.senat.fr", "www.europarl.europa.eu", "www.info.gouv.fr"].includes(u.hostname);
   } catch { return false; }
 }
 
@@ -75,11 +78,11 @@ export function cheminLogoGroupe(chambre: string, sigle: string): string | null 
 
 // « dem-an-XVIIe.png » -> { sigle: "dem", chambre: "assemblee", romain: "XVIIe" }
 export function analyserLogoGroupe(fichier: string): { sigle: string; chambre: string; romain: string } | null {
-  const m = /^([a-z0-9-]{1,20})-(an|senat|pe)-([IVXLC]+)e\.png$/.exec(fichier);
+  const m = /^([a-z0-9-]{1,20})-(an|senat|pe)-(\[IVXLC]+)e\.png$/.exec(fichier);
   if (!m) return null;
   const chambre = CHAMBRE_DE_CODE[m[2]];
   if (!chambre) return null;
   const leg = LEGISLATURES[chambre];
   if (!leg || m[3] !== leg.romain.replace(/e$/, "")) return null;
-  return { sigle: m[1], chambre, romain: leg.romain };
+  return { sigle: m[1], chambre, romain: m[3] + "e" };
 }
