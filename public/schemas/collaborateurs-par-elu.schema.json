@@ -1,0 +1,55 @@
+{
+  "$schema": "https://specs.frictionlessdata.io/table-schema.json",
+  "name": "collaborateurs-par-elu",
+  "title": "Équipes parlementaires, élu par élu",
+  "description": "Chaque parlementaire français avec ses collaborateurs en poste, leur groupe, leur fonction et leur date d'arrivée — la vue « équipe de l'élu ». Sources : publications officielles de l'Assemblée nationale, du Sénat et du Parlement européen. Producteur : DataParl'. Téléchargement réservé aux comptes DataParl' (gratuit) : dataparl.fr/connexion.",
+  "homepage": "https://www.dataparl.fr/collab/an/liste",
+  "licenses": [
+    {
+      "name": "ODbL-1.0",
+      "path": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "title": "Open Database License (ODbL) v1.0"
+    }
+  ],
+  "fields": [
+    {
+      "name": "elu",
+      "type": "string",
+      "title": "Élu employeur",
+      "description": "Nom du parlementaire employeur."
+    },
+    {
+      "name": "chambre",
+      "type": "string",
+      "title": "Chambre",
+      "description": "« assemblee », « senat » ou « europarl »."
+    },
+    {
+      "name": "groupe",
+      "type": "string",
+      "title": "Groupe",
+      "description": "Sigle du groupe parlementaire de l'élu."
+    },
+    {
+      "name": "collaborateur",
+      "type": "string",
+      "title": "Collaborateur",
+      "description": "Prénom et nom du collaborateur parlementaire."
+    },
+    {
+      "name": "fonction",
+      "type": "string",
+      "title": "Fonction",
+      "description": "Fonction exercée auprès de l'élu ; vide si non précisée."
+    },
+    {
+      "name": "debut",
+      "type": "date",
+      "title": "Début",
+      "description": "Date de début de la période en cours (AAAA-MM-JJ) ; vide si inconnue."
+    }
+  ],
+  "missingValues": [
+    ""
+  ]
+}

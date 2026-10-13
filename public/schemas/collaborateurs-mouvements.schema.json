@@ -1,0 +1,61 @@
+{
+  "$schema": "https://specs.frictionlessdata.io/table-schema.json",
+  "name": "collaborateurs-mouvements",
+  "title": "Mouvements des collaborateurs parlementaires (arrivées, départs, transferts)",
+  "description": "Historique des mouvements de collaborateurs parlementaires depuis 2015 (Sénat) et 2017 (Assemblée nationale, Parlement européen) : une ligne par événement. Méthode détaillée : dataparl.fr/vigiparl/methode. Sources : publications officielles de l'Assemblée nationale, du Sénat et du Parlement européen. Producteur : DataParl'. Téléchargement réservé aux comptes DataParl' (gratuit) : dataparl.fr/connexion.",
+  "homepage": "https://www.dataparl.fr/vigiparl/methode",
+  "licenses": [
+    {
+      "name": "ODbL-1.0",
+      "path": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "title": "Open Database License (ODbL) v1.0"
+    }
+  ],
+  "fields": [
+    {
+      "name": "date",
+      "type": "date",
+      "title": "Date",
+      "description": "Date de l'événement (AAAA-MM-JJ)."
+    },
+    {
+      "name": "chambre",
+      "type": "string",
+      "title": "Chambre",
+      "description": "« assemblee », « senat » ou « europarl »."
+    },
+    {
+      "name": "type",
+      "type": "string",
+      "title": "Type",
+      "description": "Type de mouvement : arrivée, départ ou transfert."
+    },
+    {
+      "name": "collaborateur",
+      "type": "string",
+      "title": "Collaborateur",
+      "description": "Prénom et nom du collaborateur parlementaire."
+    },
+    {
+      "name": "elu",
+      "type": "string",
+      "title": "Élu",
+      "description": "Élu concerné par le mouvement."
+    },
+    {
+      "name": "groupe",
+      "type": "string",
+      "title": "Groupe",
+      "description": "Groupe parlementaire de l'élu concerné."
+    },
+    {
+      "name": "fonction",
+      "type": "string",
+      "title": "Fonction",
+      "description": "Fonction du collaborateur ; vide si non précisée."
+    }
+  ],
+  "missingValues": [
+    ""
+  ]
+}
