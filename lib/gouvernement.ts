@@ -5,7 +5,7 @@ import type { MandatMinistre, MembreCabinet } from "./gouvernementTypes";
 
 // Lecture des mandats ministériels et des membres de cabinets (base dataparl, RLS : select ouvert).
 
-export const COLONNES_MANDATS = "id,prenom,nom,fonction,portefeuille,gouvernement,debut,fin,rang,civilite,personne_id";
+export const COLONNES_MANDATS = "id,prenom,nom,fonction,portefeuille,gouvernement,debut,fin,rang,civilite,personne_id,infogouv_slug";
 export const COLONNES_CABINETS = "id,ministre_id,collab_cle,collab_prenom,collab_nom,fonction,debut,fin,collab_id";
 
 export async function mandatsEtCabinets(): Promise<{ mandats: MandatMinistre[]; cabinets: MembreCabinet[] }> {
@@ -21,6 +21,15 @@ export async function ficheMinistre(id: string): Promise<MandatMinistre | null> 
 
 export async function cabinetsDuMinistre(ministreId: string): Promise<MembreCabinet[]> {
   return (await dataQuery<MembreCabinet>("cabinets_ministeriels", new URLSearchParams({ select: COLONNES_CABINETS, ministre_id: "eq." + ministreId, order: "debut.asc" }))).rows;
+}
+
+// Postes en cabinet ministériel d'une personne déjà recensée comme
+// collaborateur parlementaire (rapprochement par collab_id) : c'est la même
+// fiche qui réunit les deux parcours (/collab/<slug>).
+export async function cabinetsDeCollab(collabIds: string[]): Promise<MembreCabinet[]> {
+  const ids = [...new Set(collabIds.filter(Boolean))];
+  if (!ids.length) return [];
+  return (await dataQuery<MembreCabinet>("cabinets_ministeriels", new URLSearchParams({ select: COLONNES_CABINETS, collab_id: "in.(" + ids.join(",") + ")", order: "debut.asc" }))).rows;
 }
 
 // Tous les mandats d'une même personne (personne_id est rarement renseigné : rapprochement par le nom).
@@ -42,6 +51,17 @@ export async function ministresParIds(ids: string[]): Promise<MandatMinistre[]> 
 export async function dernierReleve(): Promise<string | null> {
   const { rows } = await dataQuery<{ date_jorf: string }>("jorf_releves", new URLSearchParams({ select: "date_jorf", order: "date_jorf.desc", limit: "1" }), 3600);
   return rows[0]?.date_jorf ?? null;
+}
+
+// Fiche parlementaire d'un ministre (la fiche active d'abord, sinon l'ancienne).
+export type FicheParlementaire = { chambre: string; slug: string; prenom: string; nom: string; actif: boolean };
+export async function ficheParlementaireDe(personneId: string | null): Promise<FicheParlementaire | null> {
+  if (!personneId) return null;
+  const cols = "chambre,slug,prenom,nom,actif";
+  const actives = await dataQuery<FicheParlementaire>("parlementaires", new URLSearchParams({ select: cols, personne_id: "eq." + personneId, actif: "eq.true", limit: "1" }), 3600).catch(() => ({ rows: [] as FicheParlementaire[] }));
+  if (actives.rows[0]) return actives.rows[0];
+  const toutes = await dataQuery<FicheParlementaire>("parlementaires", new URLSearchParams({ select: cols, personne_id: "eq." + personneId, limit: "1" }), 3600).catch(() => ({ rows: [] as FicheParlementaire[] }));
+  return toutes.rows[0] ?? null;
 }
 
 // ── Gouvernements ──────────────────────────────────────────────────────────
@@ -74,4 +94,14 @@ export async function photosDesPersonnes(personneIds: string[]): Promise<Map<str
   const { rows } = await dataQuery<PhotoMinistre & { personne_id: string }>("parlementaires", new URLSearchParams({ select: "personne_id,chambre,slug,photo_url", personne_id: "in.(" + liste + ")", limit: "500" }));
   for (const r of rows) if (r.photo_url && !out.has(r.personne_id)) out.set(r.personne_id, { chambre: r.chambre, slug: r.slug, photo_url: r.photo_url });
   return out;
+}
+
+// Photo d'un ministre : portrait officiel du Gouvernement (info.gouv.fr,
+// servi par media.dataparl.fr/gouv/…) quand la personnalité y est recensée,
+// sinon photo parlementaire historique.
+export function photoMinistreDe(m: MandatMinistre, photos: Map<string, PhotoMinistre>): PhotoMinistre | undefined {
+  if (m.infogouv_slug) {
+    return { chambre: "gouvernement", slug: m.infogouv_slug, photo_url: "https://www.info.gouv.fr/personnalite/" + m.infogouv_slug };
+  }
+  return m.personne_id ? photos.get(m.personne_id) : undefined;
 }

@@ -1,9 +1,9 @@
-// Types et petites fonctions partagés (serveur et navigateur) pour /gouvernement.
+// Types et petites fonctions partagés (serveur et navigateur) pour /gouv.
 
 export type MandatMinistre = {
   id: string; prenom: string; nom: string; fonction: string; portefeuille: string;
   gouvernement: string; debut: string; fin: string | null;
-  rang: string | null; civilite: string | null; personne_id: string | null;
+  rang: string | null; civilite: string | null; personne_id: string | null; infogouv_slug: string | null;
 };
 export type MembreCabinet = {
   id: string; ministre_id: string; collab_cle: string; collab_prenom: string; collab_nom: string;
