@@ -72,8 +72,23 @@ export default function Confidentialite() {
         </tbody>
       </table>
       <p>
-        Aucune mesure d&apos;audience sur le site et aucun cookie publicitaire. Voir la page{" "}
-        <a href="/informations-legales/cookies">Cookies</a>.
+        <strong>Mesure d&apos;audience et publicité.</strong> Par défaut, aucune mesure d&apos;audience et aucune
+        publicité : les seuls cookies déposés sans accord sont strictement nécessaires au service. Si
+        l&apos;utilisateur l&apos;accepte dans le bandeau, trois traitements sont activés, chacun révocable à
+        tout moment en supprimant les cookies du site :
+      </p>
+      <ul>
+        <li><strong>Mesure d&apos;audience</strong> (Google Analytics 4 via Google Tag Manager) : statistiques de
+          fréquentation, pour savoir quelles pages sont lues et améliorer le site ;</li>
+        <li><strong>Mesure comportementale</strong> (Microsoft Clarity) : cartes de clics et enregistrements de
+          session, pour comprendre comment le site est utilisé ; les zones de saisie y sont masquées ;</li>
+        <li><strong>Publicité</strong> (Google AdSense) : annonces contextualisées, avec personnalisation
+          publicitaire uniquement si l&apos;utilisateur l&apos;accepte.</li>
+      </ul>
+      <p>
+        Tant que l&apos;utilisateur n&apos;a pas répondu au bandeau, ou s&apos;il refuse, aucun de ces cookies
+        n&apos;est déposé et aucun script correspondant n&apos;est chargé. Le détail des cookies est
+        décrit sur la page <a href="/informations-legales/cookies">Cookies</a>.
       </p>
       <p>
         Les emails envoyés par DataParl&apos; (depuis les adresses en @dataparl.fr) mesurent leur
@@ -164,6 +179,8 @@ export default function Confidentialite() {
           <tr><td>Vercel</td><td>Hébergement du site</td><td>États-Unis, réseau mondial</td></tr>
           <tr><td>Resend</td><td>Envoi des emails</td><td>Envoi depuis l&apos;Union européenne (Irlande) ; société américaine</td></tr>
           <tr><td>AppLixir (et ses régies)</td><td>Vidéo publicitaire, seulement si l&apos;utilisateur choisit de la regarder pour débloquer une fiche ; reçoit un jeton aléatoire, pas le compte</td><td>Société américaine ; responsable de ses propres traitements publicitaires (voir la page Cookies)</td></tr>
+          <tr><td>Google (Analytics 4, Tag Manager, AdSense)</td><td>Mesure d&apos;audience et publicité, uniquement après acceptation dans le bandeau</td><td>États-Unis, réseau mondial</td></tr>
+          <tr><td>Microsoft (Clarity)</td><td>Cartes de clics et enregistrements de session, uniquement après acceptation de la mesure d&apos;audience</td><td>États-Unis (Azure)</td></tr>
           <tr><td>Google, GitHub</td><td>Connexion, uniquement si l&apos;utilisateur choisit ces services</td><td>Union européenne et États-Unis</td></tr>
         </tbody>
       </table>
