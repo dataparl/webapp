@@ -14,6 +14,20 @@ type Collab = { collab_id: string; nom: string; prenom: string };
 
 const CHAMBRES: Record<string, string> = { an: "assemblee", senat: "senat", pe: "europarl" };
 
+// Préflight CORS : le téléchargement après connexion se fait depuis
+// www.dataparl.fr (page /connexion) vers media.dataparl.fr.
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "https://www.dataparl.fr",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Authorization",
+      "Access-Control-Max-Age": "86400",
+    },
+  });
+}
+
 export async function GET(req: Request, ctx: { params: Promise<{ file: string }> }) {
   // Compte DataParl' obligatoire : le téléchargement des CSV de media.dataparl.fr
   // exige une session (jeton Bearer). Sans session, renvoi vers la connexion.
@@ -61,6 +75,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ file: string }>
       "Content-Type": "text/csv; charset=utf-8",
       "Cache-Control": "private, no-store",
       "Content-Disposition": 'inline; filename="collaborateurs_' + seg + '.csv"',
+      "Access-Control-Allow-Origin": "https://www.dataparl.fr",
     },
   });
 }
