@@ -66,6 +66,12 @@ export default function Cookies() {
         (Consent Mode v2) : tant que l&apos;utilisateur n&apos;a pas répondu, ou en cas de refus, aucun cookie publicitaire
         ni cookie de mesure n&apos;est déposé et aucune annonce personnalisée n&apos;est diffusée.
       </p>
+      <p>
+        La mesure d&apos;audience inclut, avec le même accord, <strong>Microsoft Clarity</strong> : heatmaps et
+        enregistrements de session, pour comprendre comment le site est utilisé. Clarity masque
+        automatiquement les zones de saisie de l&apos;utilisateur dans ses enregistrements. Sans accord, le script
+        Clarity n&apos;est jamais chargé.
+      </p>
 
       <h2>Vidéo publicitaire (à la demande de l&apos;utilisateur)</h2>
       <p>
