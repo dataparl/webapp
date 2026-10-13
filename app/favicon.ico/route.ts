@@ -1,14 +1,13 @@
-// /favicon.ico : monogramme Σ' servi sur tous les domaines et sous-domaines
+// /favicon.ico : monogramme Sigma-apostrophe servi sur tous les domaines et sous-domaines
 // (exclu du proxy, ce handler répond partout). La déclinaison dépend de l'hôte :
-//   www. jobs. link. webmail.        Σ' blanc sur bleu encre  #071A41
-//   api. media. survey. raw. drive.   Σ' bleu encre sur blanc #FFFFFF
-//   admin. mail.                     Σ' blanc sur rouge      #C8102F
+//   www. jobs. link. webmail.        blanc sur bleu encre  #071A41
+//   api. media. survey. raw. drive.   bleu encre sur blanc #FFFFFF
+//   admin. mail.                     blanc sur rouge      #C8102F
+// Tracé typographique (Georgia, gras) : même rendu que apple-icon.
 const SVG = (fond: string, encre: string, bord?: string) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <rect width="64" height="64" rx="14" fill="${fond}"${bord ? ` stroke="${bord}" stroke-width="3"` : ""}/>
-  <path d="M11 15 H43 L28 32 L43 49 H11" fill="none" stroke="${encre}" stroke-width="6.5" stroke-linejoin="miter"/>
-  <ellipse cx="52" cy="16.5" rx="3.2" ry="3.4" fill="${encre}"/>
-  <polygon points="48.9,16 55.1,16 53.3,9 50.7,9" fill="${encre}"/>
+  <text x="33" y="46" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="38" font-weight="700" fill="${encre}">&#931;&#39;</text>
 </svg>`;
 
 export async function GET(req: Request) {
