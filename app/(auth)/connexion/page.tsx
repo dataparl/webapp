@@ -93,7 +93,7 @@ export default function Connexion() {
     // Téléchargement protégé : les CSV de media.dataparl.fr exigent un jeton de
     // session ; la navigation simple serait rejetée (boucle de redirection).
     // On les récupère avec le jeton, on déclenche le téléchargement, puis on
-    // rejoint l'espace compte.
+    // rejoint le menu des feuilles téléchargeables (media.dataparl.fr/sheets).
     if (suite.startsWith("/assets/collab/")) {
       try {
         const r = await fetch("https://media.dataparl.fr" + suite, { headers: { Authorization: "Bearer " + token } });
@@ -110,7 +110,7 @@ export default function Connexion() {
           setTimeout(() => URL.revokeObjectURL(url), 60000);
         }
       } catch {}
-      window.location.replace("/mon-compte");
+      window.location.replace("https://media.dataparl.fr/sheets");
       return;
     }
     window.location.replace(suite);
