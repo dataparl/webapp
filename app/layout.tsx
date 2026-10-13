@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Spectral } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import BandeauCookies from "./_components/BandeauCookies";
 import PageTrace from "./_components/PageTrace";
 import "./globals.css";
@@ -87,6 +88,8 @@ j=d.createElement(s),dl=l!=''?'&l='+l:'';j.async=true;j.src=
         {/* Vercel Analytics : pages vues sans cookie ni identificateur
             cross-site, cohérent avec la promesse « sans pistage ». */}
         <Analytics />
+        {/* Vercel Speed Insights : mesure des performances web (Core Web Vitals). */}
+        <SpeedInsights />
         {/* Parcours des comptes connectés (route seule, 90 jours, admin
             uniquement) : voir app/_components/PageTrace.tsx. */}
         <PageTrace />
