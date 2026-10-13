@@ -1,0 +1,96 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { prenomNom } from "@/lib/format";
+import { periode } from "@/lib/gouvernementTypes";
+import { ministresParIds, parcoursCabinet } from "@/lib/gouvernement";
+
+export const revalidate = 3600;
+type Props = { params: Promise<{ cle: string }> };
+const CLE_OK = /^[\p{L}\p{N} ._’-]{1,120}$/u;
+
+// Fiches membres de cabinets indexables : parcours d'après le Journal officiel.
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const cle = decodeURIComponent((await params).cle).toLowerCase().trim();
+  if (!CLE_OK.test(cle)) return {};
+  const postes = await parcoursCabinet(cle).catch(() => []);
+  if (!postes.length) return {};
+  const nom = prenomNom(postes[0].collab_prenom, postes[0].collab_nom);
+  return {
+    title: nom + " : parcours en cabinet ministériel",
+    description: "Parcours de " + nom + " en cabinets ministériels : fonctions, ministres, portefeuilles et périodes, d'après les nominations publiées au Journal officiel.",
+    alternates: { canonical: "/gouvernement/c/" + encodeURIComponent(cle) },
+  };
+}
+
+export default async function FicheMembreCabinet({ params }: Props) {
+  const cle = decodeURIComponent((await params).cle).toLowerCase().trim();
+  if (!CLE_OK.test(cle)) notFound();
+  const postes = await parcoursCabinet(cle).catch(() => []);
+  if (!postes.length) notFound();
+  const ministres = await ministresParIds([...new Set(postes.map((p) => p.ministre_id))]);
+  const parId = new Map(ministres.map((m) => [m.id, m]));
+  const nom = prenomNom(postes[0].collab_prenom, postes[0].collab_nom);
+  const nMinistres = new Set(postes.map((p) => p.ministre_id)).size;
+  const rapproche = postes.some((p) => p.collab_id);
+  const debut = postes[0].debut;
+  const finDernier = postes[postes.length - 1].fin;
+
+  return (
+    <>
+      <p className="meta" style={{ marginBottom: 0 }}>
+        {postes.length} poste{postes.length > 1 ? "s" : ""} en cabinet ministériel · {nMinistres} ministre{nMinistres > 1 ? "s" : ""} ·{" "}
+        <a href="/gouvernement">tous les gouvernements</a>
+      </p>
+      <h1>{nom}</h1>
+      <p className="lead">
+        Parcours en cabinet ministériel d'après les nominations publiées au Journal officiel
+        {debut ? ", depuis " + debut.slice(0, 4) : ""}
+        {finDernier ? " jusqu'en " + finDernier.slice(0, 4) : " (en poste à la dernière nomination identifiée)"}.
+      </p>
+
+      {rapproche && (
+        <p className="card" style={{ maxWidth: "none" }}>
+          {nom} est aussi <a href={"/collab/k/" + encodeURIComponent(cle)}>collaborateur parlementaire</a> :{" "}
+          une fiche unique réunit ses deux parcours.
+        </p>
+      )}
+
+      <h2>Parcours</h2>
+      <ul className="gouvernement">
+        {postes.map((p) => {
+          const m = parId.get(p.ministre_id);
+          return (
+            <li key={p.id}>
+              {p.fonction || "Membre de cabinet"} au cabinet de{" "}
+              {m ? <a href={"/gouvernement/m/" + encodeURIComponent(m.id)}>{prenomNom(m.prenom, m.nom)}</a> : "—"}
+              <span className="meta">
+                {" — " + (m ? (m.portefeuille || m.fonction) + " · " + m.gouvernement + " · " : "") + periode(p.debut, p.fin)}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+
+      <p className="meta" style={{ marginTop: 32 }}>
+        Fiche établie par rapprochement du nom : deux personnes homonymes peuvent être confondues. Pour faire rectifier ou masquer une information :{" "}
+        <a href="/contact?sujet=rgpd">formulaire de contact</a>.
+      </p>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Person",
+            name: nom,
+            url: "https://www.dataparl.fr/gouvernement/c/" + cle,
+            hasOccupation: postes.map((p) => ({
+              "@type": "Occupation",
+              name: p.fonction,
+              occupationLocation: "France",
+            })),
+          }),
+        }}
+      />
+    </>
+  );
+}

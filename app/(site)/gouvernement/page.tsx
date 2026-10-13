@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { dataQueryTout } from "@/lib/data";
+import { dateLongue } from "@/lib/format";
+import { mandatsEtCabinets } from "@/lib/gouvernement";
+import ExplorateurGouvernement from "./ExplorateurGouvernement";
 
 export const revalidate = 3600;
 
@@ -7,21 +9,6 @@ export const metadata: Metadata = {
   title: "Gouvernements et cabinets ministériels depuis 2012",
   description: "La composition des gouvernements français depuis mai 2012 et la liste des membres de chaque cabinet ministériel — directeurs, chefs de cabinet, conseillers — d'après les nominations publiées au Journal officiel.",
   alternates: { canonical: "/gouvernement" },
-};
-
-type Mandat = {
-  id: string; prenom: string; nom: string; fonction: string; portefeuille: string;
-  gouvernement: string; debut: string; fin: string | null;
-};
-type Cabinet = {
-  ministre_id: string; collab_prenom: string; collab_nom: string; fonction: string;
-  debut: string; fin: string | null; collab_id: string | null; collab_cle: string;
-};
-
-const periode = (debut: string, fin: string | null) => {
-  const d = debut.slice(0, 10).split("-").reverse().join("/");
-  if (!fin) return `depuis le ${d}`;
-  return `${d} → ${fin.slice(0, 10).split("-").reverse().join("/")}`;
 };
 
 const FAQ = [
@@ -34,78 +21,29 @@ const FAQ = [
     r: "Des nominations et cessations de fonctions publiées au Journal officiel (décrets et arrêtés de nomination), extraites du fonds JORF de la DILA et rattachées à chaque ministre en fonction à la date du décret. DataParl' couvre tous les gouvernements depuis mai 2012.",
   },
   {
+    q: "Pourquoi certains cabinets sont-ils « non documentés » ?",
+    r: "Le Journal officiel publie les nominations au fil de l'eau, souvent avec du retard : pour un gouvernement très récent, un remaniement ou un mandat de quelques jours, aucun décret n'est encore paru. La mention signale donc l'absence de données identifiées dans les sources consultées, pas l'absence de cabinet.",
+  },
+  {
     q: "Un membre de cabinet peut-il aussi être collaborateur parlementaire ?",
     r: "Oui, c'est fréquent : un même parcours peut passer d'un cabinet de député à un cabinet ministériel. Quand c'est la même personne, DataParl' relie sa fiche unique de collaborateur — l'appartenance aux deux mondes est visible sur la même page.",
   },
 ];
 
 export default async function Gouvernement() {
-  const mandats = await dataQueryTout<Mandat>("ministres", new URLSearchParams({
-    select: "id,prenom,nom,fonction,portefeuille,gouvernement,debut,fin",
-    order: "debut.desc",
-  }));
-  const cabinets = await dataQueryTout<Cabinet>("cabinets_ministeriels", new URLSearchParams({
-    select: "ministre_id,collab_prenom,collab_nom,fonction,debut,fin,collab_id,collab_cle",
-    order: "debut.asc",
-  }));
-  const parMinistre = new Map<string, Cabinet[]>();
-  for (const c of cabinets) {
-    const l = parMinistre.get(c.ministre_id) ?? [];
-    l.push(c);
-    parMinistre.set(c.ministre_id, l);
-  }
-  // Regroupement : gouvernements (du plus récent au plus ancien), puis mandats.
-  const ordres = new Map<string, string>(); // gouvernement → debut le plus récent
-  for (const m of mandats) {
-    const g = m.gouvernement || "Autres mandats";
-    if (!ordres.has(g) || m.debut > ordres.get(g)!) ordres.set(g, m.debut);
-  }
-  const gouvernements = [...ordres.keys()].sort((a, b) => (ordres.get(b)!).localeCompare(ordres.get(a)!));
+  const { mandats, cabinets } = await mandatsEtCabinets();
+  const personnes = new Set(cabinets.map((c) => c.collab_cle)).size;
+  const derniere = cabinets.reduce((acc, c) => (c.debut > acc ? c.debut : acc), "0000-00-00");
 
   return (
     <>
       <h1>Les <span className="surligne">gouvernements</span> et leurs cabinets</h1>
       <p className="lead">Qui gouverne, et qui travaille pour qui : la composition des gouvernements français depuis mai 2012, avec pour chaque ministre la liste des membres de son cabinet — directeurs, chefs de cabinet, conseillers — telle que publiée au Journal officiel.</p>
-      <p className="meta">{mandats.length} mandats ministériels · {cabinets.length} membres de cabinets répertoriés · source : Journal officiel (DILA).</p>
+      <p className="meta">
+        {mandats.length} mandats ministériels · {personnes} personnes répertoriées en cabinet · dernière nomination identifiée : {dateLongue(derniere)} · source : Journal officiel (DILA).
+      </p>
 
-      {gouvernements.map((g) => {
-        const duGouvernement = mandats.filter((m) => (m.gouvernement || "Autres mandats") === g)
-          .sort((a, b) => a.debut.localeCompare(b.debut));
-        return (
-          <section key={g}>
-            <h2>{g}</h2>
-            <ul className="gouvernement">
-              {duGouvernement.map((m) => {
-                const equipe = parMinistre.get(m.id) ?? [];
-                return (
-                  <li key={m.id}>
-                    <h3>
-                      {m.prenom} {m.nom}
-                      <span className="meta"> — {m.portefeuille || m.fonction} · {periode(m.debut, m.fin)}</span>
-                    </h3>
-                    {equipe.length === 0 ? (
-                      <p className="meta">Cabinet non répertorié dans le JORF pour ce mandat.</p>
-                    ) : (
-                      <ul>
-                        {equipe.map((c, i) => (
-                          <li key={i}>
-                            {c.collab_id ? (
-                              <a href={`/collab/k/${encodeURIComponent(c.collab_cle)}`}>{c.collab_prenom} {c.collab_nom}</a>
-                            ) : (
-                              <>{c.collab_prenom} {c.collab_nom}</>
-                            )}{" "}
-                            <span className="meta">— {c.fonction} · {periode(c.debut, c.fin)}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        );
-      })}
+      <ExplorateurGouvernement mandats={mandats} cabinets={cabinets} />
 
       <h2 id="faq">Questions fréquentes</h2>
       <dl>
