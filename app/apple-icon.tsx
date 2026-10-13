@@ -1,7 +1,8 @@
 import { ImageResponse } from "next/og";
 
-// Icône tactile iOS (180x180) : monogramme « D' » sur fond or, lettre bleue —
-// même identité que /icon.svg et /favicon (palette du site : #FFD23F / #164DFF).
+// Icône tactile iOS (180x180) du site principal.
+// Monogramme « Σ' » blanc sur bleu encre #071A41 — même identité que /icon.svg,
+// appliqué à tous les domaines et sous-domaines DataParl'.
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
@@ -15,15 +16,15 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#FFD23F",
+          background: "#071A41",
           borderRadius: 40,
           fontSize: 108,
           fontWeight: 700,
           fontFamily: "Georgia, serif",
-          color: "#164DFF",
+          color: "#FFFFFF",
         }}
       >
-        D&apos;
+        &Sigma;&apos;
       </div>
     ),
     { ...size }
