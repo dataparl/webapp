@@ -12,3 +12,6 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
     sendDefaultPii: false,
   });
 }
+
+// Instrumentation des navigations App Router (exigé par le SDK v10).
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
