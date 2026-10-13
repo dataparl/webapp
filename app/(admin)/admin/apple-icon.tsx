@@ -1,8 +1,8 @@
 import { ImageResponse } from "next/og";
 
 // Icône tactile iOS (180x180) — l'espace admin (admin.dataparl.fr).
-// Monogramme « Σ' » blanc sur bleu encre #071A41 — même identité que /icon.svg,
-// appliqué à tous les domaines et sous-domaines DataParl'.
+// Monogramme « Σ' » blanc sur fond #C8102F —
+// même identité que /icon.svg du domaine correspondant.
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
@@ -16,7 +16,7 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#071A41",
+          background: "#C8102F",
           borderRadius: 40,
           fontSize: 108,
           fontWeight: 700,
