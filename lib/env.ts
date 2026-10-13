@@ -17,7 +17,7 @@ export const CONTACT_INBOX = process.env.CONTACT_INBOX ?? "";
 
 // Hôte des versions en ligne des emails (/lire/<jeton>).
 export const MAIL_WEB_URL = (process.env.MAIL_WEB_URL ?? "https://mail.dataparl.fr").replace(/\/$/, "");
-export const PRIVACY_VERSION = process.env.PRIVACY_VERSION ?? "2026-09";
+export const PRIVACY_VERSION = process.env.PRIVACY_VERSION ?? "2026-10";
 
 // Comptes GitHub autorisés à administrer (séparés par des virgules). Ils sont
 // ajoutés à admin_users à leur première connexion.
