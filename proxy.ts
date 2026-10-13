@@ -17,7 +17,7 @@ import { estInactif } from "./lib/pagesRegistre";
 //   webmail.dataparl.fr    /x -> /webmail/x, sauf /connexion et /api/*
 //   mail.dataparl.fr        /lire/<jeton> (version en ligne des emails), le reste -> www
 //   link.dataparl.fr        /<code> -> /l/<code> (liens tracés), le reste -> www
-//   media.dataparl.fr       photos des élus (/an|senat|pe)/…, le tableur
+//   media.dataparl.fr       photos des élus et des ministres (/an|senat|pe|gouv)/…, le tableur
 //                           DataParl' Sheets (/sheets/*, /search), l'export SVG
 //                           du réseau (/assets/pe/reseau) et les exports CSV
 //                           (/assets/collab/{an,senat,pe}.csv) ; tout autre
@@ -142,7 +142,7 @@ export async function proxy(req: NextRequest) {
   // autre chemin affiche un message pendant 15 secondes avant la bascule vers
   // www.dataparl.fr.
   if (host === `media.${DOMAINE}`) {
-    if (/^\/(an|senat|pe)\/[^/]+\.png$/.test(path)) {
+    if (/^\/(an|senat|pe|gouv)\/[^/]+\.png$/.test(path)) {
       const url = req.nextUrl.clone();
       // Ouverture directe dans un navigateur (pas une <img> du site, pas une aperçu
       // de lien) : page de crédit, à la même adresse. Jamais pour une demande d'image.

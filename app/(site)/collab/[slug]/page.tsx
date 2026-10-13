@@ -4,6 +4,8 @@ import { CHAMBRE_LONG, prenomNom } from "@/lib/format";
 import { libellePeriode, moisAnnee } from "@/lib/periodes";
 import { collaborateurDepuisSlug, parlementaireDepuisId, parlementairesParElu, periodesCollab } from "@/lib/referentiel";
 import { nomAffiche } from "@/lib/format";
+import { cabinetsDeCollab, ministresParIds } from "@/lib/gouvernement";
+import { finEffective, periode } from "@/lib/gouvernementTypes";
 import ParcoursCollab from "./ParcoursCollab";
 import PubGoogle from "@/app/_components/PubGoogle";
 
@@ -33,6 +35,10 @@ export default async function FicheCollab({ params }: Props) {
     c.parlementaire_slug ? parlementaireDepuisId(c.parlementaire_slug).catch(() => null) : Promise.resolve(null),
   ]);
   const nom = prenomNom(c.prenom, c.nom);
+  // Membres de cabinets ministériels rattachés à cette personne (rapprochement
+  // par collab_id) : la même fiche réunit les deux parcours.
+  const cabinets = c.collab_id ? await cabinetsDeCollab([c.collab_id]).catch(() => []) : [];
+  const ministresGouv = new Map((await ministresParIds([...new Set(cabinets.map((p) => p.ministre_id))]).catch(() => [])).map((x) => [x.id, x]));
   const role = c.genre === "F" ? "Collaboratrice parlementaire" : c.genre === "H" ? "Collaborateur parlementaire" : "Collaborateur(rice) parlementaire";
 
   return (
@@ -80,6 +86,26 @@ export default async function FicheCollab({ params }: Props) {
 
       <h2>Parcours</h2>
       <ParcoursCollab id={c.collab_id} suite={`/collab/${c.slug}`} />
+
+      {cabinets.length > 0 && (
+        <>
+          <h2>Cabinet ministériel</h2>
+          <ul className="gouvernement">
+            {cabinets.map((p) => {
+              const mi = ministresGouv.get(p.ministre_id);
+              return (
+                <li key={p.id}>
+                  {p.fonction || "Membre de cabinet"} au cabinet de{" "}
+                  {mi ? <a href={"/gouv/m/" + encodeURIComponent(mi.id)}>{prenomNom(mi.prenom, mi.nom)}</a> : "—"}
+                  <span className="meta">
+                    {" — " + (mi ? (mi.portefeuille || mi.fonction) + " · " + mi.gouvernement + " · " : "") + periode(p.debut, finEffective(p.fin, mi?.fin ?? null))}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
 
       {/* Annonce display AdSense : après le contenu, avant les fiches liées.
           Aucun espace réservé tant que NEXT_PUBLIC_ADSENSE_SLOT n’est pas défini. */}

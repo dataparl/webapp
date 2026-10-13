@@ -249,6 +249,7 @@ export default async function Parlementaire({ params }: { params: Promise<{ id: 
                   </span>
                 </p>
                 {g.portefeuille && <p className="meta" style={{ margin: "2px 0" }}>{g.portefeuille}</p>}
+                <p className="meta" style={{ margin: "2px 0" }}><a href={"/gouv/m/" + encodeURIComponent(g.id)}>Voir la fiche gouvernement et le cabinet</a></p>
               </li>
             );
           }

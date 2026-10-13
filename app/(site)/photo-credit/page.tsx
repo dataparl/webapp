@@ -12,11 +12,11 @@ const SITE = "https://www.dataparl.fr";
 // ouverte directement dans un navigateur (réécriture par proxy.ts).
 export default async function CreditPhoto({ searchParams }: { searchParams: Promise<{ img?: string }> }) {
   const img = (await searchParams).img ?? "";
-  const m = /^(an|senat|pe)\/([^/]+\.png)$/.exec(img);
+  const m = /^(an|senat|pe|gouv)\/([^/]+\.png)$/.exec(img);
   const f = m ? analyserFichier(m[2]) : null;
   const valide = !!m && !!f && f.credit === m[1];
   const inst = valide ? INSTITUTION[f!.credit] : null;
-  const elu = valide ? await parlementaireDepuisId(f!.id).catch(() => null) : null;
+  const elu = valide && m![1] !== "gouv" ? await parlementaireDepuisId(f!.id).catch(() => null) : null;
   const fiche = elu && elu.chambre === CHAMBRE_DE_CODE[m![1]] ? elu : null;
   return (
     <div className="etroit">
