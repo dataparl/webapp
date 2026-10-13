@@ -79,11 +79,12 @@ export default function Confidentialite() {
       </p>
       <ul>
         <li><strong>Mesure d&apos;audience</strong> (Google Analytics 4 via Google Tag Manager) : statistiques de
-          fréquentation, pour savoir quelles pages sont lues et améliorer le site ;</li>
-        <li><strong>Mesure comportementale</strong> (Microsoft Clarity) : cartes de clics et enregistrements de
-          session, pour comprendre comment le site est utilisé ; les zones de saisie y sont masquées ;</li>
+          fréquentation, dans une optique d&apos;amélioration de la qualité du service ;</li>
+        <li><strong>Mesure comportementale</strong> (Microsoft Clarity) : analyse anonymisée de l&apos;usage du site,
+          dans une optique d&apos;amélioration de la qualité du service ;</li>
         <li><strong>Publicité</strong> (Google AdSense) : annonces contextualisées, avec personnalisation
-          publicitaire uniquement si l&apos;utilisateur l&apos;accepte.</li>
+          publicitaire uniquement si l&apos;utilisateur l&apos;accepte. Ce traitement n&apos;est pas
+          implémenté à ce jour : aucun cookie publicitaire n&apos;est déposé, même en cas d&apos;accord.</li>
       </ul>
       <p>
         Tant que l&apos;utilisateur n&apos;a pas répondu au bandeau, ou s&apos;il refuse, aucun de ces cookies
@@ -180,7 +181,7 @@ export default function Confidentialite() {
           <tr><td>Resend</td><td>Envoi des emails</td><td>Envoi depuis l&apos;Union européenne (Irlande) ; société américaine</td></tr>
           <tr><td>AppLixir (et ses régies)</td><td>Vidéo publicitaire, seulement si l&apos;utilisateur choisit de la regarder pour débloquer une fiche ; reçoit un jeton aléatoire, pas le compte</td><td>Société américaine ; responsable de ses propres traitements publicitaires (voir la page Cookies)</td></tr>
           <tr><td>Google (Analytics 4, Tag Manager, AdSense)</td><td>Mesure d&apos;audience et publicité, uniquement après acceptation dans le bandeau</td><td>États-Unis, réseau mondial</td></tr>
-          <tr><td>Microsoft (Clarity)</td><td>Cartes de clics et enregistrements de session, uniquement après acceptation de la mesure d&apos;audience</td><td>États-Unis (Azure)</td></tr>
+          <tr><td>Microsoft (Clarity)</td><td>Mesure comportementale, uniquement après acceptation de la mesure d&apos;audience</td><td>États-Unis (Azure)</td></tr>
           <tr><td>Google, GitHub</td><td>Connexion, uniquement si l&apos;utilisateur choisit ces services</td><td>Union européenne et États-Unis</td></tr>
         </tbody>
       </table>
