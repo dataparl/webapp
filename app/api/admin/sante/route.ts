@@ -20,7 +20,7 @@ async function uptimeRobot() {
     });
     const j = (await r.json()) as { stat?: string; monitors?: Moniteur[] };
     if (j.stat !== "ok") throw new Error("réponse invalide");
-    return { configure: false as const, moniteurs: j.moniteurs ?? [] };
+    return { configure: false as const, moniteurs: j.monitors ?? [] };
   } catch (e) {
     return { configure: false as const, erreur: e instanceof Error ? e.message : "inconnue", moniteurs: [] as Moniteur[] };
   }
@@ -56,7 +56,10 @@ export async function GET(req: Request) {
   return avecAdmin(req, async () => {
     // Ping des deux bases Supabase (count, aucune donnée renvoyée).
     const ping = (q: PromiseLike<{ error: { message: string } | null }>) =>
-      q.then((x) => (x.error ? { ok: false, detail: x.error.message } : { ok: true })).catch((e) => ({ ok: false, detail: e.message }));
+      Promise.resolve(q).then(
+        (x: { error: { message: string } | null }) => (x.error ? { ok: false, detail: x.error.message } : { ok: true }),
+        (e: unknown) => ({ ok: false, detail: e instanceof Error ? e.message : "inconnue" }),
+      );
     const [baseData, baseAuth, ur, sent] = await Promise.all([
       ping(dataAdmin().from("ministres").select("id", { head: true, count: "exact" })),
       ping(authAdmin().from("profiles").select("id", { head: true, count: "exact" })),
