@@ -6,7 +6,8 @@ import { NOMS_COMPLETS } from "./partisNoms";
 // parlementaires » et « Parlementaires français »), servis sur
 // media.dataparl.fr/assets/{collab|parl}/<slug>.csv. Chaque export est décrit
 // ici : entêtes + chargeur. Téléchargement réservé aux comptes DataParl'
-// (verrou appliqué par servirCSV) ; périodes en cours uniquement, sauf pour
+// (verrou appliqué par servirCSV : sans session, page explicative puis connexion) ;
+// périodes en cours uniquement, sauf pour
 // les mouvements et les parcours croisés qui sont historiques par nature.
 
 export type LigneExport = (string | null)[];
@@ -288,7 +289,7 @@ export async function servirCSV(req: Request, file: string, exportsDisponibles: 
   const user = await utilisateur(req);
   if (!user) {
     const suite = "/assets/" + prefixe + "/" + encodeURIComponent(file);
-    return Response.redirect("https://www.dataparl.fr/connexion?suite=" + encodeURIComponent(suite), 302);
+    return Response.redirect("https://www.dataparl.fr/acces-ressource?suite=" + encodeURIComponent(suite), 302);
   }
   const slug = decodeURIComponent(file).replace(/\.csv$/i, "");
   const def = exportsDisponibles[slug];
