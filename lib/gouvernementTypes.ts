@@ -34,3 +34,21 @@ export function categorieFonction(f: string): CategorieFonction {
   if (n.startsWith("conseiller")) return "conseil";
   return "autre";
 }
+
+// ── Documentation des cabinets ─────────────────────────────────────────────
+// Trois statuts distincts, pour ne jamais confondre « pas de cabinet » et
+// « pas de données identifiées » (le JORF publie au fil de l'eau).
+export type StatutCabinet = "documente" | "nonRetrouve" | "verification";
+export const LIBELLE_STATUT: Record<StatutCabinet, string> = {
+  documente: "Cabinet documenté",
+  nonRetrouve: "Publication non retrouvée",
+  verification: "En cours de vérification",
+};
+const FENETRE_VERIFICATION_MS = 183 * 24 * 3600 * 1000;
+// Un mandat récent (moins de 6 mois) sans membre identifié est « en cours de
+// vérification » : les décrets de nomination paraissent souvent avec du retard.
+export function statutCabinet(debut: string, nMembres: number): StatutCabinet {
+  if (nMembres > 0) return "documente";
+  const t = Date.parse(debut.slice(0, 10) + "T00:00:00Z");
+  return Number.isFinite(t) && Date.now() - t < FENETRE_VERIFICATION_MS ? "verification" : "nonRetrouve";
+}

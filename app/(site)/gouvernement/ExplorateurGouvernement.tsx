@@ -1,20 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { prenomNom } from "@/lib/format";
-import { LIBELLE_FONCTION, categorieFonction, normaliseNom, periode, type MandatMinistre, type MembreCabinet } from "@/lib/gouvernementTypes";
+import { LIBELLE_FONCTION, LIBELLE_STATUT, categorieFonction, normaliseNom, periode, statutCabinet, type MandatMinistre, type MembreCabinet } from "@/lib/gouvernementTypes";
 
 const hrefM = (id: string) => "/gouvernement/m/" + encodeURIComponent(id);
 const hrefC = (cle: string) => "/gouvernement/c/" + encodeURIComponent(cle);
+// L'état des filtres vit dans l'URL (deep linking) : un lien partagé rouvre la même vue.
+const param = (cle: string) => {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get(cle) ?? "";
+};
 
 // Explorateur des gouvernements : recherche transversale par nom (ministre ou
 // membre de cabinet), filtres par fonction, gouvernement et statut. Sans
 // filtre, la chronologie repliable par gouvernement reste affichée.
 export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats: MandatMinistre[]; cabinets: MembreCabinet[] }) {
-  const [q, setQ] = useState("");
-  const [cat, setCat] = useState("");
-  const [statut, setStatut] = useState("");
-  const [gouv, setGouv] = useState("");
+  const [q, setQ] = useState(() => param("q"));
+  const [catBrut, setCat] = useState(() => param("fonction"));
+  const [gouvBrut, setGouv] = useState(() => param("gouvernement"));
+  const [statutBrut, setStatut] = useState(() => param("statut"));
 
   const mandatParId = useMemo(() => new Map(mandats.map((m) => [m.id, m])), [mandats]);
   const cabinetsParMinistre = useMemo(() => {
@@ -35,6 +40,21 @@ export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats
     }
     return [...debut.keys()].sort((a, b) => debut.get(b)!.localeCompare(debut.get(a)!));
   }, [mandats]);
+
+  // Valeurs d'URL invalides ignorées proprement.
+  const cat = catBrut in LIBELLE_FONCTION ? catBrut : "";
+  const statut = statutBrut === "en-poste" || statutBrut === "anciens" ? statutBrut : "";
+  const gouv = gouvernements.includes(gouvBrut) ? gouvBrut : "";
+
+  useEffect(() => {
+    const p = new URLSearchParams();
+    if (q) p.set("q", q);
+    if (cat) p.set("fonction", cat);
+    if (gouv) p.set("gouvernement", gouv);
+    if (statut) p.set("statut", statut);
+    const s = p.toString();
+    window.history.replaceState(null, "", s ? "/gouvernement?" + s : "/gouvernement");
+  }, [q, cat, gouv, statut]);
 
   const jetons = normaliseNom(q).split(" ").filter(Boolean).slice(0, 6);
   const cherche = jetons.length > 0;
@@ -108,6 +128,7 @@ export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats
             </button>
           )}
         </p>
+        <p className="meta">L’URL reflète vos filtres : copiez-la pour partager exactement cette vue.</p>
       </div>
 
       {filtre ? (
@@ -162,21 +183,28 @@ export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats
             const duGouvernement = mandats
               .filter((m) => (m.gouvernement || "Autres mandats") === g)
               .sort((a, b) => a.debut.localeCompare(b.debut));
+            const membres = duGouvernement.reduce((n, m) => n + (cabinetsParMinistre.get(m.id)?.length ?? 0), 0);
+            const nonDocumentes = duGouvernement.filter((m) => (cabinetsParMinistre.get(m.id)?.length ?? 0) === 0).length;
             return (
               <details key={g} open={i === 0}>
-                <summary><h2 style={{ display: "inline" }}>{g} <span className="meta">— {duGouvernement.length} ministre{duGouvernement.length > 1 ? "s" : ""}</span></h2></summary>
+                <summary>
+                  <h2 style={{ display: "inline" }}>{g}</h2>{" "}
+                  <span className="meta">
+                    — {duGouvernement.length} ministre{duGouvernement.length > 1 ? "s" : ""} · {membres} membre{membres > 1 ? "s" : ""} identifié{membres > 1 ? "s" : ""}
+                    {nonDocumentes > 0 ? " · " + nonDocumentes + " cabinet" + (nonDocumentes > 1 ? "s" : "") + " sans publication identifiée" : ""}
+                  </span>
+                </summary>
                 <ul className="gouvernement">
                   {duGouvernement.map((m) => {
                     const equipe = cabinetsParMinistre.get(m.id) ?? [];
+                    const st = statutCabinet(m.debut, equipe.length);
                     return (
                       <li key={m.id}>
                         <h3>
                           <a href={hrefM(m.id)}>{prenomNom(m.prenom, m.nom)}</a>
-                          <span className="meta"> — {m.portefeuille || m.fonction} · {periode(m.debut, m.fin)}</span>
+                          <span className="meta"> — {m.portefeuille || m.fonction} · {periode(m.debut, m.fin)} · {LIBELLE_STATUT[st]}</span>
                         </h3>
-                        {equipe.length === 0 ? (
-                          <p className="meta">Aucune nomination identifiée au JORF pour ce mandat — cabinet non documenté, pas nécessairement inexistant (recensement en cours pour les mandats récents).</p>
-                        ) : (
+                        {st === "documente" ? (
                           <ul>
                             {equipe.map((c) => (
                               <li key={c.id}>
@@ -185,6 +213,12 @@ export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats
                               </li>
                             ))}
                           </ul>
+                        ) : (
+                          <p className="meta">
+                            {st === "verification"
+                              ? "Mandat récent — recensement en cours : aucune nomination identifiée à ce jour au JORF (les décrets paraissent au fil de l’eau)."
+                              : "Publication non retrouvée au JORF pour ce mandat — cabinet non documenté ici, pas nécessairement inexistant."}
+                          </p>
                         )}
                       </li>
                     );

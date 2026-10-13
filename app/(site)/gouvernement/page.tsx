@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { dateLongue } from "@/lib/format";
-import { mandatsEtCabinets } from "@/lib/gouvernement";
+import { dernierReleve, mandatsEtCabinets } from "@/lib/gouvernement";
 import ExplorateurGouvernement from "./ExplorateurGouvernement";
 
 export const revalidate = 3600;
@@ -18,11 +18,11 @@ const FAQ = [
   },
   {
     q: "D'où viennent ces données ?",
-    r: "Des nominations et cessations de fonctions publiées au Journal officiel (décrets et arrêtés de nomination), extraites du fonds JORF de la DILA et rattachées à chaque ministre en fonction à la date du décret. DataParl' couvre tous les gouvernements depuis mai 2012.",
+    r: "Des nominations et cessations de fonctions publiées au Journal officiel (décrets et arrêtés de nomination), extraites du fonds JORF de la DILA et rattachées à chaque ministre en fonction à la date du décret. DataParl' couvre tous les gouvernements depuis mai 2012 et relève le JORF chaque jour.",
   },
   {
-    q: "Pourquoi certains cabinets sont-ils « non documentés » ?",
-    r: "Le Journal officiel publie les nominations au fil de l'eau, souvent avec du retard : pour un gouvernement très récent, un remaniement ou un mandat de quelques jours, aucun décret n'est encore paru. La mention signale donc l'absence de données identifiées dans les sources consultées, pas l'absence de cabinet.",
+    q: "Que signifient les statuts « publication non retrouvée » et « en cours de vérification » ?",
+    r: "« Cabinet documenté » : au moins un membre a été identifié au JORF. « Publication non retrouvée » : aucune nomination identifiée dans les sources consultées — le cabinet n'est pas documenté ici, pas nécessairement inexistant. « En cours de vérification » : mandat récent, le recensement suit les publications au fil de l'eau. Le Journal officiel publie en effet les nominations de cabinet avec un certain retard, surtout à la formation d'un gouvernement.",
   },
   {
     q: "Un membre de cabinet peut-il aussi être collaborateur parlementaire ?",
@@ -31,16 +31,41 @@ const FAQ = [
 ];
 
 export default async function Gouvernement() {
-  const { mandats, cabinets } = await mandatsEtCabinets();
+  const [{ mandats, cabinets }, releve] = await Promise.all([
+    mandatsEtCabinets(),
+    dernierReleve().catch(() => null),
+  ]);
   const personnes = new Set(cabinets.map((c) => c.collab_cle)).size;
+  const avecEquipe = new Set(cabinets.map((c) => c.ministre_id));
+  const documentes = mandats.filter((m) => avecEquipe.has(m.id)).length;
+  const aVerifier = mandats.filter((m) => !avecEquipe.has(m.id) && Date.now() - Date.parse(m.debut.slice(0, 10) + "T00:00:00Z") < 183 * 24 * 3600 * 1000).length;
+  const nonDocumentes = mandats.length - documentes;
   const derniere = cabinets.reduce((acc, c) => (c.debut > acc ? c.debut : acc), "0000-00-00");
+
+  const kpi: [string | number, string][] = [
+    [mandats.length, "mandats ministériels"],
+    [personnes, "personnes en cabinet"],
+    [documentes, "cabinets documentés"],
+    [nonDocumentes, "sans publication identifiée"],
+  ];
 
   return (
     <>
       <h1>Les <span className="surligne">gouvernements</span> et leurs cabinets</h1>
       <p className="lead">Qui gouverne, et qui travaille pour qui : la composition des gouvernements français depuis mai 2012, avec pour chaque ministre la liste des membres de son cabinet — directeurs, chefs de cabinet, conseillers — telle que publiée au Journal officiel.</p>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, margin: "16px 0" }}>
+        {kpi.map(([v, l]) => (
+          <div key={l} className="card" style={{ maxWidth: "none", textAlign: "center" }}>
+            <div style={{ fontSize: "1.7em", fontWeight: 700 }}>{v}</div>
+            <div className="meta">{l}</div>
+          </div>
+        ))}
+      </div>
       <p className="meta">
-        {mandats.length} mandats ministériels · {personnes} personnes répertoriées en cabinet · dernière nomination identifiée : {dateLongue(derniere)} · source : Journal officiel (DILA).
+        {aVerifier > 0 ? aVerifier + " mandat" + (aVerifier > 1 ? "s" : "") + " récent" + (aVerifier > 1 ? "s" : "") + " en cours de vérification · " : ""}
+        Dernière nomination identifiée : {dateLongue(derniere)}
+        {releve ? " · dernier relevé du JORF : " + dateLongue(releve) : ""} · source : Journal officiel (DILA).
       </p>
 
       <ExplorateurGouvernement mandats={mandats} cabinets={cabinets} />

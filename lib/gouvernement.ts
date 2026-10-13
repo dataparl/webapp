@@ -36,3 +36,9 @@ export async function ministresParIds(ids: string[]): Promise<MandatMinistre[]> 
   const liste = ids.map((i) => '"' + i.replace(/"/g, "") + '"').join(",");
   return (await dataQuery<MandatMinistre>("ministres", new URLSearchParams({ select: COLONNES_MANDATS, id: "in.(" + liste + ")", order: "debut.asc" }))).rows;
 }
+
+// Date du dernier relevé JORF traité par le balayage quotidien.
+export async function dernierReleve(): Promise<string | null> {
+  const { rows } = await dataQuery<{ date_jorf: string }>("jorf_releves", new URLSearchParams({ select: "date_jorf", order: "date_jorf.desc", limit: "1" }), 3600);
+  return rows[0]?.date_jorf ?? null;
+}
