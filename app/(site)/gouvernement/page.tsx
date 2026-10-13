@@ -1,0 +1,157 @@
+import type { Metadata } from "next";
+import { dataQueryTout } from "@/lib/data";
+
+export const revalidate = 3600;
+
+export const metadata: Metadata = {
+  title: "Gouvernements et cabinets ministériels depuis 2012",
+  description: "La composition des gouvernements français depuis mai 2012 et la liste des membres de chaque cabinet ministériel — directeurs, chefs de cabinet, conseillers — d'après les nominations publiées au Journal officiel.",
+  alternates: { canonical: "/gouvernement" },
+};
+
+type Mandat = {
+  id: string; prenom: string; nom: string; fonction: string; portefeuille: string;
+  gouvernement: string; debut: string; fin: string | null;
+};
+type Cabinet = {
+  ministre_id: string; collab_prenom: string; collab_nom: string; fonction: string;
+  debut: string; fin: string | null; collab_id: string | null; collab_cle: string;
+};
+
+const periode = (debut: string, fin: string | null) => {
+  const d = debut.slice(0, 10).split("-").reverse().join("/");
+  if (!fin) return `depuis le ${d}`;
+  return `${d} → ${fin.slice(0, 10).split("-").reverse().join("/")}`;
+};
+
+const FAQ = [
+  {
+    q: "Qu'est-ce qu'un cabinet ministériel ?",
+    r: "Le cabinet ministériel est l'équipe personnelle d'un ministre : directeur ou directrice de cabinet, chef de cabinet, conseillers et chargés de mission. Il l'assiste dans ses fonctions politiques, contrairement aux collaborateurs parlementaires qui travaillent pour un élu au Parlement.",
+  },
+  {
+    q: "D'où viennent ces données ?",
+    r: "Des nominations et cessations de fonctions publiées au Journal officiel (décrets et arrêtés de nomination), extraites du fonds JORF de la DILA et rattachées à chaque ministre en fonction à la date du décret. DataParl' couvre tous les gouvernements depuis mai 2012.",
+  },
+  {
+    q: "Un membre de cabinet peut-il aussi être collaborateur parlementaire ?",
+    r: "Oui, c'est fréquent : un même parcours peut passer d'un cabinet de député à un cabinet ministériel. Quand c'est la même personne, DataParl' relie sa fiche unique de collaborateur — l'appartenance aux deux mondes est visible sur la même page.",
+  },
+];
+
+export default async function Gouvernement() {
+  const mandats = await dataQueryTout<Mandat>("ministres", new URLSearchParams({
+    select: "id,prenom,nom,fonction,portefeuille,gouvernement,debut,fin",
+    order: "debut.desc",
+  }));
+  const cabinets = await dataQueryTout<Cabinet>("cabinets_ministeriels", new URLSearchParams({
+    select: "ministre_id,collab_prenom,collab_nom,fonction,debut,fin,collab_id,collab_cle",
+    order: "debut.asc",
+  }));
+  const parMinistre = new Map<string, Cabinet[]>();
+  for (const c of cabinets) {
+    const l = parMinistre.get(c.ministre_id) ?? [];
+    l.push(c);
+    parMinistre.set(c.ministre_id, l);
+  }
+  // Regroupement : gouvernements (du plus récent au plus ancien), puis mandats.
+  const ordres = new Map<string, string>(); // gouvernement → debut le plus récent
+  for (const m of mandats) {
+    const g = m.gouvernement || "Autres mandats";
+    if (!ordres.has(g) || m.debut > ordres.get(g)!) ordres.set(g, m.debut);
+  }
+  const gouvernements = [...ordres.keys()].sort((a, b) => (ordres.get(b)!).localeCompare(ordres.get(a)!));
+  let nbCabinets = 0;
+
+  return (
+    <>
+      <h1>Les <span className="surligne">gouvernements</span> et leurs cabinets</h1>
+      <p className="lead">Qui gouverne, et qui travaille pour qui : la composition des gouvernements français depuis mai 2012, avec pour chaque ministre la liste des membres de son cabinet — directeurs, chefs de cabinet, conseillers — telle que publiée au Journal officiel.</p>
+      <p className="meta">{mandats.length} mandats ministériels · {cabinets.length} membres de cabinets répertoriés · source : Journal officiel (DILA).</p>
+
+      {gouvernements.map((g) => {
+        const duGouvernement = mandats.filter((m) => (m.gouvernement || "Autres mandats") === g)
+          .sort((a, b) => a.debut.localeCompare(b.debut));
+        return (
+          <section key={g}>
+            <h2>{g}</h2>
+            <ul className="gouvernement">
+              {duGouvernement.map((m) => {
+                const equipe = parMinistre.get(m.id) ?? [];
+                nbCabinets += equipe.length;
+                return (
+                  <li key={m.id}>
+                    <h3>
+                      {m.prenom} {m.nom}
+                      <span className="meta"> — {m.portefeuille || m.fonction} · {periode(m.debut, m.fin)}</span>
+                    </h3>
+                    {equipe.length === 0 ? (
+                      <p className="meta">Cabinet non répertorié dans le JORF pour ce mandat.</p>
+                    ) : (
+                      <ul>
+                        {equipe.map((c, i) => (
+                          <li key={i}>
+                            {c.collab_id ? (
+                              <a href={`/collab/k/${c.collab_cle}`}>{c.collab_prenom} {c.collab_nom}</a>
+                            ) : (
+                              <>{c.collab_prenom} {c.collab_nom}</>
+                            )}{" "}
+                            <span className="meta">— {c.fonction} · {periode(c.debut, c.fin)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        );
+      })}
+
+      <h2 id="faq">Questions fréquentes</h2>
+      <dl>
+        {FAQ.map((f) => (
+          <div key={f.q}>
+            <dt><strong>{f.q}</strong></dt>
+            <dd>{f.r}</dd>
+          </div>
+        ))}
+      </dl>
+      <p className="meta">À voir aussi : <a href="/collab">la liste des collaborateurs parlementaires</a> — les mêmes personnes apparaissent parfois dans les deux, avec une fiche unique.</p>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Dataset",
+                name: "Gouvernements et cabinets ministériels français",
+                description: "Composition des gouvernements français depuis mai 2012 et membres des cabinets ministériels (directeurs, chefs de cabinet, conseillers), d'après les nominations publiées au Journal officiel.",
+                url: "https://www.dataparl.fr/gouvernement",
+                creator: { "@type": "Organization", name: "DataParl'", url: "https://www.dataparl.fr" },
+                isAccessibleForFree: true,
+              },
+              {
+                "@type": "FAQPage",
+                mainEntity: FAQ.map((f) => ({
+                  "@type": "Question",
+                  name: f.q,
+                  acceptedAnswer: { "@type": "Answer", text: f.r },
+                })),
+              },
+              {
+                "@type": "BreadcrumbList",
+                itemListElement: [
+                  { "@type": "ListItem", position: 1, name: "Accueil", item: "https://www.dataparl.fr/" },
+                  { "@type": "ListItem", position: 2, name: "Gouvernements", item: "https://www.dataparl.fr/gouvernement" },
+                ],
+              },
+            ],
+          }),
+        }}
+      />
+    </>
+  );
+}
