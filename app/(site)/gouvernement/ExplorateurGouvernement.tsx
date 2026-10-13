@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { prenomNom } from "@/lib/format";
-import { LIBELLE_FONCTION, LIBELLE_STATUT, categorieFonction, normaliseNom, periode, statutCabinet, type MandatMinistre, type MembreCabinet } from "@/lib/gouvernementTypes";
+import { LIBELLE_FONCTION, LIBELLE_STATUT, categorieFonction, enPoste, finEffective, normaliseNom, periode, statutCabinet, type MandatMinistre, type MembreCabinet } from "@/lib/gouvernementTypes";
 
 const hrefM = (id: string) => "/gouvernement/m/" + encodeURIComponent(id);
 const hrefC = (cle: string) => "/gouvernement/c/" + encodeURIComponent(cle);
@@ -76,8 +76,8 @@ export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats
         if (cat && categorieFonction(c.fonction) !== cat) return false;
         const m = mandatParId.get(c.ministre_id);
         if (gouv && (!m || (m.gouvernement || "Autres mandats") !== gouv)) return false;
-        if (statut === "en-poste" && c.fin) return false;
-        if (statut === "anciens" && !c.fin) return false;
+        if (statut === "en-poste" && !enPoste(c.fin, m?.fin ?? null)) return false;
+        if (statut === "anciens" && enPoste(c.fin, m?.fin ?? null)) return false;
         if (!cherche) return true;
         const sable = normaliseNom([c.collab_prenom, c.collab_nom, c.fonction, m?.prenom, m?.nom, m?.portefeuille, m?.gouvernement].join(" "));
         return jetons.every((j) => sable.includes(j));
@@ -165,7 +165,7 @@ export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats
                       <a href={hrefC(c.collab_cle)}>{prenomNom(c.collab_prenom, c.collab_nom)}</a>{" "}
                       <span className="meta">
                         — {c.fonction} · cabinet de {m ? prenomNom(m.prenom, m.nom) : "—"}
-                        {m?.portefeuille ? " (" + m.portefeuille + ")" : ""} · {periode(c.debut, c.fin)}
+                        {m?.portefeuille ? " (" + m.portefeuille + ")" : ""} · {periode(c.debut, finEffective(c.fin, m?.fin ?? null))}
                         {c.collab_id ? " · aussi collaborateur parlementaire" : ""}
                       </span>
                     </li>
@@ -209,7 +209,7 @@ export default function ExplorateurGouvernement({ mandats, cabinets }: { mandats
                             {equipe.map((c) => (
                               <li key={c.id}>
                                 <a href={hrefC(c.collab_cle)}>{prenomNom(c.collab_prenom, c.collab_nom)}</a>{" "}
-                                <span className="meta">— {c.fonction} · {periode(c.debut, c.fin)}{c.collab_id ? " · aussi collaborateur parlementaire" : ""}</span>
+                                <span className="meta">— {c.fonction} · {periode(c.debut, finEffective(c.fin, m.fin))}{c.collab_id ? " · aussi collaborateur parlementaire" : ""}</span>
                               </li>
                             ))}
                           </ul>

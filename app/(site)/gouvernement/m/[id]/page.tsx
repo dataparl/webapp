@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prenomNom } from "@/lib/format";
-import { ORDRE_FONCTION, categorieFonction, periode } from "@/lib/gouvernementTypes";
+import { ORDRE_FONCTION, categorieFonction, finEffective, periode } from "@/lib/gouvernementTypes";
 import { autresMandats, cabinetsDuMinistre, ficheMinistre } from "@/lib/gouvernement";
 
 export const revalidate = 3600;
@@ -57,7 +57,7 @@ export default async function FicheMinistre({ params }: Props) {
           {equipe.map((c) => (
             <li key={c.id}>
               <a href={"/gouvernement/c/" + encodeURIComponent(c.collab_cle)}>{prenomNom(c.collab_prenom, c.collab_nom)}</a>{" "}
-              <span className="meta">— {c.fonction} · {periode(c.debut, c.fin)}</span>
+              <span className="meta">— {c.fonction} · {periode(c.debut, finEffective(c.fin, m.fin))}</span>
             </li>
           ))}
         </ul>

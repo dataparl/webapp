@@ -19,6 +19,12 @@ export const periode = (debut: string, fin: string | null) => {
   return d + " → " + fin.slice(0, 10).split("-").reverse().join("/");
 };
 
+// Fin effective d'un poste : le JORF publie rarement les cessations quand le
+// ministre quitte ses fonctions. Un poste sans fin rattaché à un mandat terminé
+// prend donc la fin du mandat — sinon il s'afficherait « en poste » à tort.
+export const finEffective = (fin: string | null, finMandat: string | null): string | null => fin ?? finMandat;
+export const enPoste = (fin: string | null, finMandat: string | null): boolean => finEffective(fin, finMandat) === null;
+
 export type CategorieFonction = "direction" | "chefferie" | "conseil" | "autre";
 export const LIBELLE_FONCTION: Record<CategorieFonction, string> = {
   direction: "Direction de cabinet",
