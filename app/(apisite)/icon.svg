@@ -1,12 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Favicon API DataParl' : monogramme À — même famille que le D' du site principal. -->
-  <rect width="64" height="64" rx="14" fill="#FFD23F"/>
-  <g fill="#164DFF">
-    <polygon points="30,12 32,17 24.5,46 15,46"/>
-    <polygon points="30,12 28,17 35.5,46 45,46"/>
-    <rect x="19.5" y="34" width="21" height="4" rx="1"/>
-    <rect x="13" y="45.2" width="12" height="2.2" rx="0.6"/>
-    <rect x="35" y="45.2" width="12" height="2.2" rx="0.6"/>
-    <ellipse cx="30" cy="7.5" rx="4.6" ry="2.6"/>
-  </g>
+  <!-- Favicon DataParl' : monogramme Σ' — blanc sur bleu encre #071A41, identique sur tous les domaines et sous-domaines. -->
+  <rect width="64" height="64" rx="14" fill="#071A41"/>
+  <path d="M11 15 H43 L28 32 L43 49 H11" fill="none" stroke="#FFFFFF" stroke-width="6.5" stroke-linejoin="miter"/>
+  <ellipse cx="52" cy="16.5" rx="3.2" ry="3.4" fill="#FFFFFF"/>
+  <polygon points="48.9,16 55.1,16 53.3,9 50.7,9" fill="#FFFFFF"/>
 </svg>
