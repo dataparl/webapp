@@ -30,6 +30,32 @@ export async function GET() {
     }));
   // Pages d'informations légales publiées (hors registre éditorial).
   urls.push({ loc: `${base}/informations-legales/cgu-chat`, changefreq: "yearly", priority: "0.2" });
+  // Une page par gouvernement (les gouvernements depuis 2012, du plus récent au plus ancien).
+  if (!estInactif("/gouv", inactifs)) {
+    try {
+      const { dataQueryTout } = await import("@/lib/data");
+      const { slugGouvernement } = await import("@/lib/gouvernementTypes");
+      const rows = await dataQueryTout<{ gouvernement: string; debut: string; fin: string | null }>(
+        "ministres", new URLSearchParams({ select: "gouvernement,debut,fin", order: "debut.asc" }), 86400);
+      const gouv = new Map<string, { debut: string; fin: string | null }>();
+      for (const r of rows) {
+        if (!r.gouvernement) continue;
+        const e = gouv.get(r.gouvernement) ?? { debut: r.debut, fin: r.fin };
+        if (r.debut < e.debut) e.debut = r.debut;
+        if (!r.fin) e.fin = null;
+        else if (e.fin !== null && r.fin > e.fin) e.fin = r.fin;
+        gouv.set(r.gouvernement, e);
+      }
+      for (const [nom, e] of gouv) {
+        urls.push({
+          loc: base + "/gouv/" + slugGouvernement(nom),
+          lastmod: e.fin ? e.fin.slice(0, 10) : jour,
+          changefreq: e.fin ? "yearly" : "weekly",
+          priority: e.fin ? "0.4" : "0.7",
+        });
+      }
+    } catch { /* sans les gouvernements */ }
+  }
   // Une page par département renouvelé aux sénatoriales 2026 (données du référentiel).
   if (!estInactif("/senatoriales2026", inactifs)) {
     try {
