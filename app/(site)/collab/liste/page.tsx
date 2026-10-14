@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { CHAMBRE_LONG } from "@/lib/format";
-import { dataQueryTout } from "@/lib/data";
+import { dataQuery } from "@/lib/data";
 
 export const revalidate = 86400;
 type Periode = { collab_id: string; chambre: string; elu_id: string; elu_nom: string; debut: string; fin: string; en_cours: boolean; fonction: string };
@@ -13,17 +13,43 @@ export const metadata: Metadata = {
 
 const TAILLE_PAGE = 200;
 
+// Pagination cote base : une seule page de TAILLE_PAGE lignes est lue
+// (au lieu de telecharger l'integralite des periodes en plusieurs allers-retours),
+// le total venant du content-range renvoye par PostgREST. LCP divise d'autant.
+async function pageListe(numPage: number) {
+  const p = new URLSearchParams({
+    select: "collab_id,chambre,elu_id,elu_nom,debut,fin,en_cours,fonction",
+    en_cours: "eq.true",
+    order: "elu_nom.asc",
+    limit: String(TAILLE_PAGE),
+    offset: String((numPage - 1) * TAILLE_PAGE),
+  });
+  const { rows, total } = await dataQuery<Periode>("periodes", p, 86400);
+  return { rows, total };
+}
+
+// Compteur par chambre : une requete limitee a 1 ligne, total via content-range.
+async function compteParChambre(): Promise<Record<string, number>> {
+  const out: Record<string, number> = {};
+  for (const chambre of ["assemblee", "senat", "europarl"]) {
+    const p = new URLSearchParams({ select: "collab_id", en_cours: "eq.true", chambre: `eq.${chambre}`, limit: "1" });
+    out[chambre] = (await dataQuery<unknown>("periodes", p, 86400)).total ?? 0;
+  }
+  return out;
+}
+
 export default async function ListeCollaborateurs({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const page = Math.max(1, parseInt((await searchParams).page ?? "1", 10) || 1);
-  const rows = await dataQueryTout<Periode>("periodes",
-    new URLSearchParams({ select: "collab_id,chambre,elu_id,elu_nom,debut,fin,en_cours,fonction", en_cours: "eq.true", order: "elu_nom.asc" }));
+  const [{ rows, total }, parChambre] = await Promise.all([pageListe(page), compteParChambre()]);
 
-  const total = rows.length;
-  const totalPages = Math.max(1, Math.ceil(total / TAILLE_PAGE));
+  const totalLignes = total ?? rows.length;
+  const totalPages = Math.max(1, Math.ceil(totalLignes / TAILLE_PAGE));
   const pageOk = Math.min(page, totalPages);
-  const lignes = rows.slice((pageOk - 1) * TAILLE_PAGE, pageOk * TAILLE_PAGE);
-  const parChambre = rows.reduce((m: Record<string, number>, r) => (m[r.chambre] = (m[r.chambre] ?? 0) + 1, m), {});
-  const parChambreTxt = Object.entries(parChambre).map(([c, nb]) => nb.toLocaleString("fr-FR") + " " + (CHAMBRE_LONG[c] ?? c)).join(", ");
+  // Si la page demandee depasse la fin, on relit la derniere plage (une seule requete).
+  const lignes = pageOk === page || totalLignes === 0 ? rows : (await pageListe(pageOk)).rows;
+  const parChambreTxt = Object.entries(parChambre)
+    .filter(([, nb]) => nb > 0)
+    .map(([c, nb]) => nb.toLocaleString("fr-FR") + " " + (CHAMBRE_LONG[c] ?? c)).join(", ");
   const mois = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(new Date());
   const maj = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" }).format(new Date());
 
@@ -32,7 +58,7 @@ export default async function ListeCollaborateurs({ searchParams }: { searchPara
       <p className="meta"><a href="/collab">&larr; Collaborateurs</a></p>
       <h1>La liste complète des collaborateurs parlementaires</h1>
       <p className="lead">
-        {"En " + mois + ", " + total.toLocaleString("fr-FR") + " collaborateurs parlementaires sont en poste auprès des élus français : " + parChambreTxt + ", d'après les listes officielles suivies quotidiennement par DataParl'."}
+        {"En " + mois + ", " + totalLignes.toLocaleString("fr-FR") + " collaborateurs parlementaires sont en poste auprès des élus français : " + parChambreTxt + ", d'après les listes officielles suivies quotidiennement par DataParl'."}
       </p>
       <table className="stats">
         <thead><tr><th>Élu employeur</th><th>Chambre</th><th>Fonction</th></tr></thead>
