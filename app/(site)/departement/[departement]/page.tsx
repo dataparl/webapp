@@ -5,7 +5,7 @@ import { departementsExistants, elusDuDepartement } from "@/lib/collectifsData";
 import { hrefDepartement } from "@/lib/collectifs";
 import { nomDepartement, slugDepartement } from "@/lib/senatorialesClassement";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { params: Promise<{ departement: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
