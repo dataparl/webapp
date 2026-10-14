@@ -16,7 +16,7 @@ import { partFemmes, pct, tauxTurnover } from "@/lib/stats";
 import { hrefGroupe, hrefDepartement, hrefParti, sansGroupe } from "@/lib/collectifs";
 import { slugDepartement } from "@/lib/senatoriales";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 type Props = { params: Promise<{ id: string }> };
 

@@ -5,7 +5,7 @@ import { partiDepuisSlug, slugCollectif } from "@/lib/collectifs";
 import { libelleParti, nomCompletParti } from "@/lib/partisNoms";
 import { dataQueryTout } from "@/lib/data";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { params: Promise<{ parti: string }> };
 
 // /collab/parti/<parti> : les collaborateurs parlementaires en poste chez les

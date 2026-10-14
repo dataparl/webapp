@@ -4,7 +4,7 @@ import { departementsExistants } from "@/lib/collectifsData";
 import { hrefDepartement } from "@/lib/collectifs";
 import { slugDepartement } from "@/lib/senatorialesClassement";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: "Départements : tous les élus, de l'Assemblée au Parlement européen",

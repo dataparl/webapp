@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     "Toutes les adresses des permanences des députés et sénateurs en fonction, géocodées et réunies sur une seule carte.",
   alternates: { canonical: "/parlementaires/map" },
 };
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 const NOM_CHAMBRE = { assemblee: "députés", senat: "sénateurs", europarl: "eurodéputés" } as const;
 

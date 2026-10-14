@@ -4,7 +4,7 @@ import { mixite, mixiteMoyenne, pct, statsElus } from "@/lib/stats";
 export const alt = "MixiParl' : la mixité des équipes parlementaires";
 export const size = TAILLE_OG;
 export const contentType = "image/png";
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export default async function Image() {
   const rows = (await statsElus().catch(() => [])).filter((r) => r.chambre !== "europarl");

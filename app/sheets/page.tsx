@@ -1,7 +1,7 @@
 import { FEUILLES } from "@/lib/sheets";
 import { feuillesPubliees } from "@/lib/sheetsPublication";
 
-export const revalidate = 60;
+export const revalidate = 600;
 
 export default async function IndexSheets() {
   const publiees = await feuillesPubliees();

@@ -4,7 +4,7 @@ import { slugCollectif } from "@/lib/collectifs";
 import { libelleParti } from "@/lib/partisNoms";
 import { dataQueryTout } from "@/lib/data";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 // /collab/parti : la liste des collaborateurs par parti politique, toutes
 // chambres confondues. Chaque intitulé porte le nom complet du parti, pas

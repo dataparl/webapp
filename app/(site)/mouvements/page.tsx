@@ -4,7 +4,7 @@ import { derniersMouvements, type Mouvement } from "@/lib/data";
 import Onglets from "./Onglets";
 import Recherche from "./Recherche";
 
-export const revalidate = 900;
+export const revalidate = 3600;
 export const metadata: Metadata = { title: "Mouvements", alternates: { canonical: "/mouvements" } };
 
 export default async function Mouvements() {

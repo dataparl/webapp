@@ -8,7 +8,7 @@ import { PastilleProvenance } from "../_components/ListeOffres";
 // URL publique : https://jobs.dataparl.fr/<slug> (voir middleware.ts).
 // Pastille de provenance : déposée par l'élu ou collectée sur une source publique.
 
-export const revalidate = 300;
+export const revalidate = 3600;
 export const dynamic = "force-dynamic";
 
 type Offre = {

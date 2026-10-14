@@ -4,7 +4,7 @@ import { estInactif, PAGES } from "@/lib/pagesRegistre";
 import { reponseXml, urlset, type Url } from "@/lib/sitemaps";
 import { authAdmin } from "@/lib/supabaseAdmin";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 // Sans lecture de headers() : la vérification d'hôte rendait la route
 // dynamique et annulait le revalidate (chaque crawl relançait toutes les

@@ -5,7 +5,7 @@ import { derniersMouvements, type Mouvement } from "@/lib/data";
 import Onglets from "../Onglets";
 import Recherche from "../Recherche";
 
-export const revalidate = 900;
+export const revalidate = 3600;
 
 const PAGES = {
   parlement: { titre: "Les trois chambres", chambre: undefined },

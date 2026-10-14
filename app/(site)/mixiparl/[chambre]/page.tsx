@@ -6,7 +6,7 @@ import { historiqueMensuel } from "@/lib/indicateurs";
 import { CHAMBRE_LONG, idParlementaire, nomAffiche } from "@/lib/format";
 import { pct, tauxMixite } from "@/lib/stats";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { params: Promise<{ chambre: string }> };
 
 // /mixiparl/<id-parlementaire> : mixité de l'équipe d'un élu, mois par mois.

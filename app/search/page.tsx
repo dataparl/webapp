@@ -1,7 +1,7 @@
 import { FEUILLES, type Ligne } from "@/lib/sheets";
 import { feuillesPubliees } from "@/lib/sheetsPublication";
 
-export const revalidate = 60;
+export const revalidate = 600;
 
 type Props = { searchParams: Promise<{ q?: string }> };
 

@@ -4,7 +4,7 @@ import { groupesExistants } from "@/lib/collectifsData";
 import { mandaturesExistantes, type MandatureExistante } from "@/lib/mandaturesData";
 import { CHAMBRE_COURTE, slugCollectif, type GroupeExistant } from "@/lib/collectifs";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: "Groupes et partis au Parlement : toutes les fiches",

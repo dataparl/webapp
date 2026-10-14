@@ -4,7 +4,7 @@ import FeuilleGate from "./FeuilleGate";
 import { feuille } from "@/lib/sheets";
 import { feuillesPubliees } from "@/lib/sheetsPublication";
 
-export const revalidate = 60;
+export const revalidate = 600;
 
 type Props = { params: Promise<{ dataset: string }> };
 

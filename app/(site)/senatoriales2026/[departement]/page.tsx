@@ -8,7 +8,7 @@ import { libelleElection } from "@/lib/senatorialesClassement";
 import { hrefGroupe, hrefDepartement, hrefParti, sansGroupe } from "@/lib/collectifs";
 import { BadgeChambre, BadgeParti } from "@/app/_components/Badges";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { params: Promise<{ departement: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

@@ -15,7 +15,7 @@ import { harmoniserSigle, libelleMandature, mandatureDepuisSlug, RENOUVELLEMENTS
 // réellement enregistrés (« jusqu'où on a les valeurs ») ; au Sénat, chaque
 // série pointe vers ses scrutins (/groupe/senat/serie-1/2023…).
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { params: Promise<{ groupe: string; mandature: string }> };
 
 const CHAMBRE_DEPUIS_SLUG: Record<string, string> = {};

@@ -5,7 +5,7 @@ import { CHAMBRE_LONG, prenomNom } from "@/lib/format";
 import { parlementaireDepuisId, personne } from "@/lib/referentiel";
 import HistoriqueEquipe from "./HistoriqueEquipe";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

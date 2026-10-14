@@ -9,7 +9,7 @@ import { finEffective, periode } from "@/lib/gouvernementTypes";
 import ParcoursCollab from "./ParcoursCollab";
 import PubGoogle from "@/app/_components/PubGoogle";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { params: Promise<{ slug: string }> };
 
 // Fiches collaborateurs indexables : listes officielles publiques (AN, Senat).

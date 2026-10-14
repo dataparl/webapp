@@ -5,7 +5,7 @@ import { dateTitre } from "@/lib/daily";
 import { authAdmin } from "@/lib/supabaseAdmin";
 import { texteVersHtml } from "@/lib/gabarit";
 
-export const revalidate = 300;
+export const revalidate = 3600;
 type Props = { params: Promise<{ slug: string }> };
 
 async function lire(slug: string) {

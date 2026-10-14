@@ -8,7 +8,7 @@ import SuiteDuJour from "./SuiteDuJour";
 
 // Revalidation courte : la page du jour peut être générée avant la synchro
 // Supabase du matin (~06:08 UTC) et rester « Aucun mouvement » jusqu'à 1 h.
-export const revalidate = 900;
+export const revalidate = 3600;
 // Pages générées à la première visite, puis mises en cache (ISR) :
 // PAS de generateStaticParams retournant [] — bug Next.js (issue #57996) :
 // un tableau vide casse la route ISR à la demande (erreur 500 pour toutes les dates).
