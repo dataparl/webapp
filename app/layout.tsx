@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
     ],
-    apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
+    apple: [{ url: "/apple-icon", sizes: "180", type: "image/png" }],
   },
   // Application web sur l'écran d'accueil iOS : titre affiché sous l'icône.
   appleWebApp: { capable: true, statusBarStyle: "default", title: "DataParl'" },
@@ -58,12 +58,17 @@ gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personali
 gtag('config', 'G-GC1JD019GY');`,
           }}
         />
-        {/* Google AdSense (ca-pub-6168263680630864) : PAS chargé ici. Le script
-            publicitaire n'est injecté qu'après un consentement publicitaire
-            explicite (lib/consentement.ts, appelé par le bandeau) — jamais pour
-            un visiteur qui n'a pas répondu ou a tout refusé, conformément à la
-            promesse du bandeau. Cela allège aussi le chargement des pages
-            (~220 Ko de scripts publicitaires évités par défaut). */}
+        {/* Google AdSense (ca-pub-6168263680630864) : chargé ici, APRÈS les
+            défauts Consent Mode v2 ci-dessus. AdSense respecte ces signaux :
+            sans consentement publicitaire explicite (bandeau, lib/consentement.ts),
+            aucun cookie n'est déposé et aucune annonce n'est personnalisée.
+            Le même id que chargerPub() évite toute double injection. */}
+        <script
+          id="adsense-dataparl"
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6168263680630864"
+          crossOrigin="anonymous"
+        />
         {/* Google Tag Manager (GTM-KW3MJMTK) : le plus haut possible dans le head. */}
         <script
           dangerouslySetInnerHTML={{
