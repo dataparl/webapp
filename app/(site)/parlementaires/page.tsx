@@ -3,7 +3,7 @@ import Autocompletion from "@/app/_components/Autocompletion";
 import { tousLesParlementaires, type EluCompact } from "@/lib/referentiel";
 
 export const metadata: Metadata = { title: "Parlementaires", alternates: { canonical: "/parlementaires" } };
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 const NOM_CHAMBRE = { assemblee: "Assemblée nationale", senat: "Sénat", europarl: "Parlement européen" } as const;
 

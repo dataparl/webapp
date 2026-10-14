@@ -13,7 +13,7 @@ import BioComplete from "./BioComplete";
 import PubGoogle from "@/app/_components/PubGoogle";
 import CrayonEdition from "@/app/_components/CrayonEdition";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { params: Promise<{ id: string }> };
 
 const TITRE: Record<string, [string, string]> = {
