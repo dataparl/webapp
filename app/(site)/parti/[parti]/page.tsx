@@ -6,7 +6,7 @@ import { partiDepuisSlug, slugCollectif } from "@/lib/collectifs";
 import { couleurParti } from "@/lib/couleurs";
 import { libelleParti, nomCompletParti } from "@/lib/partisNoms";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { params: Promise<{ parti: string }> };
 
 // /parti/<parti> : la fiche des élus d'un parti, toutes chambres confondues.

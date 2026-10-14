@@ -8,7 +8,7 @@ import { CHAMBRE_COURTE, hrefParti, groupeDepuisSlug, slugCollectif } from "@/li
 import { couleurParti } from "@/lib/couleurs";
 import { cheminLogoGroupe } from "@/lib/media";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { params: Promise<{ groupe: string }> };
 
 // Page « groupe introuvable » : les groupes existants, chambre par chambre,

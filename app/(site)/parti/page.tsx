@@ -4,7 +4,7 @@ import { partisExistants } from "@/lib/collectifsData";
 import { hrefParti, slugCollectif } from "@/lib/collectifs";
 import { libelleParti } from "@/lib/partisNoms";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 // /parti : l'index des fiches par parti. Chaque intitulé porte le nom
 // complet du parti (« Élus du Rassemblement National (RN) ») : c'est la

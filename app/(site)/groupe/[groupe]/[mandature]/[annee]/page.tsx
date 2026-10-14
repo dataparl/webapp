@@ -13,7 +13,7 @@ import { harmoniserSigle, mandatureDepuisSlug, SCRUTINS_SENAT, sigleDepuisSlug }
 // affiché est celui de l'époque et les renommages sont harmonisés ; une page
 // n'existe que si des mandats élus cette année-là sont enregistrés.
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { params: Promise<{ groupe: string; mandature: string; annee: string }> };
 
 const CHAMBRE_DEPUIS_SLUG: Record<string, string> = {};
