@@ -1,3 +1,4 @@
+successfully downloaded text file (SHA: c631e284c579f2930da0b9ea9b7957d4bbe588b2)
 // Registre des pages publiques de dataparl.fr : source de vérité du module
 // « Plan du site » de l'admin et du sitemap public. Une page désactivée (ou
 // en brouillon) répond 404, ainsi que toutes ses sous-pages. Sans dépendance (testé).
@@ -22,6 +23,7 @@ export const PAGES: PageSite[] = [
   { chemin: "/gouv", titre: "Gouvernements et cabinets ministériels", dynamique: "les gouvernements depuis 2012, une fiche par ministre et une fiche par membre de cabinet", sitemap: true },
   { chemin: "/lexique", titre: "Lexique des collaborateurs parlementaires", sitemap: true },
   { chemin: "/parlementaires", titre: "Parlementaires", dynamique: "une fiche par élu, une biographie par élu", sitemap: true },
+  { chemin: "/parlementaires/map", titre: "Carte des permanences parlementaires", sitemap: true },
   { chemin: "/senatoriales2026", titre: "Sénatoriales 2026", dynamique: "une page par département renouvelé", sitemap: true },
   { chemin: "/groupe", titre: "Groupes parlementaires", dynamique: "une fiche par groupe et par chambre, et une par mandature (législature, série ou scrutin)", sitemap: true },
   { chemin: "/departement", titre: "Départements", dynamique: "une fiche par département", sitemap: true },
