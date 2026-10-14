@@ -7,7 +7,7 @@ import { historiqueMensuel } from "@/lib/indicateurs";
 import { CHAMBRE_LONG, idParlementaire, nomAffiche } from "@/lib/format";
 import { pct, statsElus, tauxTurnover, type StatElu } from "@/lib/stats";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { params: Promise<{ chambre: string }> };
 
 // /vigiparl/{an,senat,pe} : la page Turnover de chaque chambre — le mot-clé

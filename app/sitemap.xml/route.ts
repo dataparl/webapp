@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { aujourdhuiParis } from "@/lib/alertes";
 import { index, PAGES_API, reponseXml, urlset } from "@/lib/sitemaps";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 // /sitemap.xml selon l'hôte :
 //   www.dataparl.fr  index des plans (pages, parlementaires, jours) ;

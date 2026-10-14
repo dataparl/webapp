@@ -3,7 +3,7 @@ import { joursPublies } from "@/lib/daily";
 import { cheminsInactifs } from "@/lib/pagesEtat";
 import { estInactif } from "@/lib/pagesRegistre";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 // Plan des pages daily : les ~90 derniers jours avec au moins un mouvement
 // (au-delà, les pages restent accessibles mais ne sont pas poussées).
