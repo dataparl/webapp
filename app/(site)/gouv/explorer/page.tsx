@@ -4,7 +4,7 @@ import { dernierReleve, listeGouvernements, mandatsEtCabinets } from "@/lib/gouv
 import ExplorateurGouvernement from "../ExplorateurGouvernement";
 import { collaborateursParId } from "@/lib/referentiel";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: "Tous les gouvernements et leurs cabinets depuis 2012",

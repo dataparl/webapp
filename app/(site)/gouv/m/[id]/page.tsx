@@ -7,7 +7,7 @@ import { autresMandats, cabinetsDuMinistre, ficheMinistre, ficheParlementaireDe,
 import { photoAbsolue } from "@/lib/media";
 import { collaborateursParId } from "@/lib/referentiel";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { params: Promise<{ id: string }> };
 const ID_OK = /^[A-Za-z0-9._-]{1,80}$/;
 

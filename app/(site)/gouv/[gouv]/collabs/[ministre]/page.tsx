@@ -9,7 +9,7 @@ import {
   type MembreCabinet,
 } from "@/lib/gouvernementTypes";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { params: Promise<{ gouv: string; ministre: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

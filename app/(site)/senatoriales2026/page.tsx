@@ -3,7 +3,7 @@ import Carte, { type DonneesDep } from "./Carte";
 import { OUTRE_MER, SCRUTIN_2026, slugDepartement, senatoriales2026, type Senatoriales2026 as Donnees } from "@/lib/senatoriales";
 import { libelleElection } from "@/lib/senatorialesClassement";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: "Sénatoriales 2026 : les nouveaux sénateurs, département par département",

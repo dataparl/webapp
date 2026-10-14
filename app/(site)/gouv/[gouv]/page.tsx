@@ -9,7 +9,7 @@ import {
   type MandatMinistre, type MembreCabinet,
 } from "@/lib/gouvernementTypes";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { params: Promise<{ gouv: string }> };
 
 const GRILLE: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 12 };
