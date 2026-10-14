@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CHAMBRE_LONG } from "@/lib/format";
 import { dataQueryTout } from "@/lib/data";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Periode = { collab_id: string; chambre: string; elu_id: string; elu_nom: string; debut: string; fin: string; en_cours: boolean; fonction: string };
 
 export const metadata: Metadata = {

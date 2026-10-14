@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import ListeChambre from "../../ListeChambre";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 type Props = { searchParams: Promise<{ page?: string }> };
 
 export const metadata: Metadata = {
