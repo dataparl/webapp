@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { cheminsInactifs } from "@/lib/pagesEtat";
 import { estInactif } from "@/lib/pagesRegistre";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 export const metadata: Metadata = { title: "Plan du site", alternates: { canonical: "/sitemap" } };
 
 type Lien = { href: string; libelle: string; externe?: boolean };
