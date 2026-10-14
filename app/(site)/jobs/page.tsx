@@ -7,7 +7,7 @@ import ListeOffres, { type OffreListe } from "./_components/ListeOffres";
 // sert de fondation interne, redirigée depuis dataparl.fr et réécrite depuis
 // la racine du sous-domaine.
 
-export const revalidate = 300;
+export const revalidate = 3600;
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {

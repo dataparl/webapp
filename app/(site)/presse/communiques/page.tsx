@@ -3,7 +3,7 @@ import { dateTitre } from "@/lib/daily";
 import { authAdmin } from "@/lib/supabaseAdmin";
 
 export const metadata: Metadata = { title: "Communiqués de presse", alternates: { canonical: "/presse/communiques" } };
-export const revalidate = 300;
+export const revalidate = 3600;
 
 export default async function Communiques() {
   let liste: { slug: string; titre: string; chapo: string; publie_le: string }[] = [];
