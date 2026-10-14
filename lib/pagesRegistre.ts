@@ -1,4 +1,3 @@
-successfully downloaded text file (SHA: c631e284c579f2930da0b9ea9b7957d4bbe588b2)
 // Registre des pages publiques de dataparl.fr : source de vérité du module
 // « Plan du site » de l'admin et du sitemap public. Une page désactivée (ou
 // en brouillon) répond 404, ainsi que toutes ses sous-pages. Sans dépendance (testé).
