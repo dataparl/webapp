@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import RechercheGlobale from "@/app/_components/RechercheGlobale";
 import Equipes from "./Equipes";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: "Liste des collaborateurs parlementaires (AN, Sénat, Parlement européen)",

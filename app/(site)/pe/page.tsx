@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import LandingChambre from "../LandingChambre";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: "Parlement européen",
