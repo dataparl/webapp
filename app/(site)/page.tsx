@@ -11,6 +11,33 @@ async function compteFiches(): Promise<number> {
 export const revalidate = 300;
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
+// Données structurées schema.org (SEO et réponses des assistants IA) :
+// le site avec sa recherche interne, et l'organisation éditrice.
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "DataParl'",
+    url: "https://www.dataparl.fr",
+    description: "Collaborateurs parlementaires, mouvements d'équipes et indicateurs pour l'Assemblée nationale, le Sénat et le Parlement européen.",
+    inLanguage: "fr-FR",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: { "@type": "EntryPoint", urlTemplate: "https://www.dataparl.fr/search?q={search_term_string}" },
+      "query-input": "required name=search_term_string",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "DataParl'",
+    url: "https://www.dataparl.fr",
+    logo: "https://www.dataparl.fr/icon.svg",
+    description: "Projet civique de suivi des collaborateurs parlementaires français, d'après les publications officielles.",
+    contactPoint: { "@type": "ContactPoint", contactType: "customer support", url: "https://www.dataparl.fr/contact" },
+  },
+];
+
 export default async function Accueil() {
   let mouvements: Mouvement[] = [];
   let comptes: Record<string, number> = {};
@@ -25,6 +52,7 @@ export default async function Accueil() {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\u003c") }} />
       <h1>Qui travaille pour <span className="surligne">vos élus</span> ?</h1>
       <p className="lead">
         Chaque matin, DataParl&apos; relit les listes officielles des collaborateurs parlementaires et signale
