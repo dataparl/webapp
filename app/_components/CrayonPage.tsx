@@ -60,12 +60,14 @@ export default function CrayonPage() {
     if (exclus) return;
     let vivant = true;
     (async () => {
-      const t = await jeton();
-      if (!t) return;
-      const { status, json } = await appel<{ otp?: string }>("/api/admin/otp");
-      if (!vivant) return;
-      if (status === 200) setEtat("pret");
-      else if (status === 401 && json.otp === "requis") setEtat("otp");
+      try {
+        const t = await jeton();
+        if (!t) return;
+        const { status, json } = await appel<{ otp?: string }>("/api/admin/otp");
+        if (!vivant) return;
+        if (status === 200) setEtat("pret");
+        else if (status === 401 && json.otp === "requis") setEtat("otp");
+      } catch { /* réseau indisponible : pas de crayon, la page reste intacte (Sentry be184894) */ }
     })();
     return () => { vivant = false; };
   }, [chemin, exclus]);
