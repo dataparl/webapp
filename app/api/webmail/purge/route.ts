@@ -27,10 +27,11 @@ export async function POST(req: Request) {
     if (dry_run) return { domain, count: count ?? 0 };
     if (!count) return { domain, count: 0, modifie: 0 };
     const r = mode === "soft"
-      ? await db.from("emails").update({ folder: "trash", deleted: true, archived: false }).or(filtre).select("id", { count: "exact" })
-      : await db.from("emails").delete().or(filtre).select("id", { count: "exact" });
+      ? await db.from("emails").update({ folder: "trash", deleted: true, archived: false }).or(filtre).select("id")
+      : await db.from("emails").delete().or(filtre).select("id");
     if (r.error) throw r.error;
-    await audit(a, `webmail.purge.${mode}`, domain, { domain, messages: r.count ?? 0 });
-    return { domain, count, modifie: r.count ?? 0 };
+    const modifie = r.data?.length ?? 0;
+    await audit(a, `webmail.purge.${mode}`, domain, { domain, messages: modifie });
+    return { domain, count, modifie };
   });
 }
