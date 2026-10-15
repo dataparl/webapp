@@ -102,6 +102,7 @@ export default function Webmail() {
             </a>
           ))}
         </nav>
+        {role === "admin" && <PurgeDomaine onFin={(m) => { setInfo(m); charger(); }} />}
       </aside>
 
       <section className="wm-liste">
@@ -215,5 +216,53 @@ function Redaction({ b, expediteurs, onChange, onFin }: { b: Brouillon; expedite
         <button type="button" className="secondaire" onClick={() => onFin(null)}>Annuler</button>
       </div>
     </form>
+  );
+}
+
+// Purge par domaine (admins) : compte les messages concernés, puis corbeille
+// (réversible depuis « Corbeille ») ou suppression définitive.
+function PurgeDomaine({ onFin }: { onFin: (message: string) => void }) {
+  const { api } = useAdmin();
+  const [domaine, setDomaine] = useState("");
+  const [compte, setCompte] = useState<number | null>(null);
+  const [occupe, setOccupe] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const propre = domaine.trim().toLowerCase();
+
+  async function appeler(body: Record<string, unknown>) {
+    const r = await api<{ domain: string; count: number; modifie?: number }>("/api/webmail/purge", { method: "POST", body });
+    return r;
+  }
+
+  async function analyser() {
+    setErr(null); setCompte(null); setOccupe(true);
+    try { setCompte((await appeler({ domain: propre, mode: "soft", dry_run: true })).count); }
+    catch (e) { setErr((e as Error).message); }
+    finally { setOccupe(false); }
+  }
+
+  async function purger(mode: "soft" | "hard") {
+    const dure = mode === "hard" ? "DÉFINITIVEMENT" : "dans la corbeille";
+    if (!confirm(`Supprimer ${dure} tous les messages liés à @${propre} ?`)) return;
+    setErr(null); setOccupe(true);
+    try {
+      const r = await appeler({ domain: propre, mode });
+      setCompte(null);
+      onFin(`${r.modifie} message(s) ${mode === "hard" ? "supprimé(s) définitivement" : "placé(s) dans la corbeille"} (@${propre})`);
+    } catch (e) { setErr((e as Error).message); }
+    finally { setOccupe(false); }
+  }
+
+  return (
+    <details className="wm-purge">
+      <summary>Purger un domaine</summary>
+      <input type="text" placeholder="ex. vercel.com" value={domaine}
+        onChange={(e) => { setDomaine(e.target.value); setCompte(null); setErr(null); }} />
+      <button disabled={occupe || !propre} onClick={analyser}>{occupe ? "…" : "Analyser"}</button>
+      {compte !== null && <p className="meta">{compte} message(s) pour @{propre}</p>}
+      <button className="secondaire" disabled={occupe || compte === 0} onClick={() => purger("soft")}>Mettre à la corbeille</button>
+      <button className="danger" disabled={occupe || compte === 0} onClick={() => purger("hard")}>Supprimer définitivement</button>
+      {err && <p className="erreur">{err}</p>}
+    </details>
   );
 }
