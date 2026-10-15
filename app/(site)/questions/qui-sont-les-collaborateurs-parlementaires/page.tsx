@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { aujourdhuiParis } from "@/lib/alertes";
+import { dateLongue } from "@/lib/format";
 import { compteAffectations } from "@/lib/data";
 import { tousLesParlementaires, type EluCompact } from "@/lib/referentiel";
 
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const dateFr = new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeZone: "Europe/Paris" }).format(aujourdhuiParis());
+  const dateFr = dateLongue(aujourdhuiParis());
   let comptes: Record<string, number> = {};
   let elus: EluCompact[] = [];
   try { [comptes, elus] = await Promise.all([compteAffectations(), tousLesParlementaires()]); } catch {}
