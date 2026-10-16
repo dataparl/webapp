@@ -11,6 +11,14 @@ const ENCRE = "#071A41";
 const GRIS = "#4A5670";
 const LIGNE = "#E6E3D8";
 
+// Réseaux officiels (mêmes URL que la page « À propos »), affichés dans le
+// pied des mails « DataParl' Daily ».
+const RESEAUX_DAILY = [
+  { href: "https://x.com/DataParl_fr", nom: "X" },
+  { href: "https://bsky.app/profile/dataparl.fr", nom: "Bluesky" },
+  { href: "https://t.me/dataparl_daily", nom: "Telegram" },
+];
+
 export type Gabarit = {
   titre: string;
   corpsHtml: string;
@@ -62,6 +70,7 @@ ${corpsHtml}
 </td></tr>
 <tr><td style="padding:18px 32px;border-top:1px solid ${LIGNE};background:#FBFAF5;border-radius:0 0 16px 16px;font-size:13px;text-align:center">
 <span style="color:${GRIS}">DataParl&apos; ·</span> ${lien(`${SITE}/`, "www.dataparl.fr")}
+${edition === "Daily" ? `<br><span style="color:${GRIS}">Suivre :</span> ${RESEAUX_DAILY.map((r) => lien(r.href, r.nom)).join(` <span style="color:${GRIS}">·</span> `)}` : ""}
 </td></tr>
 </table>
 ${pied ? `<p style="max-width:600px;margin:16px auto 0;font-size:12px;line-height:1.5;color:${GRIS}">${pied}</p>` : ""}
