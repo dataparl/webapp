@@ -11,6 +11,22 @@ test("gabarit : lien en ligne, titre échappé, pied de carte", () => {
   assert.doesNotMatch(gabarit({ titre: "t", corpsHtml: "" }), /consulte-le en ligne/);
 });
 
+test("gabarit : réseaux sociaux au pied, uniquement pour l'édition Daily", () => {
+  const d = gabarit({ titre: "t", corpsHtml: "", edition: "Daily" });
+  assert.match(d, /Suivre :/);
+  assert.match(d, /https:\/\/x\.com\/DataParl_fr/);
+  assert.match(d, /https:\/\/bsky\.app\/profile\/dataparl\.fr/);
+  assert.match(d, /https:\/\/t\.me\/dataparl_daily/);
+  assert.match(d, /<img [^>]*src="https:\/\/www\.dataparl\.fr\/media\/logos\/x\.png" [^>]*alt="X"/);
+  assert.match(d, /<img [^>]*src="https:\/\/www\.dataparl\.fr\/media\/logos\/bluesky\.png"/);
+  assert.match(d, /<img [^>]*src="https:\/\/www\.dataparl\.fr\/media\/logos\/telegram\.png"/);
+  assert.match(d, /width="18" height="18"/);
+  const w = gabarit({ titre: "t", corpsHtml: "", edition: "Weekly" });
+  assert.doesNotMatch(w, /t\.me\//);
+  assert.doesNotMatch(w, /<img/);
+  assert.doesNotMatch(gabarit({ titre: "t", corpsHtml: "" }), /<img/);
+});
+
 test("texte vers HTML : échappement et citations", () => {
   const h = texteVersHtml("Bonjour <b>\nligne 2\n\n> cité\n> encore");
   assert.match(h, /Bonjour &lt;b&gt;<br>ligne 2/);
@@ -24,7 +40,7 @@ test("alertes : édition, date et adressage avec élision", () => {
   assert.equal(attention("Hélène MARTIN"), "À l'attention d'Hélène MARTIN");
   assert.equal(prenomNomAdresse("jean-pierre", "de la tour"), "Jean-Pierre DE LA TOUR");
   const h = gabarit({ titre: "t", corpsHtml: "", edition: "Weekly", adressage: { date: "2026-10-05", pour: "Anne <X>" } });
-  assert.match(h, /\u0026nbsp;Weekly</);
+  assert.match(h, /&nbsp;Weekly</);
   assert.match(h, /05 Octobre 2026/);
   assert.match(h, /À l&#39;attention d&#39;Anne &lt;X&gt;/);
 });
