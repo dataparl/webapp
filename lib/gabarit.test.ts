@@ -13,12 +13,18 @@ test("gabarit : lien en ligne, titre échappé, pied de carte", () => {
 
 test("gabarit : réseaux sociaux au pied, uniquement pour l'édition Daily", () => {
   const d = gabarit({ titre: "t", corpsHtml: "", edition: "Daily" });
+  assert.match(d, /Suivre :/);
   assert.match(d, /https:\/\/x\.com\/DataParl_fr/);
   assert.match(d, /https:\/\/bsky\.app\/profile\/dataparl\.fr/);
   assert.match(d, /https:\/\/t\.me\/dataparl_daily/);
-  assert.match(d, /Suivre :/);
-  assert.doesNotMatch(gabarit({ titre: "t", corpsHtml: "", edition: "Weekly" }), /t\.me\//);
-  assert.doesNotMatch(gabarit({ titre: "t", corpsHtml: "" }), /t\.me\//);
+  assert.match(d, /<img [^>]*src="https:\/\/www\.dataparl\.fr\/media\/logos\/x\.png" [^>]*alt="X"/);
+  assert.match(d, /<img [^>]*src="https:\/\/www\.dataparl\.fr\/media\/logos\/bluesky\.png"/);
+  assert.match(d, /<img [^>]*src="https:\/\/www\.dataparl\.fr\/media\/logos\/telegram\.png"/);
+  assert.match(d, /width="18" height="18"/);
+  const w = gabarit({ titre: "t", corpsHtml: "", edition: "Weekly" });
+  assert.doesNotMatch(w, /t\.me\//);
+  assert.doesNotMatch(w, /<img/);
+  assert.doesNotMatch(gabarit({ titre: "t", corpsHtml: "" }), /<img/);
 });
 
 test("texte vers HTML : échappement et citations", () => {

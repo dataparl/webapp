@@ -12,11 +12,13 @@ const GRIS = "#4A5670";
 const LIGNE = "#E6E3D8";
 
 // Réseaux officiels (mêmes URL que la page « À propos »), affichés dans le
-// pied des mails « DataParl' Daily ».
+// pied des mails « DataParl' Daily ». Logos en PNG hébergés (/media/logos/…) :
+// Gmail et Outlook ignorent le SVG dans les emails ; le PNG passe partout,
+// avec le nom du réseau en texte alternatif si les images sont bloquées.
 const RESEAUX_DAILY = [
-  { href: "https://x.com/DataParl_fr", nom: "X" },
-  { href: "https://bsky.app/profile/dataparl.fr", nom: "Bluesky" },
-  { href: "https://t.me/dataparl_daily", nom: "Telegram" },
+  { href: "https://x.com/DataParl_fr", nom: "X", logo: `${SITE}/media/logos/x.png` },
+  { href: "https://bsky.app/profile/dataparl.fr", nom: "Bluesky", logo: `${SITE}/media/logos/bluesky.png` },
+  { href: "https://t.me/dataparl_daily", nom: "Telegram", logo: `${SITE}/media/logos/telegram.png` },
 ];
 
 export type Gabarit = {
@@ -70,7 +72,7 @@ ${corpsHtml}
 </td></tr>
 <tr><td style="padding:18px 32px;border-top:1px solid ${LIGNE};background:#FBFAF5;border-radius:0 0 16px 16px;font-size:13px;text-align:center">
 <span style="color:${GRIS}">DataParl&apos; ·</span> ${lien(`${SITE}/`, "www.dataparl.fr")}
-${edition === "Daily" ? `<br><span style="color:${GRIS}">Suivre :</span> ${RESEAUX_DAILY.map((r) => lien(r.href, r.nom)).join(` <span style="color:${GRIS}">·</span> `)}` : ""}
+${edition === "Daily" ? `<br><span style="color:${GRIS}">Suivre :</span> ${RESEAUX_DAILY.map((r) => `<a href="${r.href}" style="color:${BLEU};text-decoration:none" title="${r.nom}"><img src="${r.logo}" alt="${r.nom}" width="18" height="18" style="display:inline-block;vertical-align:middle;border:0;outline:none;text-decoration:none" /></a>`).join(` <span style="color:${GRIS}">·</span> `)}` : ""}
 </td></tr>
 </table>
 ${pied ? `<p style="max-width:600px;margin:16px auto 0;font-size:12px;line-height:1.5;color:${GRIS}">${pied}</p>` : ""}
