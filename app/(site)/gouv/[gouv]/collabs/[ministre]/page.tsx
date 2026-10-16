@@ -9,7 +9,9 @@ import {
   type MembreCabinet,
 } from "@/lib/gouvernementTypes";
 
-export const revalidate = 86400;
+// Fraîcheur horaire : le balayage JORF du matin (cron ~07:10 UTC) apparaît
+// sur le site dans la journée (avant : 24 h).
+export const revalidate = 3600;
 type Props = { params: Promise<{ gouv: string; ministre: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

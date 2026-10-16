@@ -2,7 +2,9 @@ import { redirect } from "next/navigation";
 import { mandatsEtCabinets } from "@/lib/gouvernement";
 import { slugGouvernement } from "@/lib/gouvernementTypes";
 
-export const revalidate = 86400;
+// Fraîcheur horaire : le balayage JORF du matin (cron ~07:10 UTC) apparaît
+// sur le site dans la journée (avant : 24 h).
+export const revalidate = 3600;
 
 export const metadata = {
   title: "Gouvernement et cabinets ministériels",

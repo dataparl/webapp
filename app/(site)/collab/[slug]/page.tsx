@@ -9,7 +9,9 @@ import { finEffective, periode } from "@/lib/gouvernementTypes";
 import ParcoursCollab from "./ParcoursCollab";
 import PubGoogle from "@/app/_components/PubGoogle";
 
-export const revalidate = 86400;
+// Fraîcheur horaire : le balayage JORF du matin (cron ~07:10 UTC) apparaît
+// sur le site dans la journée (avant : 24 h).
+export const revalidate = 3600;
 type Props = { params: Promise<{ slug: string }> };
 
 // Fiches collaborateurs indexables : listes officielles publiques (AN, Senat).

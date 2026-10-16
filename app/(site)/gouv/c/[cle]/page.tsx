@@ -5,7 +5,9 @@ import { enPoste, finEffective, periode } from "@/lib/gouvernementTypes";
 import { ministresParIds, parcoursCabinet } from "@/lib/gouvernement";
 import { collaborateursParId } from "@/lib/referentiel";
 
-export const revalidate = 86400;
+// Fraîcheur horaire : le balayage JORF du matin (cron ~07:10 UTC) apparaît
+// sur le site dans la journée (avant : 24 h).
+export const revalidate = 3600;
 type Props = { params: Promise<{ cle: string }> };
 const CLE_OK = /^[\p{L}\p{N} ._’-]{1,120}$/u;
 

@@ -4,7 +4,9 @@ import { dernierReleve, listeGouvernements, mandatsEtCabinets } from "@/lib/gouv
 import ExplorateurGouvernement from "../ExplorateurGouvernement";
 import { collaborateursParId } from "@/lib/referentiel";
 
-export const revalidate = 86400;
+// Fraîcheur horaire : le balayage JORF du matin (cron ~07:10 UTC) apparaît
+// sur le site dans la journée (avant : 24 h).
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Tous les gouvernements et leurs cabinets depuis 2012",
