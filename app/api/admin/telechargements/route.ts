@@ -3,7 +3,7 @@ import { dataAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
 
-// Journal des téléchargements CSV de DataParl' Sheets (compte + IP),
+// Journal des téléchargements CSV de DataParl' Sheets (compte ou visiteur anonyme + IP),
 // pour l'espace équipe.
 export async function GET(req: Request) {
   return avecAdmin(req, async () => {

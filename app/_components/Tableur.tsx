@@ -9,7 +9,7 @@ import { sessionActuelle } from "@/lib/supabaseBrowser";
 // arithmétique (+ - * / ^, parenthèses). Logiciel libre, style MIT.
 // Affichage : lignes zébrées, 25 lignes par page, bouton plein écran et
 // recherche dans la grille (Ctrl+F). L'export CSV porte la source
-// (dataparl.fr) et chaque téléchargement est journalisé (compte + IP).
+// (dataparl.fr) et chaque téléchargement est journalisé (compte ou visiteur + IP).
 // En lecture seule, la prop facultative « liens » rend certaines cellules
 // cliquables (une par ligne de donnees) : la grille devient alors une
 // navigation vers les fiches détaillées.
@@ -296,12 +296,11 @@ export default function Tableur({ id, provenance, entetes, donnees, lectureSeule
     a.download = `dataparl.fr-${id}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
-    // Journal du téléchargement (compte + adresse IP), côté serveur.
+    // Journal du téléchargement (compte ou visiteur anonyme, + IP), côté serveur.
     sessionActuelle().then((s) => {
-      if (!s) return;
       fetch("/api/sheets/telechargement", {
         method: "POST",
-        headers: { Authorization: `Bearer ${s.access_token}`, "Content-Type": "application/json" },
+        headers: { ...(s ? { Authorization: `Bearer ${s.access_token}` } : {}), "Content-Type": "application/json" },
         body: JSON.stringify({ feuille: id, lignes: grille.length }),
       }).catch(() => {});
     });

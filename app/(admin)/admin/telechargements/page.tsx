@@ -14,7 +14,7 @@ export default function Telechargements() {
   return (
     <>
       <h1>Téléchargements DataParl&apos; Sheets</h1>
-      <p className="meta">Chaque export CSV du tableur, avec le compte associé et l&apos;adresse IP. 500 derniers au maximum.</p>
+      <p className="meta">Chaque export CSV du tableur, avec le compte associé (ou visiteur anonyme) et l&apos;adresse IP. 500 derniers au maximum.</p>
       <form onSubmit={(e) => { e.preventDefault(); setRecherche(q); }} className="barre-recherche">
         <input type="text" placeholder="Filtrer par feuille" value={q} onChange={(e) => setQ(e.target.value)} />
         <button>Filtrer</button>
@@ -28,7 +28,7 @@ export default function Telechargements() {
             <tr key={t.id}>
               <td className="meta">{dateHeure(t.cree_le)}</td>
               <td><strong>{t.feuille}</strong></td>
-              <td>{t.email || <span className="meta">–</span>}</td>
+              <td>{t.email || <span className="meta">visiteur anonyme</span>}</td>
               <td className="mono meta">{t.ip || "–"}</td>
               <td className="meta">{t.lignes}</td>
               <td className="meta">{(t.user_agent || "–").slice(0, 60)}</td>
